@@ -1,0 +1,144 @@
+\doxysection{blackscholesprocess.\+hpp}
+\hypertarget{blackscholesprocess_8hpp_source}{}\label{blackscholesprocess_8hpp_source}\index{ql/processes/blackscholesprocess.hpp@{ql/processes/blackscholesprocess.hpp}}
+\mbox{\hyperlink{blackscholesprocess_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2001,\ 2002,\ 2003\ Sadruddin\ Rejeb}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2003\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2004,\ 2005,\ 2006,\ 2007,\ 2009\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ Copyright\ (C)\ 2015\ Peter\ Caspers}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00011\ \textcolor{comment}{}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00017\ \textcolor{comment}{}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00021\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#ifndef\ quantlib\_black\_scholes\_process\_hpp}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ quantlib\_black\_scholes\_process\_hpp}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{stochasticprocess_8hpp}{ql/stochasticprocess.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{eulerdiscretization_8hpp}{ql/processes/eulerdiscretization.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{yieldtermstructure_8hpp}{ql/termstructures/yieldtermstructure.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackvoltermstructure_8hpp}{ql/termstructures/volatility/equityfx/blackvoltermstructure.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{localvoltermstructure_8hpp}{ql/termstructures/volatility/equityfx/localvoltermstructure.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{quote_8hpp}{ql/quote.hpp}}>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_local_constant_vol}{LocalConstantVol}};}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_local_vol_curve}{LocalVolCurve}};}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keyword}{class\ }GeneralizedBlackScholesProcess\ :\ \textcolor{keyword}{public}\ StochasticProcess1D\ \{}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ GeneralizedBlackScholesProcess(\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ dividendTS,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ riskFreeTS,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BlackVolTermStructure>}}\ blackVolTS,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<discretization>\&\ d\ =}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<discretization>(\textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_euler_discretization}{EulerDiscretization}}),}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ forceDiscretization\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ GeneralizedBlackScholesProcess(\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ dividendTS,}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ riskFreeTS,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BlackVolTermStructure>}}\ blackVolTS,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<LocalVolTermStructure>}}\ localVolTS);}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_abf46d8ac312c489f2fcf00fefc734953}{drift}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_a72dbcf1a1c410debf2b0b1d07124a3bf}{diffusion}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_af138c8d7679ab9ee3c1196db728a309c}{apply}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ dx)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_a942429a2002692b5ceb0cfc646beb174}{expectation}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t0,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ dt)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_a7eacd46b71b39baa72872d454acdeeaf}{stdDeviation}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t0,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ dt)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_a17b17c60b8a56d8eab8ed63ad7ff64d1}{variance}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t0,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ dt)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_a208d564850f58a2e14f5711bba553e34}{evolve}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t0,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ dt,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ dw)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_aadbaae308a4066e94a3aa913b444ed52}{time}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_a3a8724db10cd68b424d5572a4ebc7a62}{update}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ stateVariable()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ dividendYield()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ riskFreeRate()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BlackVolTermStructure>}}\&\ blackVolatility()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<LocalVolTermStructure>}}\&\ localVolatility()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ x0\_;}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ riskFreeRate\_,\ dividendYield\_;}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BlackVolTermStructure>}}\ blackVolatility\_;}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<LocalVolTermStructure>}}\ externalLocalVolTS\_;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ forceDiscretization\_;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ hasExternalLocalVol\_;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{class_quant_lib_1_1_relinkable_handle}{RelinkableHandle<LocalVolTermStructure>}}\ localVolatility\_;}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \textcolor{keywordtype}{bool}\ updated\_,\ isStrikeIndependent\_;}
+\DoxyCodeLine{00109\ \ \ \ \ \};}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{keyword}{class\ }BlackScholesProcess\ :\ \textcolor{keyword}{public}\ GeneralizedBlackScholesProcess\ \{}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ BlackScholesProcess(}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ riskFreeTS,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BlackVolTermStructure>}}\&\ blackVolTS,}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<discretization>\&\ d\ =}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<discretization>(\textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_euler_discretization}{EulerDiscretization}}),}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ forceDiscretization\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00132\ \ \ \ \ \};}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keyword}{class\ }BlackScholesMertonProcess\ :\ \textcolor{keyword}{public}\ GeneralizedBlackScholesProcess\ \{}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ BlackScholesMertonProcess(}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ dividendTS,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ riskFreeTS,}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BlackVolTermStructure>}}\&\ blackVolTS,}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<discretization>\&\ d\ =}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<discretization>(\textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_euler_discretization}{EulerDiscretization}}),}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ forceDiscretization\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00154\ \ \ \ \ \};}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00168\ \ \ \ \ \textcolor{keyword}{class\ }BlackProcess\ :\ \textcolor{keyword}{public}\ GeneralizedBlackScholesProcess\ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ BlackProcess(}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ riskFreeTS,}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BlackVolTermStructure>}}\&\ blackVolTS,}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<discretization>\&\ d\ =}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<discretization>(\textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_euler_discretization}{EulerDiscretization}}),}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ forceDiscretization\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00177\ \ \ \ \ \};}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{keyword}{class\ }GarmanKohlagenProcess\ :\ \textcolor{keyword}{public}\ GeneralizedBlackScholesProcess\ \{}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ GarmanKohlagenProcess(}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_generalized_black_scholes_process_ae765ed8c43a8a485adf8baf3dcf608ba}{x0}},}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ foreignRiskFreeTS,}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ domesticRiskFreeTS,}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BlackVolTermStructure>}}\&\ blackVolTS,}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<discretization>\&\ d\ =}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<discretization>(\textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_euler_discretization}{EulerDiscretization}}),}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ forceDiscretization\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00202\ \ \ \ \ \};}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00204\ \}}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

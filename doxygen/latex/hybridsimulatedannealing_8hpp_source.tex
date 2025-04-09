@@ -1,0 +1,208 @@
+\doxysection{hybridsimulatedannealing.\+hpp}
+\hypertarget{hybridsimulatedannealing_8hpp_source}{}\label{hybridsimulatedannealing_8hpp_source}\index{ql/experimental/math/hybridsimulatedannealing.hpp@{ql/experimental/math/hybridsimulatedannealing.hpp}}
+\mbox{\hyperlink{hybridsimulatedannealing_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{Copyright\ (C)\ 2015\ Andres\ Hernandez}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{<quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{<http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_optimization\_hybridsimulatedannealing\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_optimization\_hybridsimulatedannealing\_hpp}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{hybridsimulatedannealingfunctors_8hpp}{ql/experimental/math/hybridsimulatedannealingfunctors.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{constraint_8hpp}{ql/math/optimization/constraint.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{levenbergmarquardt_8hpp}{ql/math/optimization/levenbergmarquardt.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{problem_8hpp}{ql/math/optimization/problem.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{shared__ptr_8hpp}{ql/shared\_ptr.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Sampler,\ \textcolor{keyword}{class}\ Probability,\ \textcolor{keyword}{class}\ Temperature,\ \textcolor{keyword}{class}\ Reannealing\ =\ ReannealingTrivial>}
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keyword}{class\ }HybridSimulatedAnnealing\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{OptimizationMethod}}\ \{}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ LocalOptimizeScheme\ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ NoLocalOptimize,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ EveryNewPoint,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ EveryBestPoint}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ ResetScheme\ \{}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ NoResetScheme,}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ ResetToBestPoint,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ ResetToOrigin}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ HybridSimulatedAnnealing(\textcolor{keyword}{const}\ Sampler\&\ sampler,}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\&\ probability,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Temperature\ temperature,}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Reannealing\&\ reannealing\ =\ \mbox{\hyperlink{struct_quant_lib_1_1_reannealing_trivial}{ReannealingTrivial}}(),}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ startTemperature\ =\ 200.0,}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ endTemperature\ =\ 0.01,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ reAnnealSteps\ =\ 50,}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ResetScheme\ resetScheme\ =\ ResetToBestPoint,}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ resetSteps\ =\ 150,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ localOptimizer\ =}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<LevenbergMarquardt>(),}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LocalOptimizeScheme\ optimizeScheme\ =\ EveryBestPoint)}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ :\ sampler\_(sampler),\ probability\_(probability),\ temperature\_(std::move(temperature)),}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ reannealing\_(reannealing),\ startTemperature\_(startTemperature),}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ endTemperature\_(endTemperature),}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ reAnnealSteps\_(reAnnealSteps\ ==\ 0\ ?\ \mbox{\hyperlink{group__limit_macros_gac49205214551771cf97efe9839ac6cb5}{QL\_MAX\_INTEGER}}\ :\ reAnnealSteps),}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ resetScheme\_(resetScheme),\ resetSteps\_(resetSteps\ ==\ 0\ ?\ \mbox{\hyperlink{group__limit_macros_gac49205214551771cf97efe9839ac6cb5}{QL\_MAX\_INTEGER}}\ :\ resetSteps),}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ localOptimizer\_(localOptimizer),}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ optimizeScheme\_(localOptimizer\ !=\ \textcolor{keyword}{nullptr}\ ?\ optimizeScheme\ :\ NoLocalOptimize)\ \{\}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ EndCriteria::Type\ \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing_a96c109b6479ed921f29f57b399c7518c}{minimize}}(\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\&\ P,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ endCriteria)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ Sampler\ sampler\_;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ probability\_;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ Temperature\ temperature\_;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ Reannealing\ reannealing\_;}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ startTemperature\_;}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ endTemperature\_;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ reAnnealSteps\_;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ ResetScheme\ resetScheme\_;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ resetSteps\_;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ localOptimizer\_;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ LocalOptimizeScheme\ optimizeScheme\_;}
+\DoxyCodeLine{00115\ \ \ \ \ \};}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Sampler,\ \textcolor{keyword}{class}\ Probability,\ \textcolor{keyword}{class}\ Temperature,\ \textcolor{keyword}{class}\ Reannealing>}
+\DoxyCodeLine{00118\ \ \ \ \ EndCriteria::Type\ \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing_a96c109b6479ed921f29f57b399c7518c}{HybridSimulatedAnnealing<Sampler,\ Probability,\ Temperature,\ Reannealing>::minimize}}(\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\ \&P,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\ \&endCriteria)\ \{}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ EndCriteria::Type\ ecType\ =\ EndCriteria::None;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ P.\mbox{\hyperlink{class_quant_lib_1_1_problem_ac9763612c0ce7b60e95848fb85f6fd10}{reset}}();}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ reannealing\_.setProblem(P);}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ x\ =\ P.\mbox{\hyperlink{class_quant_lib_1_1_problem_add687259b50c4200297f8b5c0b78a806}{currentValue}}();}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n\ =\ x.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k\ =\ 1;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ kStationary\ =\ 1;}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ kReAnneal\ =\ 1;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ kReset\ =\ 1;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxK\ =\ endCriteria.maxIterations();}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxKStationary\ =\ endCriteria.maxStationaryStateIterations();}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ temperatureBreached\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ currentTemperature(n,\ startTemperature\_);}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ annealStep(n,\ 1.0);}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ bestPoint(x);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ currentPoint(x);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ startingPoint(x);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ newPoint(x);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ bestValue\ =\ P.\mbox{\hyperlink{class_quant_lib_1_1_problem_a06691dbed20d8c317b45b47f3321d04e}{value}}(bestPoint);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ currentValue\ =\ bestValue;}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ startingValue\ =\ bestValue;\ \textcolor{comment}{//to\ reset\ to\ starting\ point\ if\ desired}}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (k\ <=\ maxK\ \&\&\ kStationary\ <=\ maxKStationary\ \&\&\ !temperatureBreached)}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Draw\ a\ new\ sample\ point}}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \ \ sampler\_(newPoint,\ currentPoint,\ currentTemperature);}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}\{}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Evaluate\ new\ point}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ newValue\ =\ P.\mbox{\hyperlink{class_quant_lib_1_1_problem_a06691dbed20d8c317b45b47f3321d04e}{value}}(newPoint);}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Determine\ if\ new\ point\ is\ accepted}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (probability\_(currentValue,\ newValue,\ currentTemperature))\ \{}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (optimizeScheme\_\ ==\ EveryNewPoint)\ \{}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ P.setCurrentValue(newPoint);}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ P.setFunctionValue(newValue);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ localOptimizer\_-\/>minimize(P,\ endCriteria);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint\ =\ P.\mbox{\hyperlink{class_quant_lib_1_1_problem_add687259b50c4200297f8b5c0b78a806}{currentValue}}();}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newValue\ =\ P.\mbox{\hyperlink{class_quant_lib_1_1_problem_a8a6ff903be5f655af590daa41aeebc44}{functionValue}}();}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ currentPoint\ =\ newPoint;}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ currentValue\ =\ newValue;}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Check\ if\ we\ have\ a\ new\ best\ point}}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (newValue\ <\ bestValue)\ \{}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (optimizeScheme\_\ ==\ EveryBestPoint)\ \{}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ P.setCurrentValue(newPoint);}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ P.setFunctionValue(newValue);}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ localOptimizer\_-\/>minimize(P,\ endCriteria);}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint\ =\ P.\mbox{\hyperlink{class_quant_lib_1_1_problem_add687259b50c4200297f8b5c0b78a806}{currentValue}}();}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newValue\ =\ P.\mbox{\hyperlink{class_quant_lib_1_1_problem_a8a6ff903be5f655af590daa41aeebc44}{functionValue}}();}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ kStationary\ =\ 0;}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bestValue\ =\ newValue;}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bestPoint\ =\ newPoint;}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{catch}(...)\{}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Do\ nothing,\ move\ on\ to\ new\ draw}}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Increase\ steps}}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ k++;}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ kStationary++;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ i\ :\ annealStep)}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i++;}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Reanneal\ if\ necessary}}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (kReAnneal\ ==\ reAnnealSteps\_)\ \{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ kReAnneal\ =\ 0;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reannealing\_(annealStep,\ currentPoint,\ currentValue,\ currentTemperature);}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ kReAnneal++;}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Reset\ if\ necessary}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (kReset\ ==\ resetSteps\_)\ \{}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ kReset\ =\ 0;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (resetScheme\_)\ \{}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ NoResetScheme:}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ ResetToOrigin:}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ currentPoint\ =\ startingPoint;}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ currentValue\ =\ startingValue;}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ ResetToBestPoint:}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ currentPoint\ =\ bestPoint;}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ currentValue\ =\ bestValue;}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ kReset++;}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Update\ the\ current\ temperature\ according\ to\ current\ step}}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ temperature\_(currentTemperature,\ currentTemperature,\ annealStep);}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Check\ if\ temperature\ condition\ is\ breached}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ n;\ i++)}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ temperatureBreached\ =\ temperatureBreached\ \&\&\ currentTemperature[i]\ <\ endTemperature\_;}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \textcolor{comment}{//Change\ end\ criteria\ type\ if\ appropriate}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (k\ >\ maxK)}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ ecType\ =\ EndCriteria::MaxIterations;}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (kStationary\ >\ maxKStationary)}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ ecType\ =\ EndCriteria::StationaryPoint;}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \textcolor{comment}{//Set\ result\ to\ best\ point}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ P.setCurrentValue(bestPoint);}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ P.setFunctionValue(bestValue);}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ecType;}
+\DoxyCodeLine{00226\ \ \ \ \ \}}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing}{HybridSimulatedAnnealing<SamplerGaussian,\ ProbabilityBoltzmannDownhill,\ TemperatureExponential,\ ReannealingTrivial>}}\ GaussianSimulatedAnnealing;}
+\DoxyCodeLine{00229\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing}{HybridSimulatedAnnealing<SamplerLogNormal,\ ProbabilityBoltzmannDownhill,\ TemperatureExponential,\ ReannealingTrivial>}}\ LogNormalSimulatedAnnealing;}
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing}{HybridSimulatedAnnealing<SamplerMirrorGaussian,\ ProbabilityBoltzmannDownhill,\ TemperatureExponential,\ ReannealingTrivial>}}\ MirrorGaussianSimulatedAnnealing;}
+\DoxyCodeLine{00231\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing}{HybridSimulatedAnnealing<SamplerGaussian,\ ProbabilityBoltzmannDownhill,\ TemperatureExponential,\ ReannealingFiniteDifferences>}}\ GaussianSimulatedReAnnealing;}
+\DoxyCodeLine{00232\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing}{HybridSimulatedAnnealing<SamplerVeryFastAnnealing,\ ProbabilityBoltzmannDownhill,\ TemperatureVeryFastAnnealing,\ ReannealingTrivial>}}\ VeryFastSimulatedAnnealing;}
+\DoxyCodeLine{00233\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing}{HybridSimulatedAnnealing<SamplerVeryFastAnnealing,\ ProbabilityBoltzmannDownhill,\ TemperatureVeryFastAnnealing,\ ReannealingFiniteDifferences>}}\ VeryFastSimulatedReAnnealing;}
+\DoxyCodeLine{00234\ \}}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

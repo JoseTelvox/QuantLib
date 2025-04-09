@@ -1,0 +1,235 @@
+\doxysection{mc\+\_\+discr\+\_\+geom\+\_\+av\+\_\+price.\+hpp}
+\hypertarget{mc__discr__geom__av__price_8hpp_source}{}\label{mc__discr__geom__av__price_8hpp_source}\index{ql/pricingengines/asian/mc\_discr\_geom\_av\_price.hpp@{ql/pricingengines/asian/mc\_discr\_geom\_av\_price.hpp}}
+\mbox{\hyperlink{mc__discr__geom__av__price_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2000,\ 2001,\ 2002,\ 2003\ RiskMap\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2003,\ 2004\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2007,\ 2008\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_mc\_discrete\_geometric\_average\_price\_asian\_engine\_h}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_mc\_discrete\_geometric\_average\_price\_asian\_engine\_h}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{exercise_8hpp}{ql/exercise.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{mcdiscreteasianenginebase_8hpp}{ql/pricingengines/asian/mcdiscreteasianenginebase.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackscholesprocess_8hpp}{ql/processes/blackscholesprocess.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackconstantvol_8hpp}{ql/termstructures/volatility/equityfx/blackconstantvol.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackvariancecurve_8hpp}{ql/termstructures/volatility/equityfx/blackvariancecurve.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG\ =\ PseudoRandom,\ \textcolor{keyword}{class}\ S\ =\ Statistics>}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{class\ }MCDiscreteGeometricAPEngine}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ MCDiscreteAveragingAsianEngineBase<SingleVariate,RNG,S>\ \{}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ MCDiscreteAveragingAsianEngineBase<SingleVariate,RNG,S>::path\_generator\_type}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ path\_generator\_type;}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ MCDiscreteAveragingAsianEngineBase<SingleVariate,RNG,S>::path\_pricer\_type}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ path\_pricer\_type;}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ MCDiscreteAveragingAsianEngineBase<SingleVariate,RNG,S>::stats\_type}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ stats\_type;}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructor}}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ MCDiscreteGeometricAPEngine(}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<GeneralizedBlackScholesProcess>\&\ process,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antitheticVariate,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxSamples,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed);}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ ext::shared\_ptr<path\_pricer\_type>\ pathPricer()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00067\ \ \ \ \ \};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keyword}{class\ }GeometricAPOPathPricer\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_path_pricer}{PathPricer}}<Path>\ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ GeometricAPOPathPricer(Option::Type\ type,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discount,}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ runningProduct\ =\ 1.0,}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ pastFixings\ =\ 0);}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator()(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_path}{Path}}\&\ path)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_plain_vanilla_payoff}{PlainVanillaPayoff}}\ payoff\_;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discount\_;}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ runningProduct\_;}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ pastFixings\_;}
+\DoxyCodeLine{00084\ \ \ \ \ \};}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00091\ \ \ \ \ MCDiscreteGeometricAPEngine<RNG,S>::MCDiscreteGeometricAPEngine(}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<GeneralizedBlackScholesProcess>\&\ process,}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge,}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antitheticVariate,}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples,}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance,}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxSamples,}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed)}
+\DoxyCodeLine{00099\ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_m_c_discrete_averaging_asian_engine_base}{MCDiscreteAveragingAsianEngineBase}}<\mbox{\hyperlink{struct_quant_lib_1_1_single_variate}{SingleVariate}},RNG,S>(process,}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ brownianBridge,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ antitheticVariate,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ false,}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ requiredSamples,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ requiredTolerance,}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxSamples,}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seed)\ \{\}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00112\ \ \ \ \ ext::shared\_ptr<}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ MCDiscreteGeometricAPEngine<RNG,S>::path\_pricer\_type>}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ MCDiscreteGeometricAPEngine<RNG,S>::pathPricer()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ ext::shared\_ptr<PlainVanillaPayoff>\ payoff\ =}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<PlainVanillaPayoff>(}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.payoff);}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(payoff,\ \textcolor{stringliteral}{"{}non-\/plain\ payoff\ given"{}});}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ ext::shared\_ptr<EuropeanExercise>\ exercise\ =}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<EuropeanExercise>(}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.exercise);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(exercise,\ \textcolor{stringliteral}{"{}wrong\ exercise\ given"{}});}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process\ =}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<GeneralizedBlackScholesProcess>(}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>process\_);}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(process,\ \textcolor{stringliteral}{"{}Black-\/Scholes\ process\ required"{}});}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<\textcolor{keyword}{typename}}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ MCDiscreteGeometricAPEngine<RNG,S>::path\_pricer\_type>(}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ GeometricAPOPathPricer(}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>optionType(),}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>strike(),}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ process-\/>riskFreeRate()-\/>discount(exercise-\/>lastDate()),}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.runningAccumulator,}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.pastFixings));}
+\DoxyCodeLine{00139\ \ \ \ \ \}}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG\ =\ PseudoRandom,\ \textcolor{keyword}{class}\ S\ =\ Statistics>}
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{keyword}{class\ }MakeMCDiscreteGeometricAPEngine\ \{}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ MakeMCDiscreteGeometricAPEngine(}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process);}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ named\ parameters}}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ MakeMCDiscreteGeometricAPEngine\&\ withBrownianBridge(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ MakeMCDiscreteGeometricAPEngine\&\ withSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples);}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ MakeMCDiscreteGeometricAPEngine\&\ withAbsoluteTolerance(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance);}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ MakeMCDiscreteGeometricAPEngine\&\ withMaxSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples);}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ MakeMCDiscreteGeometricAPEngine\&\ withSeed(\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ MakeMCDiscreteGeometricAPEngine\&\ withAntitheticVariate(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ conversion\ to\ pricing\ engine}}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ ext::shared\_ptr<PricingEngine>()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process\_;}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antithetic\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples\_,\ maxSamples\_;}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance\_;}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge\_\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\_\ =\ 0;}
+\DoxyCodeLine{00163\ \ \ \ \ \};}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keyword}{inline}\ MakeMCDiscreteGeometricAPEngine<RNG,\ S>::MakeMCDiscreteGeometricAPEngine(}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process)}
+\DoxyCodeLine{00168\ \ \ \ \ :\ process\_(std::move(process)),\ samples\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ maxSamples\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ tolerance\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}>())\ \{\}}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keyword}{inline}\ MakeMCDiscreteGeometricAPEngine<RNG,S>\&}
+\DoxyCodeLine{00173\ \ \ \ \ MakeMCDiscreteGeometricAPEngine<RNG,S>::withSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples)\ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(tolerance\_\ ==\ Null<Real>(),}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tolerance\ already\ set"{}});}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ samples\_\ =\ samples;}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00178\ \ \ \ \ \}}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_geometric_a_p_engine}{MakeMCDiscreteGeometricAPEngine<RNG,S>}}\&}
+\DoxyCodeLine{00182\ \ \ \ \ MakeMCDiscreteGeometricAPEngine<RNG,S>::withAbsoluteTolerance(}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance)\ \{}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(samples\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ samples\ already\ set"{}});}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(RNG::allowsErrorEstimate,}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chosen\ random\ generator\ policy\ "{}}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}does\ not\ allow\ an\ error\ estimate"{}});}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ tolerance\_\ =\ tolerance;}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00191\ \ \ \ \ \}}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_geometric_a_p_engine}{MakeMCDiscreteGeometricAPEngine<RNG,S>}}\&}
+\DoxyCodeLine{00195\ \ \ \ \ MakeMCDiscreteGeometricAPEngine<RNG,S>::withMaxSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples)\ \{}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ maxSamples\_\ =\ samples;}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00198\ \ \ \ \ \}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_geometric_a_p_engine}{MakeMCDiscreteGeometricAPEngine<RNG,S>}}\&}
+\DoxyCodeLine{00202\ \ \ \ \ MakeMCDiscreteGeometricAPEngine<RNG,S>::withSeed(\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed)\ \{}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ seed\_\ =\ seed;}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00205\ \ \ \ \ \}}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00208\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_geometric_a_p_engine}{MakeMCDiscreteGeometricAPEngine<RNG,S>}}\&}
+\DoxyCodeLine{00209\ \ \ \ \ MakeMCDiscreteGeometricAPEngine<RNG,S>::withBrownianBridge(\textcolor{keywordtype}{bool}\ b)\ \{}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ brownianBridge\_\ =\ b;}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00212\ \ \ \ \ \}}
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00214\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_geometric_a_p_engine}{MakeMCDiscreteGeometricAPEngine<RNG,S>}}\&}
+\DoxyCodeLine{00216\ \ \ \ \ MakeMCDiscreteGeometricAPEngine<RNG,S>::withAntitheticVariate(\textcolor{keywordtype}{bool}\ b)\ \{}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ antithetic\_\ =\ b;}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00219\ \ \ \ \ \}}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00223\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_geometric_a_p_engine}{MakeMCDiscreteGeometricAPEngine<RNG,S>::operator}}\ ext::shared\_ptr<PricingEngine>()\textcolor{keyword}{}}
+\DoxyCodeLine{00224\ \textcolor{keyword}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ }\{}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<PricingEngine>(\textcolor{keyword}{new}}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_m_c_discrete_geometric_a_p_engine}{MCDiscreteGeometricAPEngine<RNG,S>}}(process\_,}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ brownianBridge\_,}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ antithetic\_,}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ samples\_,\ tolerance\_,}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxSamples\_,}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seed\_));}
+\DoxyCodeLine{00232\ \ \ \ \ \}}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \}}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

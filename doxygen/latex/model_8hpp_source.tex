@@ -1,0 +1,216 @@
+\doxysection{model.\+hpp}
+\hypertarget{model_8hpp_source}{}\label{model_8hpp_source}\index{ql/models/model.hpp@{ql/models/model.hpp}}
+\mbox{\hyperlink{model_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2001,\ 2002,\ 2003\ Sadruddin\ Rejeb}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2005,\ 2007\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2013,\ 2015\ Peter\ Caspers}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_interest\_rate\_model\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_interest\_rate\_model\_hpp}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{endcriteria_8hpp}{ql/math/optimization/endcriteria.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lattice_8hpp}{ql/methods/lattices/lattice.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{calibrationhelper_8hpp}{ql/models/calibrationhelper.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{parameter_8hpp}{ql/models/parameter.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{option_8hpp}{ql/option.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{OptimizationMethod}};}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_affine_model}{AffineModel}}\ :\ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ Observable\ \{}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ \mbox{\hyperlink{class_quant_lib_1_1_affine_model_a0b05f41e4bf07129470362d3f591ee19}{discount}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discountBond(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ now,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ factors)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discountBondOption(Option::Type\ type,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ bondMaturity)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discountBondOption(Option::Type\ type,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ bondStart,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ bondMaturity)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00064\ \ \ \ \ \};}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keyword}{class\ }TermStructureConsistentModel\ :\ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ Observable\ \{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ TermStructureConsistentModel(\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ termStructure)}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ :\ termStructure\_(std::move(termStructure))\ \{\}}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ termStructure()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ termStructure\_;}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ termStructure\_;}
+\DoxyCodeLine{00082\ \ \ \ \ \};}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{keyword}{class\ }CalibratedModel\ :\ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ Observer,\ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ Observable\ \{}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ CalibratedModel(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nArguments);}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_a03d7cb63ca181a47a45994cfe448e42c}{update}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ generateArguments();}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_af2776521b1584d547ec2440833508677}{calibrate}}(}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<ext::shared\_ptr<CalibrationHelper>\ >\&,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{OptimizationMethod}}\&\ method,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_a797a6b080b7a66d620758ff6fe34df39}{endCriteria}},}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\&\ constraint\ =\ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}(),}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ weights\ =\ std::vector<Real>(),}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<bool>\&\ fixParameters\ =\ std::vector<bool>());}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ value(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}},}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<ext::shared\_ptr<CalibrationHelper>\ >\&);}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Constraint>\&\ constraint()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ EndCriteria::Type\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_a797a6b080b7a66d620758ff6fe34df39}{endCriteria}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ shortRateEndCriteria\_;\ \}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_ab7766a4e575c67e8f1e00f98bfe2e8c6}{problemValues}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ problemValues\_;\ \}}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ setParams(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}});}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ functionEvaluation()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ functionEvaluation\_;\ \}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ generateArguments()\ \{\}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ std::vector<Parameter>\ arguments\_;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Constraint>\ constraint\_;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ EndCriteria::Type\ shortRateEndCriteria\_\ =\ EndCriteria::None;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ Array\ problemValues\_;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ functionEvaluation\_;}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_1_1_private_constraint}{PrivateConstraint}};}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_1_1_calibration_function}{CalibrationFunction}};}
+\DoxyCodeLine{00137\ \ \ \ \ \};}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{keyword}{class\ }ShortRateModel\ :\ \textcolor{keyword}{public}\ CalibratedModel\ \{}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ ShortRateModel(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nArguments);}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ ext::shared\_ptr<Lattice>\ tree(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_time_grid}{TimeGrid}}\&)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00145\ \ \ \ \ \};}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ AffineModel::discountBondOption(Option::Type\ type,}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}},}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ bondMaturity)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ discountBondOption(type,\ strike,\ maturity,\ bondMaturity);}
+\DoxyCodeLine{00157\ \ \ \ \ \}}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ ext::shared\_ptr<Constraint>\&}
+\DoxyCodeLine{00160\ \ \ \ \ CalibratedModel::constraint()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ constraint\_;}
+\DoxyCodeLine{00162\ \ \ \ \ \}}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_1_1_private_constraint}{CalibratedModel::PrivateConstraint}}\ :\ \textcolor{keyword}{public}\ Constraint\ \{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }Impl\ final\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_constraint_1_1_impl}{Constraint::Impl}}\ \{}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ Impl(\textcolor{keyword}{const}\ std::vector<Parameter>\&\ arguments)}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ :\ arguments\_(arguments)\ \{\}}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ test(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}})\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ argument\ :\ arguments\_)\ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size\ =\ argument.size();}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ testParams(size);}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<size;\ j++,\ k++)}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ testParams[j]\ =\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}}[k];}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!argument.testParams(testParams))}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ upperBound(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}})\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k\ =\ 0,\ k2\ =\ 0;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ totalSize\ =\ 0;}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ argument\ :\ arguments\_)\ \{}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ totalSize\ +=\ argument.size();}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ result(totalSize);}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ argument\ :\ arguments\_)\ \{}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size\ =\ argument.size();}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ partialParams(size);}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ size;\ j++,\ k++)}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ partialParams[j]\ =\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}}[k];}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ tmpBound\ =\ argument.constraint().upperBound(partialParams);}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ size;\ j++,\ k2++)}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result[k2]\ =\ tmpBound[j];}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lowerBound(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}})\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k\ =\ 0,\ k2\ =\ 0;}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ totalSize\ =\ 0;}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ argument\ :\ arguments\_)\ \{}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ totalSize\ +=\ argument.size();}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ result(totalSize);}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ argument\ :\ arguments\_)\ \{}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size\ =\ argument.size();}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ partialParams(size);}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ size;\ j++,\ k++)}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ partialParams[j]\ =\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_adae9352d30045e32f5382fa79a0bc88c}{params}}[k];}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ tmpBound\ =\ argument.constraint().lowerBound(partialParams);}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ size;\ j++,\ k2++)}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result[k2]\ =\ tmpBound[j];}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Parameter>\&\ arguments\_;}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ PrivateConstraint(\textcolor{keyword}{const}\ std::vector<Parameter>\&\ arguments)}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ :\ Constraint(ext::shared\_ptr<Constraint::Impl>(}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ PrivateConstraint::Impl(arguments)))\ \{\}}
+\DoxyCodeLine{00229\ \ \ \ \ \};}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00231\ \}}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

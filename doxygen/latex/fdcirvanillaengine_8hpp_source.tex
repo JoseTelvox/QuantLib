@@ -1,0 +1,115 @@
+\doxysection{fdcirvanillaengine.\+hpp}
+\hypertarget{fdcirvanillaengine_8hpp_source}{}\label{fdcirvanillaengine_8hpp_source}\index{ql/pricingengines/vanilla/fdcirvanillaengine.hpp@{ql/pricingengines/vanilla/fdcirvanillaengine.hpp}}
+\mbox{\hyperlink{fdcirvanillaengine_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2020\ Lew\ Wei\ Hao}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_fd\_cir\_vanilla\_engine\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_fd\_cir\_vanilla\_engine\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{vanillaoption_8hpp}{ql/instruments/vanillaoption.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdmbackwardsolver_8hpp}{ql/methods/finitedifferences/solvers/fdmbackwardsolver.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdmsolverdesc_8hpp}{ql/methods/finitedifferences/solvers/fdmsolverdesc.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{hestonmodel_8hpp}{ql/models/equity/hestonmodel.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{genericmodelengine_8hpp}{ql/pricingengines/genericmodelengine.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{coxingersollrossprocess_8hpp}{ql/processes/coxingersollrossprocess.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{localvoltermstructure_8hpp}{ql/termstructures/volatility/equityfx/localvoltermstructure.hpp}}>}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_fdm_quanto_helper}{FdmQuantoHelper}};}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{class\ }FdCIRVanillaEngine\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_one_asset_option_1_1engine}{VanillaOption::engine}}\ \{}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ FdCIRVanillaEngine(ext::shared\_ptr<CoxIngersollRossProcess>\ cirProcess,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ bsProcess,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ tGrid,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ xGrid,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ vGrid,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dampingSteps,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_scheme_desc}{FdmSchemeDesc}}\&\ schemeDesc\ =\ FdmSchemeDesc::ModifiedHundsdorfer(),}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<FdmQuantoHelper>\ quantoHelper\ =\ \{\});}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ FdCIRVanillaEngine(ext::shared\_ptr<CoxIngersollRossProcess>\ cirProcess,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ bsProcess,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DividendSchedule\ dividends,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ tGrid,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ xGrid,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ vGrid,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dampingSteps,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_scheme_desc}{FdmSchemeDesc}}\&\ schemeDesc\ =\ FdmSchemeDesc::ModifiedHundsdorfer(),}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<FdmQuantoHelper>\ quantoHelper\ =\ \{\});}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ calculate()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_solver_desc}{FdmSolverDesc}}\ getSolverDesc(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ equityScaleFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ bsProcess\_;}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ ext::shared\_ptr<CoxIngersollRossProcess>\ cirProcess\_;}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ ext::shared\_ptr<FdmQuantoHelper>\ quantoHelper\_;}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ DividendSchedule\ dividends\_;}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ tGrid\_,\ xGrid\_,\ rGrid\_,\ dampingSteps\_;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho\_;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_scheme_desc}{FdmSchemeDesc}}\ schemeDesc\_;}
+\DoxyCodeLine{00079\ \ \ \ \ \};}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keyword}{class\ }MakeFdCIRVanillaEngine\ \{}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ MakeFdCIRVanillaEngine(ext::shared\_ptr<CoxIngersollRossProcess>\ cirProcess,}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ bsProcess,}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho);}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ MakeFdCIRVanillaEngine\&\ withQuantoHelper(}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<FdmQuantoHelper>\&\ quantoHelper);}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ MakeFdCIRVanillaEngine\&\ withTGrid(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ tGrid);}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ MakeFdCIRVanillaEngine\&\ withXGrid(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ xGrid);}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ MakeFdCIRVanillaEngine\&\ withRGrid(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ rGrid);}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ MakeFdCIRVanillaEngine\&\ withDampingSteps(}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dampingSteps);}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ MakeFdCIRVanillaEngine\&\ withFdmSchemeDesc(}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_scheme_desc}{FdmSchemeDesc}}\&\ schemeDesc);}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ MakeFdCIRVanillaEngine\&\ withCashDividends(}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ dividendDates,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ dividendAmounts);}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ ext::shared\_ptr<PricingEngine>()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ ext::shared\_ptr<CoxIngersollRossProcess>\ cirProcess\_;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ bsProcess\_;}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ DividendSchedule\ dividends\_;}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho\_;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ tGrid\_\ =\ 10,\ xGrid\_\ =\ 100,\ rGrid\_\ =\ 100,\ dampingSteps\_\ =\ 0;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ ext::shared\_ptr<FdmSchemeDesc>\ schemeDesc\_;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ ext::shared\_ptr<FdmQuantoHelper>\ quantoHelper\_;}
+\DoxyCodeLine{00113\ \ \ \ \ \};}
+\DoxyCodeLine{00114\ \}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

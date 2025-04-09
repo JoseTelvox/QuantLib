@@ -1,0 +1,224 @@
+\doxysection{bootstraphelper.\+hpp}
+\hypertarget{bootstraphelper_8hpp_source}{}\label{bootstraphelper_8hpp_source}\index{ql/termstructures/bootstraphelper.hpp@{ql/termstructures/bootstraphelper.hpp}}
+\mbox{\hyperlink{bootstraphelper_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2005,\ 2006,\ 2007,\ 2008\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2007,\ 2009,\ 2015\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2015\ Paolo\ Mazzocchi}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_bootstrap\_helper\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_bootstrap\_helper\_hpp}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{handle_8hpp}{ql/handle.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{observable_8hpp}{ql/patterns/observable.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{visitor_8hpp}{ql/patterns/visitor.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{quote_8hpp}{ql/quote.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{simplequote_8hpp}{ql/quotes/simplequote.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{settings_8hpp}{ql/settings.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{date_8hpp}{ql/time/date.hpp}}>}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_pillar}{Pillar}}\ \{}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ \mbox{\hyperlink{struct_quant_lib_1_1_pillar_a50e175c9dea105ebbceba3b70f807561}{Choice}}\ \{}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \ \ \ \ MaturityDate,\ \ \ \ \ }
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_pillar_a50e175c9dea105ebbceba3b70f807561a35cd4b72a32ba5ec61d472aa16279c8b}{LastRelevantDate}},\ }
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_pillar_a50e175c9dea105ebbceba3b70f807561a52f971a295ca8849bbe81393cdc476b8}{CustomDate}}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00047\ \ \ \ \ \};}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \ std::ostream\&\ operator<<(std::ostream\&\ out,\ \mbox{\hyperlink{struct_quant_lib_1_1_pillar_a50e175c9dea105ebbceba3b70f807561}{Pillar::Choice}}\ type);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{class\ }BootstrapHelper\ :\ \textcolor{keyword}{public}\ Observer,\ \textcolor{keyword}{public}\ Observable\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ BootstrapHelper(\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ quote);}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ BootstrapHelper(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ quote);}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \string~BootstrapHelper()\ \textcolor{keyword}{override}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ quote()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ quote\_;\ \}}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ impliedQuote()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ quoteError()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ quote\_-\/>value()\ -\/\ impliedQuote();\ \}}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a1f17a55318c87b85475f7a0ace4881fc}{setTermStructure}}(TS*);}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a1ca284f9f4ade8b17be1f5c284b1cfb2}{earliestDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_ad74f6e8a3c4f734a83edacaeb6fe53e0}{maturityDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_afc339bcd0b9d3029c20dfacaac5adf52}{latestRelevantDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a00496ecfac2fb317e435a6fe48c5c267}{pillarDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a7b21f7d30980757a9721ef13ad7979af}{latestDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a29362a38767e0231afc9430c8039cf42}{update}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&);}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ quote\_;}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ TS*\ termStructure\_;}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ earliestDate\_,\ latestDate\_;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ maturityDate\_,\ latestRelevantDate\_,\ pillarDate\_;}
+\DoxyCodeLine{00121\ \ \ \ \ \};}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{keyword}{class\ }RelativeDateBootstrapHelper\ :\ \textcolor{keyword}{public}\ BootstrapHelper<TS>\ \{}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ RelativeDateBootstrapHelper(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ quote,}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ updateDates\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ RelativeDateBootstrapHelper(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ quote,}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ updateDates\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_relative_date_bootstrap_helper_a3d3ea6859e64e392e78a8fbbe36f182f}{update}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (updateDates\_\ \&\&\ evaluationDate\_\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().evaluationDate())\ \{}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ evaluationDate\_\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ initializeDates();}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a29362a38767e0231afc9430c8039cf42}{BootstrapHelper<TS>::update}}();}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ initializeDates()\ =\ 0;}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ evaluationDate\_;}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ updateDates\_;}
+\DoxyCodeLine{00148\ \ \ \ \ \};}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ \textcolor{comment}{//\ template\ definitions}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00153\ \ \ \ \ BootstrapHelper<TS>::BootstrapHelper(Handle<Quote>\ quote)}
+\DoxyCodeLine{00154\ \ \ \ \ :\ quote\_(std::move(quote)),\ termStructure\_(nullptr)\ \{}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ registerWith(quote\_);}
+\DoxyCodeLine{00156\ \ \ \ \ \}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00159\ \ \ \ \ BootstrapHelper<TS>::BootstrapHelper(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ quote)}
+\DoxyCodeLine{00160\ \ \ \ \ :\ quote\_(makeQuoteHandle(quote)),\ termStructure\_(nullptr)\ \{\}}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00163\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a1f17a55318c87b85475f7a0ace4881fc}{BootstrapHelper<TS>::setTermStructure}}(TS*\ t)\ \{}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(t\ !=\ \textcolor{keyword}{nullptr},\ \textcolor{stringliteral}{"{}null\ term\ structure\ given"{}});}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ termStructure\_\ =\ t;}
+\DoxyCodeLine{00166\ \ \ \ \ \}}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00169\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a1ca284f9f4ade8b17be1f5c284b1cfb2}{BootstrapHelper<TS>::earliestDate}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ earliestDate\_;}
+\DoxyCodeLine{00171\ \ \ \ \ \}}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00174\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_ad74f6e8a3c4f734a83edacaeb6fe53e0}{BootstrapHelper<TS>::maturityDate}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (maturityDate\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}())}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_afc339bcd0b9d3029c20dfacaac5adf52}{latestRelevantDate}}();}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ maturityDate\_;}
+\DoxyCodeLine{00178\ \ \ \ \ \}}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00181\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_afc339bcd0b9d3029c20dfacaac5adf52}{BootstrapHelper<TS>::latestRelevantDate}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (latestRelevantDate\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}())}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a7b21f7d30980757a9721ef13ad7979af}{latestDate}}();}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ latestRelevantDate\_;}
+\DoxyCodeLine{00185\ \ \ \ \ \}}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00188\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a00496ecfac2fb317e435a6fe48c5c267}{BootstrapHelper<TS>::pillarDate}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (pillarDate\_==\mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}())}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a7b21f7d30980757a9721ef13ad7979af}{latestDate}}();}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pillarDate\_;}
+\DoxyCodeLine{00192\ \ \ \ \ \}}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00195\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a7b21f7d30980757a9721ef13ad7979af}{BootstrapHelper<TS>::latestDate}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (latestDate\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}())}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pillarDate\_;}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ latestDate\_;}
+\DoxyCodeLine{00199\ \ \ \ \ \}}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00202\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_bootstrap_helper_a29362a38767e0231afc9430c8039cf42}{BootstrapHelper<TS>::update}}()\ \{}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00204\ \ \ \ \ \}}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keywordtype}{void}\ BootstrapHelper<TS>::accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&\ v)\ \{}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}*\ v1\ =\ \textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_visitor}{Visitor<BootstrapHelper<TS>}}\ \textcolor{keyword}{>}*>(\&v);}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v1\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ v1-\/>visit(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}not\ a\ bootstrap-\/helper\ visitor"{}});}
+\DoxyCodeLine{00213\ \ \ \ \ \}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00217\ \ \ \ \ RelativeDateBootstrapHelper<TS>::RelativeDateBootstrapHelper(}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Handle<Quote>\&\ quote,\ \textcolor{keywordtype}{bool}\ updateDates)}
+\DoxyCodeLine{00219\ \ \ \ \ :\ BootstrapHelper<TS>(quote),\ updateDates\_(updateDates)\ \{}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (updateDates)\ \{}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>registerWith(\mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().evaluationDate());}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ evaluationDate\_\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00224\ \ \ \ \ \}}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ TS>}
+\DoxyCodeLine{00227\ \ \ \ \ RelativeDateBootstrapHelper<TS>::RelativeDateBootstrapHelper(}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ quote,\ \textcolor{keywordtype}{bool}\ updateDates)}
+\DoxyCodeLine{00229\ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_relative_date_bootstrap_helper}{RelativeDateBootstrapHelper}}<TS>(makeQuoteHandle(quote),\ updateDates)\ \{\}}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ \ \textcolor{keyword}{inline}\ std::ostream\&\ operator<<(std::ostream\&\ out,}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_pillar_a50e175c9dea105ebbceba3b70f807561}{Pillar::Choice}}\ t)\ \{}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}\ (t)\ \{}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ Pillar::MaturityDate:}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out\ <<\ \textcolor{stringliteral}{"{}MaturityPillarDate"{}};}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{struct_quant_lib_1_1_pillar_a50e175c9dea105ebbceba3b70f807561a35cd4b72a32ba5ec61d472aa16279c8b}{Pillar::LastRelevantDate}}:}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out\ <<\ \textcolor{stringliteral}{"{}LastRelevantPillarDate"{}};}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ \mbox{\hyperlink{struct_quant_lib_1_1_pillar_a50e175c9dea105ebbceba3b70f807561a52f971a295ca8849bbe81393cdc476b8}{Pillar::CustomDate}}:}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ out\ <<\ \textcolor{stringliteral}{"{}CustomPillarDate"{}};}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}unknown\ Pillar::Choice("{}}\ <<\ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}(t)\ <<\ \textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00244\ \ \ \ \ \}}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}}\ \{}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1detail_1_1_bootstrap_helper_sorter}{BootstrapHelperSorter}}\ \{}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Helper>}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ operator()(}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Helper>\&\ h1,}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Helper>\&\ h2)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (h1-\/>pillarDate()\ <\ h2-\/>pillarDate());}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ \ \ \ \ \}}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \}}
+\DoxyCodeLine{00261\ }
+\DoxyCodeLine{00262\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

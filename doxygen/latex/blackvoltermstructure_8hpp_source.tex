@@ -1,0 +1,209 @@
+\doxysection{blackvoltermstructure.\+hpp}
+\hypertarget{blackvoltermstructure_8hpp_source}{}\label{blackvoltermstructure_8hpp_source}\index{ql/termstructures/volatility/equityfx/blackvoltermstructure.hpp@{ql/termstructures/volatility/equityfx/blackvoltermstructure.hpp}}
+\mbox{\hyperlink{blackvoltermstructure_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2002,\ 2003\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2003,\ 2004,\ 2005,\ 2006\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ quantlib\_black\_vol\_term\_structures\_hpp}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ quantlib\_black\_vol\_term\_structures\_hpp}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{voltermstructure_8hpp}{ql/termstructures/voltermstructure.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{visitor_8hpp}{ql/patterns/visitor.hpp}}>}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a2ab6b7546e0289ae73b8ad650931eca4}{BlackVolTermStructure}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_volatility_term_structure_adfc4d4619ecf74dd849ba4fdf0b36d22}{VolatilityTermStructure}}\ \{}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a2ab6b7546e0289ae73b8ad650931eca4}{BlackVolTermStructure}}(\mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a2ab6b7546e0289ae73b8ad650931eca4}{BlackVolTermStructure}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_accbf3d4af41db0333d456eb5616c4e1e}{referenceDate}},}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ cal\ =\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}(),}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a2ab6b7546e0289ae73b8ad650931eca4}{BlackVolTermStructure}}(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_abeb79eefda70a9414f206ca9e70ced0f}{settlementDays}},}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a2ab6b7546e0289ae73b8ad650931eca4}{\string~BlackVolTermStructure}}()\ \textcolor{keyword}{override}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_aceb7b98b57f15ba2da92b0b168554314}{blackVol}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ maturity,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_aceb7b98b57f15ba2da92b0b168554314}{blackVol}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a90d71ab1722605e4e176a308f6ed113f}{blackVariance}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ maturity,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a90d71ab1722605e4e176a308f6ed113f}{blackVariance}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_afcc4d1b9dd7f0b032fe9ab80096e36b4}{blackForwardVol}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date1,}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date2,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_afcc4d1b9dd7f0b032fe9ab80096e36b4}{blackForwardVol}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ time1,}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ time2,}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a0a211cb4416bdcc89912c36679d67500}{blackForwardVariance}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date1,}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date2,}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a0a211cb4416bdcc89912c36679d67500}{blackForwardVariance}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ time1,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ time2,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate\ =\ \textcolor{keyword}{false})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&);}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a0a39770b175b794ff263f84e29866c2b}{blackVarianceImpl}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a144e10cd9938d416ad7d17b91e3f19e3}{blackVolImpl}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00123\ \ \ \ \ \};}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_black_volatility_term_structure_a226a689b0c439ded08e669f92a4d1ef8}{BlackVolatilityTermStructure}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a2ab6b7546e0289ae73b8ad650931eca4}{BlackVolTermStructure}}\ \{}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_volatility_term_structure_a226a689b0c439ded08e669f92a4d1ef8}{BlackVolatilityTermStructure}}(\mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_volatility_term_structure_a226a689b0c439ded08e669f92a4d1ef8}{BlackVolatilityTermStructure}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_accbf3d4af41db0333d456eb5616c4e1e}{referenceDate}},}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ cal\ =\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}(),}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_volatility_term_structure_a226a689b0c439ded08e669f92a4d1ef8}{BlackVolatilityTermStructure}}(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_abeb79eefda70a9414f206ca9e70ced0f}{settlementDays}},}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ cal,}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_volatility_term_structure_a22360c0d782aea7a5abfe2f7e9c85f1d}{blackVarianceImpl}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00166\ \ \ \ \ \};}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00177\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_black_variance_term_structure_a961c1b3cd21a88a54084767088ad82f0}{BlackVarianceTermStructure}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a2ab6b7546e0289ae73b8ad650931eca4}{BlackVolTermStructure}}\ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_variance_term_structure_a961c1b3cd21a88a54084767088ad82f0}{BlackVarianceTermStructure}}(\mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_variance_term_structure_a961c1b3cd21a88a54084767088ad82f0}{BlackVarianceTermStructure}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_accbf3d4af41db0333d456eb5616c4e1e}{referenceDate}},}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ cal\ =\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}(),}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_black_variance_term_structure_a961c1b3cd21a88a54084767088ad82f0}{BlackVarianceTermStructure}}(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_abeb79eefda70a9414f206ca9e70ced0f}{settlementDays}},}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&,}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}},}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}());}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_variance_term_structure_a0c1761cfe017defa8e9eefc208e7a950}{blackVolImpl}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00211\ \ \ \ \ \};}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_aceb7b98b57f15ba2da92b0b168554314}{BlackVolTermStructure::blackVol}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_aa7297742ffbeeb0c7611f90a0f7d15bf}{checkRange}}(d,\ extrapolate);}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_volatility_term_structure_aad02ea6fe4bf30c662adaf01a46d5537}{checkStrike}}(strike,\ extrapolate);}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t\ =\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_ac8da61eb0f06ae07a35e8e4bbe7146b0}{timeFromReference}}(d);}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a144e10cd9938d416ad7d17b91e3f19e3}{blackVolImpl}}(t,\ strike);}
+\DoxyCodeLine{00224\ \ \ \ \ \}}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_aceb7b98b57f15ba2da92b0b168554314}{BlackVolTermStructure::blackVol}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_aa7297742ffbeeb0c7611f90a0f7d15bf}{checkRange}}(t,\ extrapolate);}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_volatility_term_structure_aad02ea6fe4bf30c662adaf01a46d5537}{checkStrike}}(strike,\ extrapolate);}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a144e10cd9938d416ad7d17b91e3f19e3}{blackVolImpl}}(t,\ strike);}
+\DoxyCodeLine{00232\ \ \ \ \ \}}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a90d71ab1722605e4e176a308f6ed113f}{BlackVolTermStructure::blackVariance}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_aa7297742ffbeeb0c7611f90a0f7d15bf}{checkRange}}(d,\ extrapolate);}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_volatility_term_structure_aad02ea6fe4bf30c662adaf01a46d5537}{checkStrike}}(strike,\ extrapolate);}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t\ =\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_ac8da61eb0f06ae07a35e8e4bbe7146b0}{timeFromReference}}(d);}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a0a39770b175b794ff263f84e29866c2b}{blackVarianceImpl}}(t,\ strike);}
+\DoxyCodeLine{00241\ \ \ \ \ \}}
+\DoxyCodeLine{00242\ }
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a90d71ab1722605e4e176a308f6ed113f}{BlackVolTermStructure::blackVariance}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolate)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_aa7297742ffbeeb0c7611f90a0f7d15bf}{checkRange}}(t,\ extrapolate);}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_volatility_term_structure_aad02ea6fe4bf30c662adaf01a46d5537}{checkStrike}}(strike,\ extrapolate);}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a0a39770b175b794ff263f84e29866c2b}{blackVarianceImpl}}(t,\ strike);}
+\DoxyCodeLine{00249\ \ \ \ \ \}}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ BlackVolTermStructure::accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&\ v)\ \{}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}*\ v1\ =\ \textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_visitor}{Visitor<BlackVolTermStructure>}}*\textcolor{keyword}{>}(\&v);}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v1\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ v1-\/>visit(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}not\ a\ Black-\/volatility\ term\ structure\ visitor"{}});}
+\DoxyCodeLine{00257\ \ \ \ \ \}}
+\DoxyCodeLine{00258\ }
+\DoxyCodeLine{00259\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00260\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_volatility_term_structure_a22360c0d782aea7a5abfe2f7e9c85f1d}{BlackVolatilityTermStructure::blackVarianceImpl}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ vol\ =\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a144e10cd9938d416ad7d17b91e3f19e3}{blackVolImpl}}(t,\ strike);}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ vol*vol*t;}
+\DoxyCodeLine{00264\ \ \ \ \ \}}
+\DoxyCodeLine{00265\ }
+\DoxyCodeLine{00266\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ BlackVolatilityTermStructure::accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&\ v)\ \{}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}*\ v1\ =\ \textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_visitor}{Visitor<BlackVolatilityTermStructure>}}*\textcolor{keyword}{>}(\&v);}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v1\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ v1-\/>visit(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ BlackVolTermStructure::accept(v);}
+\DoxyCodeLine{00272\ \ \ \ \ \}}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00275\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ BlackVarianceTermStructure\ ::blackVolImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ nonZeroMaturity\ =\ (t==0.0\ ?\ 0.00001\ :\ t);}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ var\ =\ \mbox{\hyperlink{class_quant_lib_1_1_black_vol_term_structure_a0a39770b175b794ff263f84e29866c2b}{blackVarianceImpl}}(nonZeroMaturity,\ strike);}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::sqrt(var/nonZeroMaturity);}
+\DoxyCodeLine{00280\ \ \ \ \ \}}
+\DoxyCodeLine{00281\ }
+\DoxyCodeLine{00282\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ BlackVarianceTermStructure::accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&\ v)\ \{}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}*\ v1\ =\ \textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_visitor}{Visitor<BlackVarianceTermStructure>}}*\textcolor{keyword}{>}(\&v);}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v1\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ v1-\/>visit(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ BlackVolTermStructure::accept(v);}
+\DoxyCodeLine{00288\ \ \ \ \ \}}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00290\ \}}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

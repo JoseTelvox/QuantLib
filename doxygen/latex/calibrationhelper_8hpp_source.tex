@@ -1,0 +1,105 @@
+\doxysection{calibrationhelper.\+hpp}
+\hypertarget{calibrationhelper_8hpp_source}{}\label{calibrationhelper_8hpp_source}\index{ql/models/calibrationhelper.hpp@{ql/models/calibrationhelper.hpp}}
+\mbox{\hyperlink{calibrationhelper_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2001,\ 2002,\ 2003\ Sadruddin\ Rejeb}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2015\ Peter\ Caspers}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ quantlib\_interest\_rate\_modelling\_calibration\_helper\_h}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ quantlib\_interest\_rate\_modelling\_calibration\_helper\_h}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lazyobject_8hpp}{ql/patterns/lazyobject.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{quote_8hpp}{ql/quote.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{volatilitytype_8hpp}{ql/termstructures/volatility/volatilitytype.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{yieldtermstructure_8hpp}{ql/termstructures/yieldtermstructure.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <list>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_pricing_engine}{PricingEngine}};}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_calibration_helper}{CalibrationHelper}}\ \{}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_calibration_helper}{\string~CalibrationHelper}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_calibration_helper_a175a23e1cbdc1d748f227a8018f3e752}{calibrationError}}()\ =\ 0;}
+\DoxyCodeLine{00045\ \ \ \ \ \};}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keyword}{class\ }BlackCalibrationHelper\ :\ \textcolor{keyword}{public}\ LazyObject,\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_calibration_helper}{CalibrationHelper}}\ \{}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ CalibrationErrorType\ \{}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ RelativePriceError,\ PriceError,\ ImpliedVolError\};}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ BlackCalibrationHelper(\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_adb2295d22872b7f624239b3ad7f6f73b}{volatility}},}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CalibrationErrorType\ calibrationErrorType\ =\ RelativePriceError,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ VolatilityType\ type\ =\ ShiftedLognormal,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ shift\ =\ 0.0)}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ :\ volatility\_(std::move(\mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_adb2295d22872b7f624239b3ad7f6f73b}{volatility}})),\ volatilityType\_(type),\ shift\_(shift),}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ calibrationErrorType\_(calibrationErrorType)\ \{}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ registerWith(volatility\_);}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_ad61f4667f3db57d46fdd71ea49bd6433}{performCalculations}}()\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ marketValue\_\ =\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_a5ad3a0f6853a78be83832da1dd452e88}{blackPrice}}(volatility\_-\/>value());}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_adb2295d22872b7f624239b3ad7f6f73b}{volatility}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ volatility\_;\ \}}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ VolatilityType\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_af91f1b9770402e12ac06bda4d401c510}{volatilityType}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ volatilityType\_;\ \}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_aa780b826711423299ee216cd8ccc40d0}{marketValue}}()\textcolor{keyword}{\ const\ }\{\ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();\ \textcolor{keywordflow}{return}\ marketValue\_;\ \}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_a14a74949a453678460f9b723c047eb71}{modelValue}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_a2722e738c93c59974863f478ab102a58}{calibrationError}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ addTimesTo(std::list<Time>\&\ times)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_a4a3a58fc494790845a1866d1c9a32e15}{impliedVolatility}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ targetValue,}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy,}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxEvaluations,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ minVol,}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ maxVol)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_a5ad3a0f6853a78be83832da1dd452e88}{blackPrice}}(\mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_black_calibration_helper_adb2295d22872b7f624239b3ad7f6f73b}{volatility}})\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setPricingEngine(\textcolor{keyword}{const}\ ext::shared\_ptr<PricingEngine>\&\ engine)\ \{}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ engine\_\ =\ engine;}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ marketValue\_;}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ volatility\_;}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ ext::shared\_ptr<PricingEngine>\ engine\_;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ VolatilityType\ volatilityType\_;}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ shift\_;}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }ImpliedVolatilityHelper;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ CalibrationErrorType\ calibrationErrorType\_;}
+\DoxyCodeLine{00107\ \ \ \ \ \};}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \}}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

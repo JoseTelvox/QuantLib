@@ -1,0 +1,234 @@
+\doxysection{basket.\+hpp}
+\hypertarget{basket_8hpp_source}{}\label{basket_8hpp_source}\index{ql/experimental/credit/basket.hpp@{ql/experimental/credit/basket.hpp}}
+\mbox{\hyperlink{basket_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Roland\ Lichters}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2009,\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ quantlib\_basket\_hpp}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ quantlib\_basket\_hpp}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{claim_8hpp}{ql/instruments/claim.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{defaulttermstructure_8hpp}{ql/termstructures/defaulttermstructure.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lazyobject_8hpp}{ql/patterns/lazyobject.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{defaultprobabilitykey_8hpp}{ql/experimental/credit/defaultprobabilitykey.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{issuer_8hpp}{ql/experimental/credit/issuer.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/recoveryratemodel.hpp>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{pool_8hpp}{ql/experimental/credit/pool.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{loss_8hpp}{ql/experimental/credit/loss.hpp}}>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_default_loss_model}{DefaultLossModel}};}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keyword}{class\ }Basket\ :\ \textcolor{keyword}{public}\ LazyObject\ \{}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ Basket()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_basket_aec429747163959e23d34a15ee535e883}{Basket}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a293c2b2fbe89b07504527272375e955d}{refDate}},}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::string>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a5bfcb66633488ec17a22c923323dabcb}{names}},}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ae55de9298e595aa2976f292e19cc08ac}{notionals}},}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Pool>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ab343b3d3b245bd161a1e19aedd7e2ae6}{pool}},}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a4c74577014cca12a9da988b40c462e04}{attachmentRatio}}\ =\ 0.0,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_aec339867af9dbbfb329d108555f58a18}{detachmentRatio}}\ =\ 1.0,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Claim>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_af0842fa054f3a073783e8d320be9be10}{claim}}\ =\ ext::shared\_ptr<Claim>(\textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_face_value_claim}{FaceValueClaim}}()));}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a4c308e29170a0b6c98e5721dd7ec2654}{update}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ computeBasket();}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_adee2bf49be5c4c78736be293321a856d}{LazyObject::update}}();}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ computeBasket()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ update\ cache\ values\ at\ the\ calculation\ date\ (work\ as\ arguments\ }}
+\DoxyCodeLine{00077\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ to\ the\ Loss\ Models)}}
+\DoxyCodeLine{00078\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)to\ do:\ IMPORTANT:\ notice\ that\ defaults\ added\ to\ Issuers\ dont\ get}}
+\DoxyCodeLine{00079\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ notify\ as\ the\ codes\ stnds\ today.\ Issuers\ need\ to\ be\ observables.}}
+\DoxyCodeLine{00080\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//this\ one\ must\ remain\ on\ top\ since\ there\ are\ dependencies}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateLiveKeys\_\ \ \ \ \ \ =\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a1d95d60bc5085271ca6c11669e49436a}{remainingDefaultKeys}}(today);}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateSettledLoss\_\ \ \ =\ \mbox{\hyperlink{class_quant_lib_1_1_basket_af9ca9aa6a01a857ee380618bf504f5c7}{settledLoss}}(today);}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateRemainingNot\_\ \ =\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a51c593360b72d76f70d59066d4031b6e}{remainingNotional}}(today);}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateLiveNotionals\_\ =\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ac46a085c0c178f4f3f2045e28735a27f}{remainingNotionals}}(today);}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateLiveNames\_\ \ \ \ \ =\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a07ff31fdca3315c595f76c49c294e766}{remainingNames}}(today);}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateAttachAmount\_\ \ =\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a7a53e607dbe1d49585ad4683dac0a8c0}{remainingAttachmentAmount}}(today);}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateDetachAmmount\_\ =\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_basket_a27b01fdfd9ff411c9d2b6272645bee55}{remainingDetachmentAmount}}(today);}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateLiveList\_\ =\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a10b57599065c108e4578309cca27cf44}{liveList}}(today);}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a99d8252eaa111838ae40fa6c827352e3}{size}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::string>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a5bfcb66633488ec17a22c923323dabcb}{names}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ pool\_-\/>names();\}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ae55de9298e595aa2976f292e19cc08ac}{notionals}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a6de240b963234e3ccbf5b1b25ce53160}{notional}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a02037e878ecc0e8c2c3b0f57f0937c15}{exposure}}(\textcolor{keyword}{const}\ std::string\&\ name,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}())\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ab343b3d3b245bd161a1e19aedd7e2ae6}{pool}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ std::vector<DefaultProbKey>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a8f931ce7664bfa18e5b8dcbfcbeb593a}{defaultKeys}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a293c2b2fbe89b07504527272375e955d}{refDate}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ refDate\_;\}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a4c74577014cca12a9da988b40c462e04}{attachmentRatio}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ attachmentRatio\_;\}}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_aec339867af9dbbfb329d108555f58a18}{detachmentRatio}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ detachmentRatio\_;\}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a99d9a4747847130aec04f919a5de2472}{basketNotional}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ basketNotional\_;\}}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a63d29b55c00d9919a21825ae92da7b0e}{trancheNotional}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ trancheNotional\_;\}}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_afab4acbd3210693c27dfa22e92923d02}{attachmentAmount}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ attachmentAmount\_;\}}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a55d1682836809622635ddf980d37e6ba}{detachmentAmount}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ detachmentAmount\_;\}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Claim>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_af0842fa054f3a073783e8d320be9be10}{claim}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ claim\_;\}}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ std::vector<Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_af243121cd9546022688152a6910e65d5}{probabilities}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_af9ca9aa6a01a857ee380618bf504f5c7}{settledLoss}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_af9ca9aa6a01a857ee380618bf504f5c7}{settledLoss}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a746f0df8bf087abb39d3227f9df5330c}{cumulatedLoss}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a746f0df8bf087abb39d3227f9df5330c}{cumulatedLoss}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a51c593360b72d76f70d59066d4031b6e}{remainingNotional}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a51c593360b72d76f70d59066d4031b6e}{remainingNotional}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ac46a085c0c178f4f3f2045e28735a27f}{remainingNotionals}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ac46a085c0c178f4f3f2045e28735a27f}{remainingNotionals}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::string>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a07ff31fdca3315c595f76c49c294e766}{remainingNames}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ std::vector<std::string>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a07ff31fdca3315c595f76c49c294e766}{remainingNames}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<DefaultProbKey>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a1d95d60bc5085271ca6c11669e49436a}{remainingDefaultKeys}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ std::vector<DefaultProbKey>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a1d95d60bc5085271ca6c11669e49436a}{remainingDefaultKeys}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_adca2dce05e858f501c94fb968cd20454}{remainingSize}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_adca2dce05e858f501c94fb968cd20454}{remainingSize}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ std::vector<Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a52558e992f4d95b635cb57a21f0b6daa}{remainingProbabilities}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a7a53e607dbe1d49585ad4683dac0a8c0}{remainingAttachmentAmount}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a7a53e607dbe1d49585ad4683dac0a8c0}{remainingAttachmentAmount}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ endDate)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a27b01fdfd9ff411c9d2b6272645bee55}{remainingDetachmentAmount}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a27b01fdfd9ff411c9d2b6272645bee55}{remainingDetachmentAmount}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ endDate)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ab36d5a4d15df946022f07e4706f53293}{remainingTrancheNotional}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evalDateDetachAmmount\_\ -\/\ evalDateAttachAmount\_;}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_af2e679fee3f0727528cf7d51e9e7ea4b}{remainingTrancheNotional}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ endDate)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a27b01fdfd9ff411c9d2b6272645bee55}{remainingDetachmentAmount}}(endDate)\ -\/\ }
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_basket_a7a53e607dbe1d49585ad4683dac0a8c0}{remainingAttachmentAmount}}(endDate);}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Size>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a10b57599065c108e4578309cca27cf44}{liveList}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ std::vector<Size>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a10b57599065c108e4578309cca27cf44}{liveList}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};\textcolor{comment}{//??\ keep?}}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_afe2e2652f2b4184282dee43e53524691}{setLossModel}}(}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<DefaultLossModel>\&\ lossModel);}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a11916d3dbaeef4851496138069982fc2}{probOverLoss}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossFraction)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ percentile(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ prob)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a111d9dbb5afe7b9444ad76d5b6e5ce83}{expectedShortfall}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ prob)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Split\ a\ portfolio\ loss\ along\ counterparties.\ Typically\ loss\ }}
+\DoxyCodeLine{00243\ \textcolor{comment}{\ \ \ \ \ \ \ \ corresponds\ to\ some\ percentile.*/}}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ std::vector<Real>\ splitVaRLevel(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_aa6a87cf3aa8447031b0d6a6e33fa57fb}{lossDistribution}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ densityTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossFraction)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ defaultCorrelation(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ jName)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ std::vector<Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_abf9a880a5fc60ba3fb19e67d48043284}{probsBeingNthEvent}}(}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a2128dcb300624b2344a0d49086e47cf9}{probAtLeastNEvents}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a6d7b3831d9fa63d0efdc2d492ec194fc}{recoveryRate}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ LazyObject\ interface}}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ performCalculations()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ std::vector<Real>\ notionals\_;}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Pool>\ pool\_;}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Claim>\ claim\_;}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachmentRatio\_;}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detachmentRatio\_;}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ basketNotional\_;}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachmentAmount\_;}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detachmentAmount\_;}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ trancheNotional\_;}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Caches.\ Most\ of\ the\ times\ one\ wants\ statistics\ on\ the\ distribution\ of}}
+\DoxyCodeLine{00290\ \textcolor{comment}{\ \ \ \ \ \ \ \ futures\ losses\ at\ arbitrary\ dates\ but\ some\ problems\ (e.g.\ derivatives\ }}
+\DoxyCodeLine{00291\ \textcolor{comment}{\ \ \ \ \ \ \ \ pricing)\ work\ with\ todays\ (evalDate)\ magnitudes\ which\ do\ not\ require\ a\ }}
+\DoxyCodeLine{00292\ \textcolor{comment}{\ \ \ \ \ \ \ \ loss\ model\ and\ would\ be\ too\ expensive\ to\ recompute\ on\ every\ call.}}
+\DoxyCodeLine{00293\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ evalDateSettledLoss\_,}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateRemainingNot\_,}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateAttachAmount\_,}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ evalDateDetachAmmount\_;}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Size>\ evalDateLiveList\_;}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Real>\ evalDateLiveNotionals\_;}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<std::string>\ evalDateLiveNames\_;}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<DefaultProbKey>\ evalDateLiveKeys\_;}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ refDate\_;}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ It\ is\ the\ basket\ responsibility\ to\ ensure\ that\ the\ model\ assigned\ it\ }}
+\DoxyCodeLine{00305\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ is\ properly\ initialized\ to\ the\ basket\ current\ data.\ }}
+\DoxyCodeLine{00306\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ This\ might\ not\ be\ the\ case\ for\ various\ reasons:\ the\ basket\ data\ might}}
+\DoxyCodeLine{00307\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ have\ been\ updated,\ the\ evaluation\ date\ has\ changed\ or\ the\ model\ has\ }}
+\DoxyCodeLine{00308\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ received\ another\ request\ from\ another\ basket\ pointing\ to\ it.\ For}}
+\DoxyCodeLine{00309\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ this\ last\ reason\ we\ can\ never\ be\ sure\ between\ calls\ that\ this\ is\ the\ }}
+\DoxyCodeLine{00310\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ case\ (and\ that\ is\ true\ in\ a\ single\ thread\ environment\ only).}}
+\DoxyCodeLine{00311\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ ext::shared\_ptr<DefaultLossModel>\ lossModel\_;}
+\DoxyCodeLine{00313\ \ \ \ \ \};}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00315\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ Inlines\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00316\ }
+\DoxyCodeLine{00317\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a99d8252eaa111838ae40fa6c827352e3}{Basket::size}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pool\_-\/>size();}
+\DoxyCodeLine{00319\ \ \ \ \ \}}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ std::vector<Real>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ae55de9298e595aa2976f292e19cc08ac}{Basket::notionals}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ notionals\_;}
+\DoxyCodeLine{00323\ \ \ \ \ \}}
+\DoxyCodeLine{00324\ }
+\DoxyCodeLine{00325\ \ \ \ \ \textcolor{keyword}{inline}\ std::vector<DefaultProbKey>\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a8f931ce7664bfa18e5b8dcbfcbeb593a}{Basket::defaultKeys}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pool\_-\/>defaultKeys();}
+\DoxyCodeLine{00327\ \ \ \ \ \}}
+\DoxyCodeLine{00328\ }
+\DoxyCodeLine{00329\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ab343b3d3b245bd161a1e19aedd7e2ae6}{Basket::pool}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pool\_;}
+\DoxyCodeLine{00331\ \ \ \ \ \}}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ std::vector<Size>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a10b57599065c108e4578309cca27cf44}{Basket::liveList}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evalDateLiveList\_;}
+\DoxyCodeLine{00335\ \ \ \ \ \}}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a27b01fdfd9ff411c9d2b6272645bee55}{Basket::remainingDetachmentAmount}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evalDateDetachAmmount\_;}
+\DoxyCodeLine{00339\ \ \ \ \ \}}
+\DoxyCodeLine{00340\ }
+\DoxyCodeLine{00341\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a7a53e607dbe1d49585ad4683dac0a8c0}{Basket::remainingAttachmentAmount}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evalDateAttachAmount\_;}
+\DoxyCodeLine{00343\ \ \ \ \ \}}
+\DoxyCodeLine{00344\ }
+\DoxyCodeLine{00345\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ std::vector<std::string>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a07ff31fdca3315c595f76c49c294e766}{Basket::remainingNames}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evalDateLiveNames\_;}
+\DoxyCodeLine{00347\ \ \ \ \ \}}
+\DoxyCodeLine{00348\ }
+\DoxyCodeLine{00349\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ std::vector<Real>\&\ \mbox{\hyperlink{class_quant_lib_1_1_basket_ac46a085c0c178f4f3f2045e28735a27f}{Basket::remainingNotionals}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evalDateLiveNotionals\_;}
+\DoxyCodeLine{00351\ \ \ \ \ \}}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_a746f0df8bf087abb39d3227f9df5330c}{Basket::cumulatedLoss}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>evalDateSettledLoss\_;}
+\DoxyCodeLine{00355\ \ \ \ \ \}}
+\DoxyCodeLine{00356\ \ \ \ \ }
+\DoxyCodeLine{00357\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_basket_af9ca9aa6a01a857ee380618bf504f5c7}{Basket::settledLoss}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evalDateSettledLoss\_;}
+\DoxyCodeLine{00359\ \ \ \ \ \}}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ std::vector<DefaultProbKey>\&\ }
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_basket_a1d95d60bc5085271ca6c11669e49436a}{Basket::remainingDefaultKeys}}()\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00363\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ evalDateLiveKeys\_;}
+\DoxyCodeLine{00365\ \ \ \ \ \}}
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00367\ \}}
+\DoxyCodeLine{00368\ }
+\DoxyCodeLine{00369\ }
+\DoxyCodeLine{00370\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

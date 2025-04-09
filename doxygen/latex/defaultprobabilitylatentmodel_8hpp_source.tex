@@ -1,0 +1,262 @@
+\doxysection{defaultprobabilitylatentmodel.\+hpp}
+\hypertarget{defaultprobabilitylatentmodel_8hpp_source}{}\label{defaultprobabilitylatentmodel_8hpp_source}\index{ql/experimental/credit/defaultprobabilitylatentmodel.hpp@{ql/experimental/credit/defaultprobabilitylatentmodel.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#ifndef\ quantlib\_default\_latent\_model\_hpp}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ quantlib\_default\_latent\_model\_hpp}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{basket_8hpp}{ql/experimental/credit/basket.hpp}}>}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{latentmodel_8hpp}{ql/experimental/math/latentmodel.hpp}}>}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <ql/experimental/math/gaussiancopulapolicy.hpp>}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <boost/dynamic\_bitset.hpp>}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ copulaPolicy>}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a1c8277cedada4e4a6bb66863948a15a2}{DefaultLatentModel}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\ \{}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ import\ template\ members}}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>::factorWeights\_;}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>::idiosyncFctrs\_;}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>::copula\_;}
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{::inverseCumulativeY}};}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\mbox{\hyperlink{class_quant_lib_1_1_latent_model_ae64724a9ecdc4cb7dadd555b019da10b}{::cumulativeZ}};}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f73847f26e632e54de23dc218e44875}{::integratedExpectedValue}};\textcolor{comment}{//\ which\ one?}}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ not\ a\ handle,\ the\ model\ doesnt\ keep\ any\ cached\ magnitudes,\ no\ need\ }}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ for\ notifications,\ still...}}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<Basket>\ basket\_;}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ ext::shared\_ptr<LMIntegration>\ integration\_;}
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ copulaPolicy::initTraits\ initTraits;}
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a1c8277cedada4e4a6bb66863948a15a2}{DefaultLatentModel}}(}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ integralType,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ initTraits\&\ ini\ =\ initTraits()}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ )\ }
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},\ ini),}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ integration\_(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>::IntegrationFactory::}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ createLMIntegration(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[0].size(),\ integralType))}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a1c8277cedada4e4a6bb66863948a15a2}{DefaultLatentModel}}(}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ mktCorrel,}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nVariables,}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ integralType,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ initTraits\&\ ini\ =\ initTraits()}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model}{LatentModel}}<copulaPolicy>(mktCorrel,\ nVariables,\ ini),}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ integration\_(\mbox{\hyperlink{class_quant_lib_1_1_latent_model}{LatentModel}}<copulaPolicy>::IntegrationFactory::}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ createLMIntegration(1,\ integralType))}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \(\backslash\)todo}}
+\DoxyCodeLine{00090\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Add\ other\ constructors\ as\ in\ LatentModel\ for\ ease\ of\ use.\ (less\ }}
+\DoxyCodeLine{00091\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ dimensions,\ factors,\ etcc...)}}
+\DoxyCodeLine{00092\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ To\ interface\ with\ loss\ models.\ It\ is\ possible\ to\ change\ the\ basket\ }}
+\DoxyCodeLine{00095\ \textcolor{comment}{\ \ \ \ \ \ \ \ since\ there\ are\ no\ cached\ magnitudes.}}
+\DoxyCodeLine{00096\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ resetBasket(\textcolor{keyword}{const}\ ext::shared\_ptr<Basket>\&\ basket)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_\ =\ basket;}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ in\ the\ future\ change\ 'size'\ to\ 'liveSize'}}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(basket\_-\/>size()\ ==\ factorWeights\_.size(),\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Incompatible\ new\ basket\ and\ model\ sizes."{}});}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_adeafa90c0190ca6df804755b7fbc762f}{conditionalDefaultProbability}}(\mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ prob,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00116\ \textcolor{keyword}{\ \ \ \ \ \ \ \ }\{}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ can\ be\ called\ from\ the\ outside\ (from\ an\ integrable\ loss\ model)}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ but\ we\ are\ called\ often\ at\ integration\ points.\ This\ or}}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ consider\ a\ list\ of\ friends.}}
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(QL\_EXTRA\_SAFETY\_CHECKS)}}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(basket\_,\ \textcolor{stringliteral}{"{}No\ portfolio\ basket\ set."{}});}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*Avoid\ redundant\ call\ to\ minimum\ value\ inversion\ (might\ be\ \(\backslash\)infty),}}
+\DoxyCodeLine{00124\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ and\ this\ independently\ of\ the\ copula\ function.}}
+\DoxyCodeLine{00125\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (prob\ <\ 1.e-\/10)\ \textcolor{keywordflow}{return}\ 0.;\textcolor{comment}{//\ use\ library\ macro...}}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_ae42643670e071e369b0859af9d948990}{conditionalDefaultProbabilityInvP}}(}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(prob,\ iName),\ iName,\ mktFactors);}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a68cb23471d12e47dae26213b6fa3f73b}{update}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (basket\_\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>notifyObservers();}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a25404a7f39fe1422f6e4dd1fb9b67115}{LatentModel<copulaPolicy>::update}}();}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ \textcolor{keyword}{public}:\textcolor{comment}{//\ open\ since\ users\ access\ it\ for\ performance\ on\ joint\ integrations.}}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_ae42643670e071e369b0859af9d948990}{conditionalDefaultProbabilityInvP}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invCumYProb,\ }
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ m)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sumMs\ =\ }
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::inner\_product(factorWeights\_[iName].begin(),\ }
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ factorWeights\_[iName].end(),\ m.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.));}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ res\ =\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_ae64724a9ecdc4cb7dadd555b019da10b}{cumulativeZ}}((invCumYProb\ -\/\ sumMs)\ /\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ idiosyncFctrs\_[iName]\ );}
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \#if\ defined(QL\_EXTRA\_SAFETY\_CHECKS)}}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}\ (res\ >=\ 0.\ \&\&\ res\ <=\ 1.,}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}conditional\ probability\ "{}}\ <<\ res\ <<\ \textcolor{stringliteral}{"{}out\ of\ range"{}});}
+\DoxyCodeLine{00162\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a24a7009dfa3918fe8e577a120a3d4a52}{conditionalDefaultProbability}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00181\ \textcolor{keyword}{\ \ \ \ \ \ \ \ }\{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pDefUncond\ =}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pool-\/>get(pool-\/>names()[iName]).}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[iName])}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(date);}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_adeafa90c0190ca6df804755b7fbc762f}{conditionalDefaultProbability}}(pDefUncond,\ iName,\ mktFactors);}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a6db2041303cd4a079a6e6d8e96b3b70a}{condProbProduct}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invCumYProb1,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invCumYProb2,\ }
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName1,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName2,\ }
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_ae42643670e071e369b0859af9d948990}{conditionalDefaultProbabilityInvP}}(invCumYProb1,\ iName1,\ }
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactors)\ *}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_ae42643670e071e369b0859af9d948990}{conditionalDefaultProbabilityInvP}}(invCumYProb2,\ iName2,\ }
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactors);}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo:\ check\ the\ issuer\ has\ not\ defaulted.}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a21d3a5426480ed63c72f8b4492f514cf}{conditionalProbAtLeastNEvents}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<LMIntegration>\&\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a25bb529ee409a22cc0384aed147d0528}{integration}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ integration\_;\ \}}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_ae282023c13b0e2404d29163b8e5a6b5c}{probOfDefault}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(basket\_,\ \textcolor{stringliteral}{"{}No\ portfolio\ basket\ set."{}});}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ avoid\ repeating\ this\ in\ the\ integration:}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pUncond\ =\ pool-\/>get(pool-\/>names()[iName]).}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[iName])}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(d);}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (pUncond\ <\ 1.e-\/10)\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f73847f26e632e54de23dc218e44875}{integratedExpectedValue}}(}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_ae42643670e071e369b0859af9d948990}{conditionalDefaultProbabilityInvP}}(}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(pUncond,\ iName),\ iName,\ v1);}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a21018a103e011428082f5697486c2e5d}{defaultCorrelation}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iNamei,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iNamej)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_af683416c9c109efaaa58f51e72224fa0}{probAtLeastNEvents}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f73847f26e632e54de23dc218e44875}{integratedExpectedValue}}(}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a21d3a5426480ed63c72f8b4492f514cf}{conditionalProbAtLeastNEvents}}(n,\ date,\ v1);}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00243\ \ \ \ \ \};}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/\ Defines\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00249\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a21018a103e011428082f5697486c2e5d}{DefaultLatentModel<CP>::defaultCorrelation}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ }
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iNamei,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iNamej)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00251\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(basket\_,\ \textcolor{stringliteral}{"{}No\ portfolio\ basket\ set."{}});}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ unconditionals:}}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pi\ =\ pool-\/>get(pool-\/>names()[iNamei]).}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[iNamei])}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(d);}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pj\ =\ pool-\/>get(pool-\/>names()[iNamej]).}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[iNamej])}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(d);}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ pipj\ =\ pi\ *\ pj;}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invPi\ =\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(pi,\ iNamei);}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invPj\ =\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(pj,\ iNamej);}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ avoid\ repetitive\ calls\ when\ i=j?}}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ E1i1j;\ \textcolor{comment}{//\ joint\ default\ covariance\ term}}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(iNamei\ !=iNamej)\ \{}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ E1i1j\ =\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f73847f26e632e54de23dc218e44875}{integratedExpectedValue}}(}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a6db2041303cd4a079a6e6d8e96b3b70a}{condProbProduct}}(invPi,\ invPj,\ iNamei,\ iNamej,\ v1);\ \});}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ E1i1j\ =\ pi;}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (E1i1j\ -\/\ pipj\ )/std::sqrt(pipj*(1.-\/pi)*(1.-\/pj));}
+\DoxyCodeLine{00275\ \ \ \ \ \}}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00278\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00279\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a21d3a5426480ed63c72f8b4492f514cf}{DefaultLatentModel<CP>::conditionalProbAtLeastNEvents}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,\ }
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(basket\_,\ \textcolor{stringliteral}{"{}No\ portfolio\ basket\ set."{}});}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \(\backslash\)todo\ }}
+\DoxyCodeLine{00285\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ This\ algorithm\ traverses\ all\ permutations\ starting\ form\ the}}
+\DoxyCodeLine{00286\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ lowest\ one.\ This\ is\ inneficient,\ there\ shouldnt\ be\ any\ need\ to\ }}
+\DoxyCodeLine{00287\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ go\ through\ the\ invalid\ ones.\ Use\ combinations\ of\ n\ elements.}}
+\DoxyCodeLine{00288\ \textcolor{comment}{}}
+\DoxyCodeLine{00289\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ See\ integration\ in\ O'Kane\ for\ homogeneous\ ntds.}}
+\DoxyCodeLine{00290\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ first\ position\ with\ as\ many\ defaults\ as\ desired:}}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ poolSize\ =\ basket\_-\/>size();\textcolor{comment}{//move\ to\ 'livesize'}}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00294\ }
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ limit\ =\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\textcolor{keyword}{>}(std::pow(2.,\ (\textcolor{keywordtype}{int})(poolSize)));}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Precalc\ conditional\ probabilities}}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Probability>\ pDefCond;}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<poolSize;\ i++)}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pDefCond.push\_back(\mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_adeafa90c0190ca6df804755b7fbc762f}{conditionalDefaultProbability}}(}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pool-\/>get(pool-\/>names()[i]).}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[i])-\/>}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(date),\ i,\ mktFactors));}
+\DoxyCodeLine{00304\ }
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ probNEventsOrMore\ =\ 0.;}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ mask\ =\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\textcolor{keyword}{>}(std::pow(2.,\ (\textcolor{keywordtype}{int})(n))\ -\/\ 1);\ mask\ <\ limit;}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mask++)\ \{}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cheap\ permutations}}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ boost::dynamic\_bitset<>\ bsetMask(poolSize,\ mask);}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(bsetMask.count()\ >=\ n)\ \{}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pConfig\ =\ 1;}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<bsetMask.size();\ i++)}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pConfig\ *=\ }
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (bsetMask[i]\ ?\ pDefCond[i]\ :\ (1.-\/\ pDefCond[i]));}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ probNEventsOrMore\ +=\ pConfig;}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ probNEventsOrMore;}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ }
+\DoxyCodeLine{00322\ \ \ \ \ \textcolor{comment}{//\ often\ used:}}
+\DoxyCodeLine{00323\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model}{DefaultLatentModel<GaussianCopulaPolicy>}}\ GaussianDefProbLM;}
+\DoxyCodeLine{00324\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model}{DefaultLatentModel<TCopulaPolicy>}}\ TDefProbLM;}
+\DoxyCodeLine{00325\ \}}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00327\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

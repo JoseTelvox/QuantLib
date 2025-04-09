@@ -1,0 +1,91 @@
+\doxysection{extendedblackvariancesurface.\+hpp}
+\hypertarget{extendedblackvariancesurface_8hpp_source}{}\label{extendedblackvariancesurface_8hpp_source}\index{ql/experimental/volatility/extendedblackvariancesurface.hpp@{ql/experimental/volatility/extendedblackvariancesurface.hpp}}
+\mbox{\hyperlink{extendedblackvariancesurface_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Frank\ Hövermann}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_extended\_black\_variance\_surface\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_extended\_black\_variance\_surface\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackvoltermstructure_8hpp}{ql/termstructures/volatility/equityfx/blackvoltermstructure.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{matrix_8hpp}{ql/math/matrix.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{interpolation2d_8hpp}{ql/math/interpolations/interpolation2d.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{handle_8hpp}{ql/handle.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{quote_8hpp}{ql/quote.hpp}}>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{class\ }ExtendedBlackVarianceSurface\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_black_variance_term_structure_a961c1b3cd21a88a54084767088ad82f0}{BlackVarianceTermStructure}}\ \{}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ Extrapolation\ \{\ ConstantExtrapolation,}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ InterpolatorDefaultExtrapolation\ \};}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ ExtendedBlackVarianceSurface(}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_accbf3d4af41db0333d456eb5616c4e1e}{referenceDate}},}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_ac4ea5cbce495c9a47a44eeaedf7a9d45}{calendar}},}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ dates,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ strikes,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\&\ volatilities,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ \mbox{\hyperlink{class_quant_lib_1_1_extended_black_variance_surface_a1fcf7cca5560818ff2d1ed4b5f9e535f}{dayCounter}},}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ Extrapolation\ lowerExtrapolation\ =\ InterpolatorDefaultExtrapolation,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ Extrapolation\ upperExtrapolation\ =\ InterpolatorDefaultExtrapolation);}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ \mbox{\hyperlink{class_quant_lib_1_1_extended_black_variance_surface_a1fcf7cca5560818ff2d1ed4b5f9e535f}{dayCounter}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ dayCounter\_;\ \}}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_extended_black_variance_surface_a03a0e8832dd7a959c8744786dd1fa0a0}{maxDate}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ maxDate\_;\ \}}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_extended_black_variance_surface_a1a0ed550e884075af01bd33b2e847ed7}{minStrike}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ strikes\_.front();\ \}}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_extended_black_variance_surface_ae2caff4f8e5ad989c0e8fa3167f02e6b}{maxStrike}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ strikes\_.back();\ \}}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Interpolator>}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setInterpolation(\textcolor{keyword}{const}\ Interpolator\&\ i\ =\ Interpolator())\ \{}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ varianceSurface\_\ =}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i.interpolate(times\_.begin(),\ times\_.end(),}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strikes\_.begin(),\ strikes\_.end(),}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ variances\_);}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ varianceSurface\_.update();}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ accept(AcyclicVisitor\&)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_extended_black_variance_surface_a8041e47a1604bce105d232cfb67e4a01}{update}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ blackVarianceImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setVariances();}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ DayCounter\ dayCounter\_;}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ Date\ maxDate\_;}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Handle<Quote>\ >\&\ volatilities\_;}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ std::vector<Real>\ strikes\_;}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ std::vector<Time>\ times\_;}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ Matrix\ variances\_;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ Interpolation2D\ varianceSurface\_;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ Extrapolation\ lowerExtrapolation\_,\ upperExtrapolation\_;}
+\DoxyCodeLine{00079\ \ \ \ \ \};}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ ExtendedBlackVarianceSurface::accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&\ v)\ \{}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}*\ v1\ =\ \textcolor{keyword}{dynamic\_cast<}Visitor<ExtendedBlackVarianceSurface>*\textcolor{keyword}{>}(\&v);}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v1\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ v1-\/>visit(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ BlackVarianceTermStructure::accept(v);}
+\DoxyCodeLine{00087\ \ \ \ \ \}}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \}}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

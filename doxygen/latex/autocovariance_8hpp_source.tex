@@ -1,0 +1,161 @@
+\doxysection{autocovariance.\+hpp}
+\hypertarget{autocovariance_8hpp_source}{}\label{autocovariance_8hpp_source}\index{ql/math/autocovariance.hpp@{ql/math/autocovariance.hpp}}
+\mbox{\hyperlink{autocovariance_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2010\ Liquidnet\ Holdings,\ Inc.}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_auto\_covariance\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_auto\_covariance\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fastfouriertransform_8hpp}{ql/math/fastfouriertransform.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{array_8hpp}{ql/math/array.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <complex>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Outputs\ double\ FT\ for\ a\ given\ input:}}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ input\ -\/>\ FFT\ -\/>\ norm\ -\/>\ FFT\ -\/>\ out}}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ ForwardIterator>}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ std::vector<std::complex<Real>\ >\ double\_ft(ForwardIterator\ begin,}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ForwardIterator\ end)\ \{}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ nData\ =\ std::distance(begin,\ end);}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ order\ =\ \mbox{\hyperlink{class_quant_lib_1_1_fast_fourier_transform_a6be08b6a4c0091059ccb13f98e52ead3}{FastFourierTransform::min\_order}}(nData)\ +\ 1;}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ FastFourierTransform\ fft(order);}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<std::complex<Real>\ >\ ft(fft.output\_size());}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ fft.transform(begin,\ end,\ ft.begin());}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ Array\ tmp(ft.size(),\ 0.0);}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ std::complex<Real>\ z\ =\ std::complex<Real>();}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<ft.size();\ ++i)\ \{}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmp[i]\ =\ std::norm(ft[i]);}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ft[i]\ =\ z;}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ fft.transform(tmp.begin(),\ tmp.end(),\ ft.begin());}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ft;}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Calculates\ and\ subtracts\ mean\ from\ the\ input\ data;\ returns\ mean}}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ InputIterator,\ \textcolor{keyword}{typename}\ OutputIterator>}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remove\_mean(InputIterator\ begin,\ InputIterator\ end,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OutputIterator\ out)\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ mean(0.0);}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ n\ =\ 1;}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (InputIterator\ it\ =\ begin;\ it\ !=\ end;\ ++it,\ ++n)}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mean\ =\ (mean*\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(n-\/1)\ +\ *it)/n;}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ std::transform(begin,\ end,\ out,\ [=](\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ -\/>\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \{\ \textcolor{keywordflow}{return}\ x\ -\/\ mean;\ \});}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ mean;}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \}}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ ForwardIterator,\ \textcolor{keyword}{typename}\ OutputIterator>}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{namespace_quant_lib_a245c3846a62779b851f74f27cf9f2fc1}{convolutions}}(ForwardIterator\ begin,\ ForwardIterator\ end,}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OutputIterator\ out,\ std::size\_t\ maxLag)\ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}};}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ std::size\_t\ nData\ =\ std::distance(begin,\ end);}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(maxLag\ <\ nData,\ \textcolor{stringliteral}{"{}maxLag\ must\ be\ less\ than\ data\ size"{}});}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::complex<Real>\ >\&\ ft\ =\ double\_ft(begin,\ end);}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ w\ =\ 1.0\ /\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}})ft.size();}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ k\ =\ 0;\ k\ <=\ maxLag;\ ++k)}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ *out++\ =\ ft[k].real()\ *\ w;}
+\DoxyCodeLine{00090\ \ \ \ \ \}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ ForwardIterator,\ \textcolor{keyword}{typename}\ OutputIterator>}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{namespace_quant_lib_acc182ba96f5a4b6694a484644a170138}{autocovariances}}(ForwardIterator\ begin,\ ForwardIterator\ end,}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OutputIterator\ out,\ std::size\_t\ maxLag)\ \{}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}};}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ std::size\_t\ nData\ =\ std::distance(begin,\ end);}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(maxLag\ <\ nData,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ covariances\ must\ be\ less\ than\ data\ size"{}});}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::complex<Real>\ >\&\ ft\ =\ double\_ft(begin,\ end);}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ w1\ =\ 1.0\ /\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}})ft.size(),\ w2\ =\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}})nData;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ k\ =\ 0;\ k\ <=\ maxLag;\ ++k,\ w2\ -\/=\ 1.0)\ \{}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ *out++\ =\ ft[k].real()\ *\ w1\ /\ w2;}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00110\ \ \ \ \ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ ForwardIterator,\ \textcolor{keyword}{typename}\ OutputIterator>}
+\DoxyCodeLine{00122\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{namespace_quant_lib_acc182ba96f5a4b6694a484644a170138}{autocovariances}}(ForwardIterator\ begin,\ ForwardIterator\ end,}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OutputIterator\ out,}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ maxLag,\ \textcolor{keywordtype}{bool}\ reuse)\ \{}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}};}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ mean\ =\ 0.0;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (reuse)\ \{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ mean\ =\ remove\_mean(begin,\ end,\ begin);}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_acc182ba96f5a4b6694a484644a170138}{autocovariances}}(begin,\ end,\ out,\ maxLag);}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ tmp(std::distance(begin,\ end));}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ mean\ =\ remove\_mean(begin,\ end,\ tmp.begin());}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_acc182ba96f5a4b6694a484644a170138}{autocovariances}}(tmp.begin(),\ tmp.end(),\ out,\ maxLag);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ mean;}
+\DoxyCodeLine{00136\ \ \ \ \ \}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ ForwardIterator,\ \textcolor{keyword}{typename}\ OutputIterator>}
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{namespace_quant_lib_a5de9385f3e863dab5a3dfeca592217e8}{autocorrelations}}(ForwardIterator\ begin,\ ForwardIterator\ end,}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OutputIterator\ out,\ std::size\_t\ maxLag)\ \{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}};}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ std::size\_t\ nData\ =\ std::distance(begin,\ end);}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(maxLag\ <\ nData,}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ correlations\ must\ be\ less\ than\ data\ size"{}});}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::complex<Real>\ >\&\ ft\ =\ double\_ft(begin,\ end);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ w1\ =\ 1.0\ /\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}})ft.size(),\ w2\ =\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}})nData;}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ variance\ =\ ft[0].real()\ *\ w1\ /\ w2;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ *out++\ =\ variance\ *\ w2\ /\ (w2-\/1.0);}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ w2\ -\/=\ 1.0;}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (std::size\_t\ k\ =\ 1;\ k\ <=\ maxLag;\ ++k,\ w2\ -\/=\ 1.0)}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ *out++\ =\ ft[k].real()\ *\ w1\ /\ (variance\ *\ w2);}
+\DoxyCodeLine{00160\ \ \ \ \ \}}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ ForwardIterator,\ \textcolor{keyword}{typename}\ OutputIterator>}
+\DoxyCodeLine{00173\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{namespace_quant_lib_a5de9385f3e863dab5a3dfeca592217e8}{autocorrelations}}(ForwardIterator\ begin,\ ForwardIterator\ end,}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OutputIterator\ out,}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::size\_t\ maxLag,\ \textcolor{keywordtype}{bool}\ reuse)\ \{}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}};}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ mean\ =\ 0.0;}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (reuse)\ \{}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ mean\ =\ remove\_mean(begin,\ end,\ begin);}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a5de9385f3e863dab5a3dfeca592217e8}{autocorrelations}}(begin,\ end,\ out,\ maxLag);}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ tmp(std::distance(begin,\ end));}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ mean\ =\ remove\_mean(begin,\ end,\ tmp.begin());}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a5de9385f3e863dab5a3dfeca592217e8}{autocorrelations}}(tmp.begin(),\ tmp.end(),\ out,\ maxLag);}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ mean;}
+\DoxyCodeLine{00187\ \ \ \ \ \}}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

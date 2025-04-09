@@ -1,0 +1,179 @@
+\doxysection{inhomogeneouspooldef.\+hpp}
+\hypertarget{inhomogeneouspooldef_8hpp_source}{}\label{inhomogeneouspooldef_8hpp_source}\index{ql/experimental/credit/inhomogeneouspooldef.hpp@{ql/experimental/credit/inhomogeneouspooldef.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Roland\ Lichters}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2009,\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#ifndef\ quantlib\_inhomogenous\_pool\_default\_model\_hpp}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ quantlib\_inhomogenous\_pool\_default\_model\_hpp}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lossdistribution_8hpp}{ql/experimental/credit/lossdistribution.hpp}}>}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{basket_8hpp}{ql/experimental/credit/basket.hpp}}>}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/constantlosslatentmodel.hpp>}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultlossmodel.hpp>}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{comment}{//\ Intended\ to\ replace\ InhomogeneousPoolCDOEngine\ in\ syntheticcdoengines.hpp}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{comment}{/*\ A\ note\ on\ the\ number\ of\ buckets:\ As\ it\ is\ now\ the\ code\ goes\ splitting}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ \ \ \ losses\ into\ buckets\ from\ loses\ equal\ to\ zero\ to\ losses\ up\ to\ the\ value\ of}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ \ \ \ the\ underlying\ basket.\ This\ is\ in\ view\ of\ a\ stochastic\ loss\ given\ default}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ \ \ \ but\ in\ a\ constant\ LGD\ situation\ this\ is\ a\ waste\ and\ it\ is\ more\ efficient\ to}}
+\DoxyCodeLine{00039\ \textcolor{comment}{\ \ \ \ go\ up\ to\ the\ attainable\ losses.}}
+\DoxyCodeLine{00040\ \textcolor{comment}{\ \ \ \ \(\backslash\)todo\ Extend\ to\ the\ multifactor\ case\ for\ a\ generic\ LM}}
+\DoxyCodeLine{00041\ \textcolor{comment}{\ \ \ \ \(\backslash\)todo\ Many\ common\ code\ with\ the\ homogeneous\ version,\ both\ classes\ perform}}
+\DoxyCodeLine{00042\ \textcolor{comment}{\ \ \ \ the\ same\ work\ on\ different\ loss\ distribution\ types,\ merge\ and\ send\ the\ }}
+\DoxyCodeLine{00043\ \textcolor{comment}{\ \ \ \ distribution\ object?}}
+\DoxyCodeLine{00044\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ copulaPolicy>}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{class\ }InhomogeneousPoolLossModel\ :\ \textcolor{keyword}{public}\ DefaultLossModel\ \{}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ resetModel()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ allow\ base\ correlations:}}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ copulaPolicy\ copulaType;}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ InhomogeneousPoolLossModel(}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ restricted\ to\ non\ random\ recoveries,\ but\ it\ could\ be\ possible.}}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<\mbox{\hyperlink{class_quant_lib_1_1_constant_loss_latentmodel}{ConstantLossLatentmodel<copulaPolicy>}}\ >\&\ }
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nBuckets,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ max\ =\ 5.,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ min\ =\ -\/5.,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nSteps\ =\ 50)}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ :\ copula\_(copula),\ }
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ nBuckets\_(nBuckets),\ }
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ max\_(max),\ min\_(min),\ nSteps\_(nSteps),\ delta\_((max\ -\/\ min)/nSteps)}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \{\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(copula-\/>numFactors()\ ==\ 1,\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Inhomogeneous\ model\ not\ implemented\ for\ multifactor"{}});}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{comment}{//\ Write\ another\ constructor\ sending\ the\ LM\ factors\ and\ recoveries.}}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_distribution}{Distribution}}\ lossDistrib(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lossDistrib(d).cumulativeExcessProbability(attachAmount\_,\ detachAmount\_);}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ This\ one\ if\ the\ distribution\ is\ over\ the\ whole\ loss\ structure:}}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ but\ it\ becomes\ very\ expensive}}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00078\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ return\ lossDistrib(d).trancheExpectedValue(}}
+\DoxyCodeLine{00079\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ attachAmount\_,\ detachAmount\_);}}
+\DoxyCodeLine{00080\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_inhomogeneous_pool_loss_model_a9172ce4e691a49aeb93098c9305b749c}{percentile}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_inhomogeneous_pool_loss_model_a9172ce4e691a49aeb93098c9305b749c}{percentile}})\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ portfLoss\ =\ lossDistrib(d).confidenceLevel(\mbox{\hyperlink{class_quant_lib_1_1_inhomogeneous_pool_loss_model_a9172ce4e691a49aeb93098c9305b749c}{percentile}});}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::min(std::max(portfLoss\ -\/\ attachAmount\_,\ 0.),\ detachAmount\_\ -\/\ attachAmount\_);}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_inhomogeneous_pool_loss_model_ae84612645744d5b55b1818a00484256a}{expectedShortfall}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_inhomogeneous_pool_loss_model_a9172ce4e691a49aeb93098c9305b749c}{percentile}})\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_distribution}{Distribution}}\ dist\ =\ lossDistrib(d);}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ dist.\mbox{\hyperlink{class_quant_lib_1_1_distribution_a9af8e9ccde3970cc3dc95c0871d1335b}{tranche}}(attachAmount\_,\ detachAmount\_);}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dist.expectedShortfall(\mbox{\hyperlink{class_quant_lib_1_1_inhomogeneous_pool_loss_model_a9172ce4e691a49aeb93098c9305b749c}{percentile}});}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<ConstantLossLatentmodel<copulaPolicy>\ >\ copula\_;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nBuckets\_;}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attach\_,\ detach\_,\ notional\_,\ attachAmount\_,\ detachAmount\_;}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Real>\ notionals\_;}
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ integration:}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \(\backslash\)todo\ move\ integration\ to\ latent\ model\ types\ when\ moving\ to\ a\ }}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ multifactor\ version}}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ max\_;\textcolor{comment}{//\ redundant?}}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ min\_;}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nSteps\_;}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta\_;\ }
+\DoxyCodeLine{00105\ \ \ \ \ \};}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo\ Add\ other\ loss\ distribution\ statistics}}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keyword}{typedef}\ InhomogeneousPoolLossModel<GaussianCopulaPolicy>\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ IHGaussPoolLossModel;}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{typedef}\ InhomogeneousPoolLossModel<TCopulaPolicy>\ IHStudentPoolLossModel;}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keywordtype}{void}\ InhomogeneousPoolLossModel<CP>::resetModel()}
+\DoxyCodeLine{00115\ \ \ \ \ \{}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ need\ to\ be\ capped\ now\ since\ the\ limit\ amounts\ might\ be\ over\ the\ }}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ remaining\ notional\ (think\ amortizing)}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ attach\_\ =\ std::min(basket\_-\/>remainingAttachmentAmount()\ /\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingNotional(),\ 1.);}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ detach\_\ =\ std::min(basket\_-\/>remainingDetachmentAmount()\ /\ }
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingNotional(),\ 1.);}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ notional\_\ =\ basket\_-\/>remainingNotional();}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ notionals\_\ =\ basket\_-\/>remainingNotionals();}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ attachAmount\_\ =\ basket\_-\/>remainingAttachmentAmount();}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ detachAmount\_\ =\ basket\_-\/>remainingDetachmentAmount();}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ copula\_-\/>resetBasket(basket\_.currentLink());}
+\DoxyCodeLine{00128\ \ \ \ \ \}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00131\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_distribution}{Distribution}}\ InhomogeneousPoolLossModel<CP>::lossDistrib(}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00133\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_loss_dist_bucketing}{LossDistBucketing}}\ bucktLDistBuff(nBuckets\_,\ detachAmount\_);}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ std::vector<Real>\ lgd;\textcolor{comment}{//\ switch\ to\ a\ mutable\ cache\ member}}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ std::vector<Real>\ recoveries\ =\ copula\_-\/>recoveries();}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ std::transform(recoveries.begin(),\ recoveries.end(),\ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::back\_inserter(lgd),}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [](\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ -\/>\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \{\ return\ 1.0-\/x;\ \});}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ std::transform(lgd.begin(),\ lgd.end(),\ notionals\_.begin(),\ }
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lgd.begin(),\ std::multiplies<>());}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ std::vector<Real>\ prob\ =\ basket\_-\/>remainingProbabilities(d);}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<prob.size();\ iName++)}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ prob[iName]\ =\ copula\_-\/>inverseCumulativeY(prob[iName],\ iName);}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ integrate\ locally\ (1\ factor).\ }}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ use\ explicitly\ a\ 1D\ latent\ model\ object?\ }}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo\ Use\ a\ library\ integrator\ here\ and\ in\ the\ homogeneous\ case.}}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_distribution}{Distribution}}\ dist(nBuckets\_,\ 0.0,\ }
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\_);}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//notional\_);}}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ std::vector<Real>\ mkft(1,\ min\_\ +\ delta\_\ /2.);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ nSteps\_;\ i++)\ \{}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ conditionalProbs;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<notionals\_.size();\ iName++)}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ conditionalProbs.push\_back(}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(prob[iName],\ iName,\ }
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mkft));}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_distribution}{Distribution}}\ bld\ =\ bucktLDistBuff(lgd,\ conditionalProbs);}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ densitydm\ =\ delta\_\ *\ copula\_-\/>density(mkft);}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ also,\ instead\ of\ calling\ the\ static\ method\ it\ could\ be\ wrapped\ }}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ through\ an\ inlined\ call\ in\ the\ latent\ model}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ nBuckets\_;\ j++)}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dist.addDensity(j,\ bld.density(j)\ *\ densitydm);}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ mkft[0]\ +=\ delta\_;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dist;}
+\DoxyCodeLine{00169\ \ \ \ \ \}}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

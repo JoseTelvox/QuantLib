@@ -1,0 +1,124 @@
+\doxysection{swaptionconstantvol.\+hpp}
+\hypertarget{swaptionconstantvol_8hpp_source}{}\label{swaptionconstantvol_8hpp_source}\index{ql/termstructures/volatility/swaption/swaptionconstantvol.hpp@{ql/termstructures/volatility/swaption/swaptionconstantvol.hpp}}
+\mbox{\hyperlink{swaptionconstantvol_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2006,\ 2007\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2015\ Peter\ Caspers}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_swaption\_constant\_volatility\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_swaption\_constant\_volatility\_hpp}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{swaptionvolstructure_8hpp}{ql/termstructures/volatility/swaption/swaptionvolstructure.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{period_8hpp}{ql/time/period.hpp}}>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_quote}{Quote}};}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ad992c710a059a6ac09936e0f5b21baf4}{ConstantSwaptionVolatility}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_abd6d1f07a9aae40747af8ec3b834ab3b}{SwaptionVolatilityStructure}}\ \{}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ad992c710a059a6ac09936e0f5b21baf4}{ConstantSwaptionVolatility}}(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_abeb79eefda70a9414f206ca9e70ced0f}{settlementDays}},}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ cal,}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc,}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a7bc429391cc8c53f944f19322b5ef507}{volatility}},}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ VolatilityType\ type\ =\ ShiftedLognormal,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a8479ca4d2aa0fd1a267627a6287b1b8e}{shift}}\ =\ 0.0);}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ad992c710a059a6ac09936e0f5b21baf4}{ConstantSwaptionVolatility}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_accbf3d4af41db0333d456eb5616c4e1e}{referenceDate}},}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ cal,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a7bc429391cc8c53f944f19322b5ef507}{volatility}},}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ VolatilityType\ type\ =\ ShiftedLognormal,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a8479ca4d2aa0fd1a267627a6287b1b8e}{shift}}\ =\ 0.0);}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ad992c710a059a6ac09936e0f5b21baf4}{ConstantSwaptionVolatility}}(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_abeb79eefda70a9414f206ca9e70ced0f}{settlementDays}},}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ cal,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a7bc429391cc8c53f944f19322b5ef507}{volatility}},}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ VolatilityType\ type\ =\ ShiftedLognormal,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a8479ca4d2aa0fd1a267627a6287b1b8e}{shift}}\ =\ 0.0);}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ad992c710a059a6ac09936e0f5b21baf4}{ConstantSwaptionVolatility}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_term_structure_accbf3d4af41db0333d456eb5616c4e1e}{referenceDate}},}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ cal,}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ bdc,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a7bc429391cc8c53f944f19322b5ef507}{volatility}},}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ VolatilityType\ type\ =\ ShiftedLognormal,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a8479ca4d2aa0fd1a267627a6287b1b8e}{shift}}\ =\ 0.0);}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_a0428d044ca76820e9353f856b67a36af}{maxDate}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ae3a5c02b965928bb05c6c1576514615b}{minStrike}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_a6d14440f1a0127ba84adcda86443ae13}{maxStrike}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ad9b2c2d1c2a438ddec3e340491630970}{maxSwapTenor}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ VolatilityType\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_a18ea02604fa2344e1ff6704d4fe79ccb}{volatilityType}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SmileSection>\ smileSectionImpl(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SmileSection>\ smileSectionImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}},\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ volatilityImpl(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&,\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}},\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}},\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ shiftImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ volatility\_;}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\ maxSwapTenor\_;}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ VolatilityType\ volatilityType\_;}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ shift\_;}
+\DoxyCodeLine{00099\ \ \ \ \ \};}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_a0428d044ca76820e9353f856b67a36af}{ConstantSwaptionVolatility::maxDate}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ad04a122553934667f47284aede26bde2}{Date::maxDate}}();}
+\DoxyCodeLine{00106\ \ \ \ \ \}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ae3a5c02b965928bb05c6c1576514615b}{ConstantSwaptionVolatility::minStrike}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{group__limit_macros_ga8a6736b7bfef354a1fc507317d49117a}{QL\_MIN\_REAL}};}
+\DoxyCodeLine{00110\ \ \ \ \ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_a6d14440f1a0127ba84adcda86443ae13}{ConstantSwaptionVolatility::maxStrike}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}};}
+\DoxyCodeLine{00114\ \ \ \ \ \}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_ad9b2c2d1c2a438ddec3e340491630970}{ConstantSwaptionVolatility::maxSwapTenor}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ maxSwapTenor\_;}
+\DoxyCodeLine{00118\ \ \ \ \ \}}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{keyword}{inline}\ VolatilityType\ \mbox{\hyperlink{class_quant_lib_1_1_constant_swaption_volatility_a18ea02604fa2344e1ff6704d4fe79ccb}{ConstantSwaptionVolatility::volatilityType}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ volatilityType\_;}
+\DoxyCodeLine{00122\ \ \ \ \ \}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ ConstantSwaptionVolatility::shiftImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ swapLength)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ consistency\ check}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ SwaptionVolatilityStructure::shiftImpl(optionTime,\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}});}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ shift\_;}
+\DoxyCodeLine{00128\ \ \ \ \ \}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

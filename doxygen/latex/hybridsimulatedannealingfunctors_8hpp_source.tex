@@ -1,0 +1,370 @@
+\doxysection{hybridsimulatedannealingfunctors.\+hpp}
+\hypertarget{hybridsimulatedannealingfunctors_8hpp_source}{}\label{hybridsimulatedannealingfunctors_8hpp_source}\index{ql/experimental/math/hybridsimulatedannealingfunctors.hpp@{ql/experimental/math/hybridsimulatedannealingfunctors.hpp}}
+\mbox{\hyperlink{hybridsimulatedannealingfunctors_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{Copyright\ (C)\ 2015\ Andres\ Hernandez}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{<quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{<http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ HYBRIDSIMULATEDANNEALINGFUNCTORS\_H}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ HYBRIDSIMULATEDANNEALINGFUNCTORS\_H}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{array_8hpp}{ql/math/array.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{seedgenerator_8hpp}{ql/math/randomnumbers/seedgenerator.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{problem_8hpp}{ql/math/optimization/problem.hpp}}>}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <random>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}}
+\DoxyCodeLine{00038\ \{}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keyword}{class\ }SamplerLogNormal}
+\DoxyCodeLine{00044\ \ \ \ \ \{}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ SamplerLogNormal(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())\ :}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ generator\_(seed),\ distribution\_(0.0,\ 1.0)\ \{\};}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currentPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ temp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ i++)}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ currentPoint[i]\ *\ exp(sqrt(temp[i])\ *\ distribution\_(generator\_));}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ std::normal\_distribution<Real>\ distribution\_;}
+\DoxyCodeLine{00058\ \ \ \ \ \};}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{class\ }SamplerGaussian}
+\DoxyCodeLine{00065\ \ \ \ \ \{}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ SamplerGaussian(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())\ :}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ generator\_(seed),\ distribution\_(0.0,\ 1.0)\ \{\};}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currentPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ temp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ i++)}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ currentPoint[i]\ +\ std::sqrt(temp[i])\ *\ distribution\_(generator\_);}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ std::normal\_distribution<Real>\ distribution\_;}
+\DoxyCodeLine{00079\ \ \ \ \ \};}
+\DoxyCodeLine{00080\ \ \ \ \ }
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{keyword}{class\ }SamplerRingGaussian}
+\DoxyCodeLine{00087\ \ \ \ \ \{}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ SamplerRingGaussian(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lower,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ upper,}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ :\ generator\_(seed),\ distribution\_(0.0,\ 1.0),}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ lower\_(std::move(lower)),\ upper\_(std::move(upper))\{\};}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currentPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ temp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ i++)\{}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ currentPoint[i]\ +\ std::sqrt(temp[i])\ *\ distribution\_(generator\_);}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(newPoint[i]\ <\ lower\_[i]\ ||\ newPoint[i]\ >\ upper\_[i])\{}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(newPoint[i]\ <\ lower\_[i])\{}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ upper\_[i]\ +\ newPoint[i]\ -\/\ lower\_[i];}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ lower\_[i]\ +\ newPoint[i]\ -\/\ upper\_[i];}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ }
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ std::normal\_distribution<Real>\ distribution\_;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lower\_,\ upper\_;}
+\DoxyCodeLine{00113\ \ \ \ \ \};}
+\DoxyCodeLine{00114\ \ \ \ \ }
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{keyword}{class\ }SamplerMirrorGaussian}
+\DoxyCodeLine{00121\ \ \ \ \ \{}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ SamplerMirrorGaussian(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lower,}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ upper,}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ :\ generator\_(seed),\ distribution\_(0.0,\ 1.0),}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ lower\_(std::move(lower)),\ upper\_(std::move(upper))\{\};}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currentPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ temp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ i++)\{}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ currentPoint[i]\ +\ std::sqrt(temp[i])\ *\ distribution\_(generator\_);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(newPoint[i]\ <\ lower\_[i]\ ||\ newPoint[i]\ >\ upper\_[i])\{}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(newPoint[i]\ <\ lower\_[i])\{}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ lower\_[i]\ +\ lower\_[i]\ -\/\ newPoint[i];}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ upper\_[i]\ +\ upper\_[i]\ -\/\ newPoint[i];}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ std::normal\_distribution<Real>\ distribution\_;}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lower\_,\ upper\_;}
+\DoxyCodeLine{00147\ \ \ \ \ \};}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{keyword}{class\ }SamplerCauchy}
+\DoxyCodeLine{00156\ \ \ \ \ \{}
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ SamplerCauchy(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())\ :}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ generator\_(seed),\ distribution\_(0.0,\ 1.0)\ \{\};}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currentPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ temp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ i++)}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ currentPoint[i]\ +\ temp[i]\ *\ distribution\_(generator\_);}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ std::cauchy\_distribution<Real>\ distribution\_;}
+\DoxyCodeLine{00170\ \ \ \ \ \};}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00176\ \ \ \ \ \textcolor{keyword}{class\ }SamplerVeryFastAnnealing}
+\DoxyCodeLine{00177\ \ \ \ \ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ SamplerVeryFastAnnealing(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lower,}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ upper,}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ :\ lower\_(std::move(lower)),\ upper\_(std::move(upper)),\ generator\_(seed)\ \{}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(lower\_.size()\ ==\ upper\_.size(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currentPoint,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ lower\_.size(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(newPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ temp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ currentPoint.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ i++)\ \{}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ lower\_[i]\ -\/\ 1.0;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (newPoint[i]\ <\ lower\_[i]\ ||\ newPoint[i]\ >\ upper\_[i])\ \{}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ draw\ =\ distribution\_(generator\_);}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sign\ =\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(0.5\ <\ draw)\ -\/\ \textcolor{keyword}{static\_cast<}\textcolor{keywordtype}{int}\textcolor{keyword}{>}(draw\ <\ 0.5);}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ y\ =\ sign*temp[i]\ *\ (std::pow(1.0\ +\ 1.0\ /\ temp[i],}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::abs(2\ *\ draw\ -\/\ 1.0))\ -\/\ 1.0);}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoint[i]\ =\ currentPoint[i]\ +\ y*(upper\_[i]\ -\/\ lower\_[i]);}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lower\_,\ upper\_;}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ std::uniform\_real\_distribution<Real>\ distribution\_;}
+\DoxyCodeLine{00205\ \ \ \ \ \};}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00212\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_probability_always_downhill}{ProbabilityAlwaysDownhill}}\ \{}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ operator()(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ currentValue,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ newValue,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ currentValue\ >\ newValue;\ \textcolor{comment}{//return\ true\ if\ new\ value\ is\ lower\ than\ old\ value}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00216\ \ \ \ \ \};}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00223\ \ \ \ \ \textcolor{keyword}{class\ }ProbabilityBoltzmann\ \{}
+\DoxyCodeLine{00224\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ ProbabilityBoltzmann(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())\ :\ generator\_(seed)\ \{\};}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ operator()(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ currentValue,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ newValue,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ temperature\ =\ *std::max\_element(temp.begin(),\ temp.end());}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (1.0\ /\ (1.0\ +\ exp((newValue\ -\/\ currentValue)\ /\ temperature)))\ >\ distribution\_(generator\_);}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00231\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ std::uniform\_real\_distribution<Real>\ distribution\_;}
+\DoxyCodeLine{00234\ \ \ \ \ \};}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{keyword}{class\ }ProbabilityBoltzmannDownhill}
+\DoxyCodeLine{00240\ \ \ \ \ \{}
+\DoxyCodeLine{00241\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ ProbabilityBoltzmannDownhill(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())\ :\ generator\_(seed)\ \{\};}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ operator()(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ currentValue,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ newValue,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&temp)\ \{}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (newValue\ <\ currentValue)}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ mTemperature\ =\ *std::max\_element(temp.begin(),\ temp.end());}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (1.0\ /\ (1.0\ +\ exp((newValue\ -\/\ currentValue)\ /\ mTemperature)))\ >\ distribution\_(generator\_);}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00250\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ std::uniform\_real\_distribution<Real>\ distribution\_;}
+\DoxyCodeLine{00253\ \ \ \ \ \};}
+\DoxyCodeLine{00255\ }
+\DoxyCodeLine{00257\ \ \ \ \ \textcolor{keyword}{class\ }TemperatureBoltzmann\ \{}
+\DoxyCodeLine{00258\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ TemperatureBoltzmann(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialTemp,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dimension)}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ :\ initialTemp\_(dimension,\ initialTemp)\ \{\}}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&steps)\ \{}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ initialTemp\_.size(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ newTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ initialTemp\_.size();\ i++)}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newTemp[i]\ =\ initialTemp\_[i]\ /\ std::log(steps[i]);}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00267\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ initialTemp\_;}
+\DoxyCodeLine{00269\ \ \ \ \ \};}
+\DoxyCodeLine{00271\ }
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{keyword}{class\ }TemperatureCauchy\ \{}
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ TemperatureCauchy(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialTemp,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dimension)}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ :\ initialTemp\_(dimension,\ initialTemp)\ \{\}}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&steps)\ \{}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ initialTemp\_.size(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ newTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ initialTemp\_.size();\ i++)}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newTemp[i]\ =\ initialTemp\_[i]\ /\ steps[i];}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00283\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ initialTemp\_;}
+\DoxyCodeLine{00285\ \ \ \ \ \};}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \ \ \ \ \textcolor{keyword}{class\ }TemperatureCauchy1D\ \{}
+\DoxyCodeLine{00288\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ TemperatureCauchy1D(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialTemp,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dimension)\ :}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ inverseN\_(1.0\ /\ dimension),}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ initialTemp\_(dimension,\ initialTemp)\ \{\}}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&steps)\ \{}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ initialTemp\_.size(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ newTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ initialTemp\_.size();\ i++)}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newTemp[i]\ =\ initialTemp\_[i]\ /\ std::pow(steps[i],\ inverseN\_);}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ inverseN\_;}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ initialTemp\_;}
+\DoxyCodeLine{00301\ \ \ \ \ \};}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \ \ \ \ \textcolor{keyword}{class\ }TemperatureExponential\ \{}
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ TemperatureExponential(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialTemp,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dimension,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ power\ =\ 0.95)}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ :\ initialTemp\_(dimension,\ initialTemp),\ power\_(power)\ \{\}}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&steps)\ \{}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ initialTemp\_.size(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ newTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ initialTemp\_.size();\ i++)}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newTemp[i]\ =\ initialTemp\_[i]\ *\ std::pow(power\_,\ steps[i]);}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00313\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ initialTemp\_;}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ power\_;}
+\DoxyCodeLine{00316\ \ \ \ \ \};}
+\DoxyCodeLine{00318\ }
+\DoxyCodeLine{00320\ \ \ \ \ \textcolor{keyword}{class\ }TemperatureVeryFastAnnealing\ \{}
+\DoxyCodeLine{00321\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ TemperatureVeryFastAnnealing(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialTemp,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ finalTemp,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxSteps,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dimension)}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ \ \ :inverseN\_(1.0\ /\ dimension),\ initialTemp\_(dimension,\ initialTemp),}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ finalTemp\_(dimension,\ finalTemp),\ exponent\_(dimension,\ 0.0)\ \{}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ coeff\ =\ std::pow(maxSteps,\ -\/inverseN\_);}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ initialTemp\_.size();\ i++)}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ exponent\_[i]\ =\ -\/std::log(finalTemp\_[i]\ /\ initialTemp\_[i])*coeff;}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&newTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currTemp,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&steps)\ \{}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ initialTemp\_.size(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ newTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}(),\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ initialTemp\_.size();\ i++)}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newTemp[i]\ =\ initialTemp\_[i]\ *\ exp(-\/exponent\_[i]\ *\ std::pow(steps[i],\ inverseN\_));}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00335\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ inverseN\_;}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ initialTemp\_,\ finalTemp\_,\ exponent\_;}
+\DoxyCodeLine{00338\ \ \ \ \ \};}
+\DoxyCodeLine{00340\ }
+\DoxyCodeLine{00342\ \ \ \ \ \textcolor{keyword}{struct\ }ReannealingTrivial\ \{}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ ReannealingTrivial()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ ;}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setProblem(\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\ \&P)\ \{\};}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&\ steps,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currentPoint,}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ aCurrentValue,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&\ currTemp)\ \{\};}
+\DoxyCodeLine{00348\ \ \ \ \ \};}
+\DoxyCodeLine{00350\ }
+\DoxyCodeLine{00357\ \ \ \ \ \textcolor{keyword}{class\ }ReannealingFiniteDifferences\ \{}
+\DoxyCodeLine{00358\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ ReannealingFiniteDifferences(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialTemp,}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dimension,}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ lower\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ upper\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ stepSize\ =\ 1e-\/7,}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minSize\ =\ 1e-\/10,}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ functionTol\ =\ 1e-\/10)}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ :\ stepSize\_(stepSize),\ minSize\_(minSize),\ functionTol\_(functionTol),\ N\_(dimension),}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ lower\_(lower),\ upper\_(upper),\ initialTemp\_(dimension,\ initialTemp),}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ bounded\_(dimension,\ 1.0)\ \{}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!lower.empty()\ \&\&\ !upper.empty())\ \{}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(lower.size()\ ==\ N\_,\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(upper.size()\ ==\ N\_,\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bound\_\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ N\_;\ i++)\ \{}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bounded\_[i]\ =\ upper[i]\ -\/\ lower[i];}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setProblem(\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\ \&P)\ \{\ problem\_\ =\ \&P;\ \};}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ operator()(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&\ steps,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&currentPoint,}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ currentValue,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&\ currTemp)\ \{}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(currTemp.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ N\_,\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(steps.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}()\ ==\ N\_,\ \textcolor{stringliteral}{"{}Incompatible\ input"{}});}
+\DoxyCodeLine{00383\ }
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ finiteDiffs(N\_,\ 0.0);}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ finiteDiffMax\ =\ 0.0;}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ ofssetPoint(currentPoint);}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ N\_;\ i++)\ \{}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ofssetPoint[i]\ +=\ stepSize\_;}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ finiteDiffs[i]\ =\ bounded\_[i]\ *\ std::abs((problem\_-\/>value(ofssetPoint)\ -\/\ currentValue)\ /\ stepSize\_);}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ofssetPoint[i]\ -\/=\ stepSize\_;}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (finiteDiffs[i]\ <\ minSize\_)}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ finiteDiffs[i]\ =\ minSize\_;}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (finiteDiffs[i]\ >\ finiteDiffMax)}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ finiteDiffMax\ =\ finiteDiffs[i];}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ N\_;\ i++)\ \{}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tRatio\ =\ initialTemp\_[i]\ /\ currTemp[i];}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sRatio\ =\ finiteDiffMax\ /\ finiteDiffs[i];}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (sRatio*tRatio\ <\ functionTol\_)}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ steps[i]\ =\ std::pow(std::fabs(std::log(functionTol\_)),}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}(N\_));}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ steps[i]\ =\ std::pow(std::fabs(std::log(sRatio*tRatio)),}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}(N\_));}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00407\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\ *problem\_;}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ stepSize\_,\ minSize\_,\ functionTol\_;}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ N\_;}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ bound\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lower\_,\ upper\_,\ initialTemp\_,\ bounded\_;}
+\DoxyCodeLine{00413\ \ \ \ \ \};}
+\DoxyCodeLine{00414\ \}}
+\DoxyCodeLine{00415\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ HYBRIDSIMULATEDANNEALINGFUNCTORS\_H}}
+
+\end{DoxyCode}

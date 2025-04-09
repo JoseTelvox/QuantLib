@@ -1,0 +1,203 @@
+\doxysection{creditdefaultswap.\+hpp}
+\hypertarget{creditdefaultswap_8hpp_source}{}\label{creditdefaultswap_8hpp_source}\index{ql/instruments/creditdefaultswap.hpp@{ql/instruments/creditdefaultswap.hpp}}
+\mbox{\hyperlink{creditdefaultswap_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008,\ 2009\ Jose\ Aparicio}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Roland\ Lichters}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_credit\_default\_swap\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_credit\_default\_swap\_hpp}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{instrument_8hpp}{ql/instrument.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{simplecashflow_8hpp}{ql/cashflows/simplecashflow.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{default_8hpp}{ql/default.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{defaulttermstructure_8hpp}{ql/termstructures/defaulttermstructure.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{schedule_8hpp}{ql/time/schedule.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{optional_8hpp}{ql/optional.hpp}}>}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_yield_term_structure}{YieldTermStructure}};}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_claim}{Claim}};}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00056\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a0aadbf6b822fae4c4f6f7bc8fd16568b}{CreditDefaultSwap}}\ :\ \textcolor{keyword}{public}\ Instrument\ \{}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_1_1arguments}{arguments}};}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_1_1results}{results}};}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_1_1engine}{engine}};}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ PricingModel\ \{}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ Midpoint,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ ISDA}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a0aadbf6b822fae4c4f6f7bc8fd16568b}{CreditDefaultSwap}}(Protection::Side\ side,}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notional,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ spread,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\&\ schedule,}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ paymentConvention,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ settlesAccrual\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ paysAtDefaultTime\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ protectionStart\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Claim>\ =\ ext::shared\_ptr<Claim>(),}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ lastPeriodDayCounter\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}(),}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ rebatesAccrual\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ tradeDate\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ cashSettlementDays\ =\ 3);}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a0aadbf6b822fae4c4f6f7bc8fd16568b}{CreditDefaultSwap}}(Protection::Side\ side,}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notional,}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ upfront,}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ spread,}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\&\ schedule,}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ paymentConvention,}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ settlesAccrual\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ paysAtDefaultTime\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ protectionStart\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ upfrontDate\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Claim>\ =\ ext::shared\_ptr<Claim>(),}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ lastPeriodDayCounter\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}(),}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ rebatesAccrual\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ tradeDate\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ cashSettlementDays\ =\ 3);}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_afb91ae4bc5ff8c6bff6d5b5fe4895624}{isExpired}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a563c1d0f57171a654f739dc45fd7088b}{setupArguments}}(\mbox{\hyperlink{class_quant_lib_1_1_pricing_engine_1_1arguments}{PricingEngine::arguments}}*)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a53cb75af0223286edb1da28f31e90a35}{fetchResults}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_pricing_engine_1_1results}{PricingEngine::results}}*)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ Protection::Side\ side()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notional()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ runningSpread()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ ext::optional<Rate>\ upfront()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ settlesAccrual()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ paysAtDefaultTime()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a14f786c47ee979097c448d96b2defaab}{Leg}}\&\ coupons()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a36bc6bcc991990fba383a932d7ebc0b8}{protectionStartDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a068a2781ca3d7ddc6a0846abf00f3d34}{protectionEndDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ rebatesAccrual()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ accrualRebate\_\ !=\ \textcolor{keyword}{nullptr};\ \}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<SimpleCashFlow>\&\ upfrontPayment()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<SimpleCashFlow>\&\ accrualRebate()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ tradeDate()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ cashSettlementDays()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a89cb25e2417a552e11311f64f8a8c519}{fairUpfront}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a286e703f20753abeef1df56ff1e137e8}{fairSpread}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_ac8bbe9f688902baeae0e8daa091c5e22}{couponLegBPS}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ upfrontBPS()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ couponLegNPV()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ defaultLegNPV()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ upfrontNPV()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accrualRebateNPV()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a08d873d0f0d9e92df648483161192eef}{impliedHazardRate}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ targetNPV,}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ discountCurve,}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ recoveryRate\ =\ 0.4,}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ 1.0e-\/8,}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PricingModel\ model\ =\ Midpoint)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00242\ }
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a8466d6a49951c9e947c7c2071766c323}{conventionalSpread}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ conventionalRecovery,}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ discountCurve,}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ PricingModel\ model\ =\ Midpoint)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_a2b09907de34836832eba08eda2e57526}{setupExpired}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ data\ members}}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ Protection::Side\ side\_;}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notional\_;}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ ext::optional<Rate>\ upfront\_;}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ runningSpread\_;}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ settlesAccrual\_,\ paysAtDefaultTime\_;}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Claim>\ claim\_;}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a14f786c47ee979097c448d96b2defaab}{Leg}}\ leg\_;}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SimpleCashFlow>\ upfrontPayment\_;}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SimpleCashFlow>\ accrualRebate\_;}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ protectionStart\_;}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ tradeDate\_;}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ cashSettlementDays\_;}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ maturity\_;}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ results}}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ fairUpfront\_;}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ fairSpread\_;}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ couponLegBPS\_,\ couponLegNPV\_;}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ upfrontBPS\_,\ upfrontNPV\_;}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ defaultLegNPV\_;}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accrualRebateNPV\_;}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ init(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\&\ schedule,\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ paymentConvention,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ lastPeriodDayCounter,\ \textcolor{keywordtype}{bool}\ rebatesAccrual,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ upfrontDate\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}());}
+\DoxyCodeLine{00308\ \ \ \ \ \};}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_1_1arguments}{CreditDefaultSwap::arguments}}}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_pricing_engine_1_1arguments}{PricingEngine::arguments}}\ \{}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ arguments();}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ Protection::Side\ side;}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notional;}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ ext::optional<Rate>\ upfront;}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ spread;}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a14f786c47ee979097c448d96b2defaab}{Leg}}\ leg;}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ not\ initialized\ by\ constructors\ means\ theres\ no\ flows.}}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SimpleCashFlow>\ upfrontPayment;}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SimpleCashFlow>\ accrualRebate;}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ settlesAccrual;}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ paysAtDefaultTime;}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Claim>\ claim;}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ protectionStart;}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ maturity;}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ validate()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00329\ \ \ \ \ \};}
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_1_1results}{CreditDefaultSwap::results}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_instrument_1_1results}{Instrument::results}}\ \{}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ fairSpread;}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ fairUpfront;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ couponLegBPS;}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ couponLegNPV;}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ defaultLegNPV;}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ upfrontBPS;}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ upfrontNPV;}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accrualRebateNPV;}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ reset()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00342\ \ \ \ \ \};}
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_credit_default_swap_1_1engine}{CreditDefaultSwap::engine}}}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_generic_engine}{GenericEngine}}<CreditDefaultSwap::arguments,}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CreditDefaultSwap::results>\ \{\};}
+\DoxyCodeLine{00347\ }
+\DoxyCodeLine{00361\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{namespace_quant_lib_ac7d105585f943dd8bfca27d63ce2bdff}{cdsMaturity}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ tradeDate,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ tenor,\ \mbox{\hyperlink{struct_quant_lib_1_1_date_generation_a3fee9b3c834b0d3be240d05886ac2f6e}{DateGeneration::Rule}}\ rule);}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \}}
+\DoxyCodeLine{00364\ }
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

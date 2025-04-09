@@ -1,0 +1,255 @@
+\doxysection{mcforwardeuropeanbsengine.\+hpp}
+\hypertarget{mcforwardeuropeanbsengine_8hpp_source}{}\label{mcforwardeuropeanbsengine_8hpp_source}\index{ql/pricingengines/forward/mcforwardeuropeanbsengine.hpp@{ql/pricingengines/forward/mcforwardeuropeanbsengine.hpp}}
+\mbox{\hyperlink{mcforwardeuropeanbsengine_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#ifndef\ quantlib\_mc\_forward\_european\_bs\_engine\_hpp}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ quantlib\_mc\_forward\_european\_bs\_engine\_hpp}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{mcforwardvanillaengine_8hpp}{ql/pricingengines/forward/mcforwardvanillaengine.hpp}}>}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackscholesprocess_8hpp}{ql/processes/blackscholesprocess.hpp}}>}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG\ =\ PseudoRandom,\ \textcolor{keyword}{class}\ S\ =\ Statistics>}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{class\ }MCForwardEuropeanBSEngine}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ MCForwardVanillaEngine<SingleVariate,RNG,S>\ \{}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ MCForwardVanillaEngine<SingleVariate,RNG,S>::path\_generator\_type}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \ \ \ \ path\_generator\_type;}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ MCForwardVanillaEngine<SingleVariate,RNG,S>::path\_pricer\_type}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ path\_pricer\_type;}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ MCForwardVanillaEngine<SingleVariate,RNG,S>::stats\_type}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ stats\_type;}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructor}}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ MCForwardEuropeanBSEngine(}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<GeneralizedBlackScholesProcess>\&\ process,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeStepsPerYear,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antitheticVariate,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxSamples,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed);}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ ext::shared\_ptr<path\_pricer\_type>\ pathPricer()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00060\ \ \ \ \ \};}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG\ =\ PseudoRandom,\ \textcolor{keyword}{class}\ S\ =\ Statistics>}
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{class\ }MakeMCForwardEuropeanBSEngine\ \{}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ MakeMCForwardEuropeanBSEngine(}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process);}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ named\ parameters}}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ MakeMCForwardEuropeanBSEngine\&\ withSteps(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps);}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ MakeMCForwardEuropeanBSEngine\&\ withStepsPerYear(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps);}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ MakeMCForwardEuropeanBSEngine\&\ withBrownianBridge(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ MakeMCForwardEuropeanBSEngine\&\ withSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples);}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ MakeMCForwardEuropeanBSEngine\&\ withAbsoluteTolerance(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance);}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ MakeMCForwardEuropeanBSEngine\&\ withMaxSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples);}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ MakeMCForwardEuropeanBSEngine\&\ withSeed(\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed);}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ MakeMCForwardEuropeanBSEngine\&\ withAntitheticVariate(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ conversion\ to\ pricing\ engine}}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ ext::shared\_ptr<PricingEngine>()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process\_;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antithetic\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps\_,\ stepsPerYear\_,\ samples\_,\ maxSamples\_;}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance\_;}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\_\ =\ 0;}
+\DoxyCodeLine{00086\ \ \ \ \ \};}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keyword}{class\ }ForwardEuropeanBSPathPricer\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_path_pricer}{PathPricer}}<Path>\ \{}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ ForwardEuropeanBSPathPricer(Option::Type\ type,}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ moneyness,}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ resetIndex,}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discount);}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator()(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_path}{Path}}\&\ path)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ Option::Type\ type\_;}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ moneyness\_;}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ resetIndex\_;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discount\_;}
+\DoxyCodeLine{00102\ \ \ \ \ \};}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00109\ \ \ \ \ MCForwardEuropeanBSEngine<RNG,S>::MCForwardEuropeanBSEngine(}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<GeneralizedBlackScholesProcess>\&\ process,}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps,}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeStepsPerYear,}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge,}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antitheticVariate,}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples,}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance,}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxSamples,}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed)}
+\DoxyCodeLine{00119\ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_m_c_forward_vanilla_engine}{MCForwardVanillaEngine}}<\mbox{\hyperlink{struct_quant_lib_1_1_single_variate}{SingleVariate}},RNG,S>(process,}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeSteps,}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeStepsPerYear,}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ brownianBridge,}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ antitheticVariate,}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ requiredSamples,}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ requiredTolerance,}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxSamples,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seed)\ \{\}}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00132\ \ \ \ \ ext::shared\_ptr<typename\ MCForwardEuropeanBSEngine<RNG,S>::path\_pricer\_type>}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ MCForwardEuropeanBSEngine<RNG,S>::pathPricer()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ TimeGrid\ timeGrid\ =\ this-\/>timeGrid();}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ resetTime\ =\ this-\/>process\_-\/>time(this-\/>arguments\_.resetDate);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ resetIndex\ =\ timeGrid.closestIndex(resetTime);}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ ext::shared\_ptr<PlainVanillaPayoff>\ payoff\ =}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<PlainVanillaPayoff>(}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.payoff);}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(payoff,\ \textcolor{stringliteral}{"{}non-\/plain\ payoff\ given"{}});}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ ext::shared\_ptr<EuropeanExercise>\ exercise\ =}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<EuropeanExercise>(}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.exercise);}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(exercise,\ \textcolor{stringliteral}{"{}wrong\ exercise\ given"{}});}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process\ =}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<GeneralizedBlackScholesProcess>(}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>process\_);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(process,\ \textcolor{stringliteral}{"{}Black-\/Scholes\ process\ required"{}});}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<\textcolor{keyword}{typename}}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ MCForwardEuropeanBSEngine<RNG,S>::path\_pricer\_type>(}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ ForwardEuropeanBSPathPricer(}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>optionType(),}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.moneyness,}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ resetIndex,}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ process-\/>riskFreeRate()-\/>discount(}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeGrid.back())));}
+\DoxyCodeLine{00163\ \ \ \ \ \}}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keyword}{inline}\ MakeMCForwardEuropeanBSEngine<RNG,\ S>::MakeMCForwardEuropeanBSEngine(}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process)}
+\DoxyCodeLine{00169\ \ \ \ \ :\ process\_(std::move(process)),\ steps\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ stepsPerYear\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ samples\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ maxSamples\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ tolerance\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}>())\ \{\}}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>}}\&}
+\DoxyCodeLine{00174\ \ \ \ \ MakeMCForwardEuropeanBSEngine<RNG,S>::withSteps(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps)\ \{}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ steps\_\ =\ steps;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00177\ \ \ \ \ \}}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>}}\&}
+\DoxyCodeLine{00181\ \ \ \ \ MakeMCForwardEuropeanBSEngine<RNG,S>::withStepsPerYear(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps)\ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ stepsPerYear\_\ =\ steps;}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00184\ \ \ \ \ \}}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>}}\&}
+\DoxyCodeLine{00188\ \ \ \ \ MakeMCForwardEuropeanBSEngine<RNG,S>::withSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples)\ \{}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(tolerance\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tolerance\ already\ set"{}});}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ samples\_\ =\ samples;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00193\ \ \ \ \ \}}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00196\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>}}\&}
+\DoxyCodeLine{00197\ \ \ \ \ MakeMCForwardEuropeanBSEngine<RNG,S>::withAbsoluteTolerance(}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance)\ \{}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(samples\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ samples\ already\ set"{}});}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(RNG::allowsErrorEstimate,}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chosen\ random\ generator\ policy\ "{}}}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}does\ not\ allow\ an\ error\ estimate"{}});}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ tolerance\_\ =\ tolerance;}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00206\ \ \ \ \ \}}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00209\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>}}\&}
+\DoxyCodeLine{00210\ \ \ \ \ MakeMCForwardEuropeanBSEngine<RNG,S>::withMaxSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples)\ \{}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ maxSamples\_\ =\ samples;}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00213\ \ \ \ \ \}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>}}\&}
+\DoxyCodeLine{00217\ \ \ \ \ MakeMCForwardEuropeanBSEngine<RNG,S>::withSeed(\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed)\ \{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ seed\_\ =\ seed;}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00220\ \ \ \ \ \}}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00223\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>}}\&}
+\DoxyCodeLine{00224\ \ \ \ \ MakeMCForwardEuropeanBSEngine<RNG,S>::withBrownianBridge(\textcolor{keywordtype}{bool}\ b)\ \{}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ brownianBridge\_\ =\ b;}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00227\ \ \ \ \ \}}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00229\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>}}\&}
+\DoxyCodeLine{00231\ \ \ \ \ MakeMCForwardEuropeanBSEngine<RNG,S>::withAntitheticVariate(\textcolor{keywordtype}{bool}\ b)\ \{}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ antithetic\_\ =\ b;}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00234\ \ \ \ \ \}}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00237\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00238\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_forward_european_b_s_engine}{MakeMCForwardEuropeanBSEngine<RNG,S>::operator}}\ ext::shared\_ptr<PricingEngine>()\textcolor{keyword}{}}
+\DoxyCodeLine{00239\ \textcolor{keyword}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ }\{}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(steps\_\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}()\ ||\ stepsPerYear\_\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ steps\ not\ given"{}});}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(steps\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}()\ ||\ stepsPerYear\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ steps\ overspecified\ -\/\ set\ EITHER\ steps\ OR\ stepsPerYear"{}});}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<PricingEngine>(\textcolor{keyword}{new}}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_m_c_forward_european_b_s_engine}{MCForwardEuropeanBSEngine<RNG,S>}}(process\_,}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ steps\_,}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stepsPerYear\_,}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ brownianBridge\_,}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ antithetic\_,}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ samples\_,\ tolerance\_,}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxSamples\_,}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seed\_));}
+\DoxyCodeLine{00253\ \ \ \ \ \}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \}}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

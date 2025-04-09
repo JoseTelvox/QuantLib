@@ -1,0 +1,297 @@
+\doxysection{mcdoublebarrierengine.\+hpp}
+\hypertarget{mcdoublebarrierengine_8hpp_source}{}\label{mcdoublebarrierengine_8hpp_source}\index{ql/experimental/barrieroption/mcdoublebarrierengine.hpp@{ql/experimental/barrieroption/mcdoublebarrierengine.hpp}}
+\mbox{\hyperlink{mcdoublebarrierengine_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2020\ Lew\ Wei\ Hao}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_mc\_double\_barrier\_engines\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_mc\_double\_barrier\_engines\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{exercise_8hpp}{ql/exercise.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{doublebarrieroption_8hpp}{ql/instruments/doublebarrieroption.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{mcsimulation_8hpp}{ql/pricingengines/mcsimulation.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackscholesprocess_8hpp}{ql/processes/blackscholesprocess.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG\ =\ PseudoRandom,\ \textcolor{keyword}{class}\ S\ =\ Statistics>}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{class\ }MCDoubleBarrierEngine\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_double_barrier_option_1_1engine}{DoubleBarrierOption::engine}},}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ McSimulation<SingleVariate,RNG,S>\ \{}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ McSimulation<SingleVariate,RNG,S>::path\_generator\_type}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ path\_generator\_type;}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ McSimulation<SingleVariate,RNG,S>::path\_pricer\_type}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ path\_pricer\_type;}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructor}}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ MCDoubleBarrierEngine(ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeStepsPerYear,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antithetic,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxSamples,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed);}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ calculate()\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ spot\ =\ process\_-\/>x0();}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(spot\ >\ 0.0,\ \textcolor{stringliteral}{"{}negative\ or\ null\ underlying\ given"{}});}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(!triggered(spot),\ \textcolor{stringliteral}{"{}barrier\ touched"{}});}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_mc_simulation_af5ccf2e30a050c14f9e30965855b4993}{McSimulation<SingleVariate,RNG,S>::calculate}}(requiredTolerance\_,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ requiredSamples\_,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxSamples\_);}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ results\_.value\ =\ this-\/>mcModel\_-\/>sampleAccumulator().mean();}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ \textcolor{keyword}{constexpr}\ (RNG::allowsErrorEstimate)}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ results\_.errorEstimate\ =}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>mcModel\_-\/>sampleAccumulator().errorEstimate();}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ McSimulation\ implementation}}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_time_grid}{TimeGrid}}\ timeGrid()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ ext::shared\_ptr<path\_generator\_type>\ pathGenerator()\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_time_grid}{TimeGrid}}\ grid\ =\ timeGrid();}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ RNG::rsg\_type\ gen\ =}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ RNG::make\_sequence\_generator(grid.size()-\/1,seed\_);}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<path\_generator\_type>(}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ path\_generator\_type(process\_,}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ grid,\ gen,\ brownianBridge\_));}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ ext::shared\_ptr<path\_pricer\_type>\ pathPricer()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ data\ members}}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process\_;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps\_,\ timeStepsPerYear\_;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples\_,\ maxSamples\_;}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance\_;}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antithetic\_;}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge\_;}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\_;}
+\DoxyCodeLine{00086\ \ \ \ \ \};}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG\ =\ PseudoRandom,\ \textcolor{keyword}{class}\ S\ =\ Statistics>}
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{keyword}{class\ }MakeMCDoubleBarrierEngine\ \{}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ MakeMCDoubleBarrierEngine(ext::shared\_ptr<GeneralizedBlackScholesProcess>);}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ named\ parameters}}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine\&\ withSteps(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps);}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine\&\ withStepsPerYear(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps);}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine\&\ withBrownianBridge(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine\&\ withAntitheticVariate(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine\&\ withSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples);}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine\&\ withAbsoluteTolerance(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance);}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine\&\ withMaxSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples);}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine\&\ withSeed(\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed);}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ conversion\ to\ pricing\ engine}}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ ext::shared\_ptr<PricingEngine>()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process\_;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge\_\ =\ \textcolor{keyword}{false},\ antithetic\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps\_,\ stepsPerYear\_,\ samples\_,\ maxSamples\_;}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance\_;}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\_\ =\ 0;}
+\DoxyCodeLine{00110\ \ \ \ \ \};}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keyword}{class\ }DoubleBarrierPathPricer\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_path_pricer}{PathPricer}}<Path>\ \{}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ DoubleBarrierPathPricer(\mbox{\hyperlink{struct_quant_lib_1_1_double_barrier_ac1221f8400cd673297abbf49b58cdf5b}{DoubleBarrier::Type}}\ barrierType,}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ barrierLow,}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ barrieHigh,}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rebate,}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Option::Type\ type,}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<DiscountFactor>\ discounts);}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator()(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_path}{Path}}\&\ path)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_double_barrier_ac1221f8400cd673297abbf49b58cdf5b}{DoubleBarrier::Type}}\ barrierType\_;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ barrierLow\_;}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ barrierHigh\_;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rebate\_;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_plain_vanilla_payoff}{PlainVanillaPayoff}}\ payoff\_;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ std::vector<DiscountFactor>\ discounts\_;}
+\DoxyCodeLine{00130\ \ \ \ \ \};}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{comment}{//\ template\ definitions}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keyword}{inline}\ MCDoubleBarrierEngine<RNG,\ S>::MCDoubleBarrierEngine(}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process,}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps,}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeStepsPerYear,}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ brownianBridge,}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antitheticVariate,}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples,}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance,}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxSamples,}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed)}
+\DoxyCodeLine{00145\ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_mc_simulation}{McSimulation}}<\mbox{\hyperlink{struct_quant_lib_1_1_single_variate}{SingleVariate}},\ RNG,\ S>(antitheticVariate,\ false),\ process\_(std::move(process)),}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ timeSteps\_(timeSteps),\ timeStepsPerYear\_(timeStepsPerYear),\ requiredSamples\_(requiredSamples),}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ maxSamples\_(maxSamples),\ requiredTolerance\_(requiredTolerance),}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ brownianBridge\_(brownianBridge),\ seed\_(seed)\ \{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(timeSteps\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}()\ ||}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeStepsPerYear\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}no\ time\ steps\ provided"{}});}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(timeSteps\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}()\ ||}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeStepsPerYear\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}both\ time\ steps\ and\ time\ steps\ per\ year\ were\ provided"{}});}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(timeSteps\ !=\ 0,}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}timeSteps\ must\ be\ positive,\ "{}}\ <<\ timeSteps\ <<}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ not\ allowed"{}});}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(timeStepsPerYear\ !=\ 0,}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}timeStepsPerYear\ must\ be\ positive,\ "{}}\ <<\ timeStepsPerYear\ <<}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ not\ allowed"{}});}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ registerWith(process\_);}
+\DoxyCodeLine{00162\ \ \ \ \ \}}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00165\ \ \ \ \ \textcolor{keyword}{inline}\ TimeGrid\ MCDoubleBarrierEngine<RNG,S>::timeGrid()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ residualTime\ =\ process\_-\/>time(arguments\_.exercise-\/>lastDate());}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (timeSteps\_\ !=\ Null<Size>())\ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ TimeGrid(residualTime,\ timeSteps\_);}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (timeStepsPerYear\_\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}())\ \{}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps\ =\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\textcolor{keyword}{>}(timeStepsPerYear\_*residualTime);}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_time_grid}{TimeGrid}}(residualTime,\ std::max<Size>(steps,\ 1));}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}time\ steps\ not\ specified"{}});}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00176\ \ \ \ \ \}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00180\ \ \ \ \ ext::shared\_ptr<typename\ MCDoubleBarrierEngine<RNG,S>::path\_pricer\_type>}
+\DoxyCodeLine{00181\ \ \ \ \ MCDoubleBarrierEngine<RNG,S>::pathPricer()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ ext::shared\_ptr<PlainVanillaPayoff>\ payoff\ =}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<PlainVanillaPayoff>(arguments\_.payoff);}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(payoff,\ \textcolor{stringliteral}{"{}non-\/plain\ payoff\ given"{}});}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_time_grid}{TimeGrid}}\ grid\ =\ timeGrid();}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ std::vector<DiscountFactor>\ discounts(grid.size());}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<grid.size();\ i++)}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ discounts[i]\ =\ process\_-\/>riskFreeRate()-\/>discount(grid[i]);}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ MCDoubleBarrierEngine<RNG,S>::path\_pricer\_type>(}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_double_barrier_path_pricer}{DoubleBarrierPathPricer}}(}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ arguments\_.barrierType,}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ arguments\_.barrier\_lo,}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ arguments\_.barrier\_hi,}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ arguments\_.rebate,}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>optionType(),}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>strike(),}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ discounts));}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \textcolor{keyword}{inline}\ MakeMCDoubleBarrierEngine<RNG,\ S>::MakeMCDoubleBarrierEngine(}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process)}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ :\ process\_(std::move(process)),\ steps\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ stepsPerYear\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ samples\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ maxSamples\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ tolerance\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}>())\ \{\}}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,\ S>}}\&}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ MakeMCDoubleBarrierEngine<RNG,\ S>::withSteps(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps)\ \{}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ steps\_\ =\ steps;}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00214\ \ \ \ \ \}}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,S>}}\&}
+\DoxyCodeLine{00218\ \ \ \ \ MakeMCDoubleBarrierEngine<RNG,S>::withStepsPerYear(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps)\ \{}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ stepsPerYear\_\ =\ steps;}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00221\ \ \ \ \ \}}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00223\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00224\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,S>}}\&}
+\DoxyCodeLine{00225\ \ \ \ \ MakeMCDoubleBarrierEngine<RNG,S>::withBrownianBridge(\textcolor{keywordtype}{bool}\ brownianBridge)\ \{}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ brownianBridge\_\ =\ brownianBridge;}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00228\ \ \ \ \ \}}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00231\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,S>}}\&}
+\DoxyCodeLine{00232\ \ \ \ \ MakeMCDoubleBarrierEngine<RNG,S>::withAntitheticVariate(\textcolor{keywordtype}{bool}\ b)\ \{}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ antithetic\_\ =\ b;}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00235\ \ \ \ \ \}}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00238\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,S>}}\&}
+\DoxyCodeLine{00239\ \ \ \ \ MakeMCDoubleBarrierEngine<RNG,S>::withSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples)\ \{}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(tolerance\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tolerance\ already\ set"{}});}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ samples\_\ =\ samples;}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00244\ \ \ \ \ \}}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,S>}}\&}
+\DoxyCodeLine{00248\ \ \ \ \ MakeMCDoubleBarrierEngine<RNG,S>::withAbsoluteTolerance(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance)\ \{}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(samples\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ samples\ already\ set"{}});}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(RNG::allowsErrorEstimate,}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chosen\ random\ generator\ policy\ "{}}}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}does\ not\ allow\ an\ error\ estimate"{}});}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ tolerance\_\ =\ tolerance;}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00256\ \ \ \ \ \}}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00259\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,S>}}\&}
+\DoxyCodeLine{00260\ \ \ \ \ MakeMCDoubleBarrierEngine<RNG,S>::withMaxSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples)\ \{}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ maxSamples\_\ =\ samples;}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00263\ \ \ \ \ \}}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00266\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,S>}}\&}
+\DoxyCodeLine{00267\ \ \ \ \ MakeMCDoubleBarrierEngine<RNG,S>::withSeed(\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed)\ \{}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ seed\_\ =\ seed;}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00270\ \ \ \ \ \}}
+\DoxyCodeLine{00271\ }
+\DoxyCodeLine{00272\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S>}
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00274\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_double_barrier_engine}{MakeMCDoubleBarrierEngine<RNG,S>::operator}}\ ext::shared\_ptr<PricingEngine>()\textcolor{keyword}{}}
+\DoxyCodeLine{00275\ \textcolor{keyword}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ }\{}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(steps\_\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}()\ ||\ stepsPerYear\_\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ steps\ not\ given"{}});}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(steps\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}()\ ||\ stepsPerYear\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ steps\ overspecified"{}});}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<PricingEngine>(\textcolor{keyword}{new}}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_m_c_double_barrier_engine}{MCDoubleBarrierEngine<RNG,S>}}(process\_,}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ steps\_,}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stepsPerYear\_,}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ brownianBridge\_,}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ antithetic\_,}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ samples\_,}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tolerance\_,}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxSamples\_,}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seed\_));}
+\DoxyCodeLine{00290\ \ \ \ \ \}}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \}}
+\DoxyCodeLine{00293\ }
+\DoxyCodeLine{00294\ }
+\DoxyCodeLine{00295\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

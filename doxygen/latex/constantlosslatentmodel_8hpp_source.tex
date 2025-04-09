@@ -1,0 +1,164 @@
+\doxysection{constantlosslatentmodel.\+hpp}
+\hypertarget{constantlosslatentmodel_8hpp_source}{}\label{constantlosslatentmodel_8hpp_source}\index{ql/experimental/credit/constantlosslatentmodel.hpp@{ql/experimental/credit/constantlosslatentmodel.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#ifndef\ quantlib\_constantloss\_latentmodel\_hpp}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ quantlib\_constantloss\_latentmodel\_hpp}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultprobabilitylatentmodel.hpp>}}
+\DoxyCodeLine{00025\ \textcolor{comment}{//\ take\ the\ loss\ model\ to\ a\ different\ file\ and\ avoid\ this\ inclusion}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultlossmodel.hpp>}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{comment}{/*\ \(\backslash\)todo:\ }}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ \ \ \ \ \ \ \ Several\ options:\ Refer\ to\ a\ set\ of\ individual\ RR\ models,\ have\ quotes\ to}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ \ \ \ \ \ \ \ RRs\ (registered)}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ copulaPolicy>}
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keyword}{class\ }ConstantLossLatentmodel\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a1c8277cedada4e4a6bb66863948a15a2}{DefaultLatentModel}}<copulaPolicy>\ \{}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ recoveries\_;}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ copulaPolicy::initTraits\ initTraits;}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ ConstantLossLatentmodel(}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ integralType,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ initTraits\&\ ini\ =\ initTraits()\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ )\ }
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a1c8277cedada4e4a6bb66863948a15a2}{DefaultLatentModel<copulaPolicy>}}(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},\ integralType,\ ini),}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ recoveries\_(recoveries)\ \{}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(recoveries.size()\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}.size(),\ }
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Incompatible\ factors\ and\ recovery\ sizes."{}});}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ ConstantLossLatentmodel(}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ mktCorrel,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ integralType,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nVariables,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ initTraits\&\ ini\ =\ initTraits()\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ )\ }
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a1c8277cedada4e4a6bb66863948a15a2}{DefaultLatentModel<copulaPolicy>}}(mktCorrel,\ nVariables,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ integralType,\ ini),}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ recoveries\_(recoveries)\ \{}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ actually\ one\ could\ define\ the\ other\ and\ get\ rid\ of\ the\ variable\ }}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ here\ and\ in\ other\ similar\ models}}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(recoveries.size()\ ==\ nVariables,\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Incompatible\ model\ and\ recovery\ sizes."{}});}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ conditionalRecovery(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ recoveries\_[iName];}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ conditionalRecovery(\mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ uncondDefP,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ recoveries\_[iName];}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ conditionalRecoveryInvP(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invUncondDefP,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ recoveries\_[iName];}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ conditionalRecovery(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ latentVarSample,\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ recoveries\_[iName];}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ recoveries\_;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ this\ is\ really\ an\ interface\ to\ rr\ models\ even\ if\ not\ imposed.\ Default}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ loss\ models\ do\ have\ an\ interface\ for\ this\ one.\ Enforced\ only\ through}}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ duck\ typing.}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedRecovery(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_default_prob_key}{DefaultProbKey}}\&\ defKeys)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ recoveries\_[iName];}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00103\ \ \ \ \ \};}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_loss_latentmodel}{ConstantLossLatentmodel<GaussianCopulaPolicy>}}\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ GaussianConstantLossLM;}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_loss_latentmodel}{ConstantLossLatentmodel<TCopulaPolicy>}}\ TConstantLossLM;}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ copulaPolicy>}
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keyword}{class\ }ConstantLossModel\ :\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ ConstantLossLatentmodel<copulaPolicy>,\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ DefaultLossModel\ }
+\DoxyCodeLine{00121\ \ \ \ \ \{}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ ConstantLossModel(}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries,}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ integralType,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ copulaPolicy::initTraits\&\ ini\ =\ }
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copulaPolicy::initTraits())\ }
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ :\ ConstantLossLatentmodel<copulaPolicy>(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},\ recoveries,\ }
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ integralType,\ ini)\ \{\}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ ConstantLossModel(}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ mktCorrel,}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries,}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ integralType,}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nVariables,}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ copulaPolicy::initTraits\&\ ini\ =\ }
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copulaPolicy::initTraits())\ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ :\ ConstantLossLatentmodel<copulaPolicy>(mktCorrel,\ recoveries,\ }
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ integralType,\ nVariables,ini)\ \{\}}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{comment}{//std::vector<Probability>\ probsBeingNthEvent(}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ Size\ n,\ const\ Date\&\ d)\ const\ \{}}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ return\ }}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ ConstantLossLatentmodel<copulaPolicy>::probsBeingNthEvent(n,\ d);}}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\}}}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_loss_model_a74d120cd6073910368151490081fedac}{defaultCorrelation}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ jName)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_a21018a103e011428082f5697486c2e5d}{ConstantLossLatentmodel<copulaPolicy>::defaultCorrelation}}(d,\ iName,\ jName);}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_loss_model_aa2cdc1e96a656e2a84db7ac855abf906}{probAtLeastNEvents}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_default_latent_model_af683416c9c109efaaa58f51e72224fa0}{ConstantLossLatentmodel<copulaPolicy>::probAtLeastNEvents}}(n,\ d);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_constant_loss_model_a5197eb8424577e18f970a4764ca8f3dc}{expectedRecovery}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_default_prob_key}{DefaultProbKey}}\&\ k)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ConstantLossLatentmodel<copulaPolicy>::expectedRecovery(d,\ iName,\ k);}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ resetModel()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ the\ default\ latent\ model\ we\ derive\ from}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ DefaultLatentModel<copulaPolicy>::resetBasket(}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DefaultLossModel::basket\_.currentLink());\ \textcolor{comment}{//\ forces\ interface}}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00164\ \ \ \ \ \};}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \}}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

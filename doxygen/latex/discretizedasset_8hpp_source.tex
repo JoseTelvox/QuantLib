@@ -1,0 +1,187 @@
+\doxysection{discretizedasset.\+hpp}
+\hypertarget{discretizedasset_8hpp_source}{}\label{discretizedasset_8hpp_source}\index{ql/discretizedasset.hpp@{ql/discretizedasset.hpp}}
+\mbox{\hyperlink{discretizedasset_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2001,\ 2002,\ 2003\ Sadruddin\ Rejeb}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2004,\ 2005,\ 2006\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ quantlib\_discretized\_asset\_hpp}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ quantlib\_discretized\_asset\_hpp}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{exercise_8hpp}{ql/exercise.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{comparison_8hpp}{ql/math/comparison.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{numericalmethod_8hpp}{ql/numericalmethod.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{class\ }DiscretizedAsset\ \{}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ DiscretizedAsset()}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ :\ latestPreAdjustment\_(\mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}}),}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ latestPostAdjustment\_(\mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}})\ \{\}}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \string~DiscretizedAsset()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ time()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ time\_;\ \}}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\&\ time()\ \{\ \textcolor{keywordflow}{return}\ time\_;\ \}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ values()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ values\_;\ \}}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ values()\ \{\ \textcolor{keywordflow}{return}\ values\_;\ \}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Lattice>\&\ method()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ method\_;}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ initialize(\textcolor{keyword}{const}\ ext::shared\_ptr<Lattice>\&,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t);}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ rollback(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ to);}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ partialRollback(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ to);}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ presentValue();}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a564cea41e833b0f86e4bbbfca26274bc}{reset}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size)\ =\ 0;}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_af9d63f3511be393f92de7770fe2b058f}{preAdjustValues}}();}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a0c3c8bdd418e754442145a8346bc0bce}{postAdjustValues}}();}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a35b681c10038f1f62bad25e9b4915c4b}{adjustValues}}()\ \{}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_af9d63f3511be393f92de7770fe2b058f}{preAdjustValues}}();}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a0c3c8bdd418e754442145a8346bc0bce}{postAdjustValues}}();}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ std::vector<Time>\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a387fb8413f6892687f001d0091fcc2ce}{mandatoryTimes}}()\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum\ class}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_ae818ed5af32e6c027454bcc19a4abb4f}{CouponAdjustment}}\ \{\ pre,\ post\ \};}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a36eb67653a2ca130274fbcdbf89deb59}{isOnTime}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_ae760c4f8673c95ebeda43f7bef83e12a}{preAdjustValuesImpl}}()\ \{\}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a977eeb69773ccb7e8dc16fc7d61f678c}{postAdjustValuesImpl}}()\ \{\}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ time\_;}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ latestPreAdjustment\_,\ latestPostAdjustment\_;}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ values\_;}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Lattice>\ method\_;}
+\DoxyCodeLine{00143\ \ \ \ \ \};}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keyword}{class\ }DiscretizedDiscountBond\ :\ \textcolor{keyword}{public}\ DiscretizedAsset\ \{}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ DiscretizedDiscountBond()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_discount_bond_a0ccee6b495fee361d9ea5c8e9b603939}{reset}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size)\textcolor{keyword}{\ override\ }\{\ values\_\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(size,\ 1.0);\ \}}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ std::vector<Time>\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_discount_bond_ab44a8224498f9f63b387379974e648fc}{mandatoryTimes}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ std::vector<Time>();\ \}}
+\DoxyCodeLine{00152\ \ \ \ \ \};}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keyword}{class\ }DiscretizedOption\ :\ \textcolor{keyword}{public}\ DiscretizedAsset\ \{}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ DiscretizedOption(ext::shared\_ptr<DiscretizedAsset>\ underlying,}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Exercise::Type\ exerciseType,}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Time>\ exerciseTimes)}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ :\ underlying\_(std::move(underlying)),\ exerciseType\_(exerciseType),}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ exerciseTimes\_(std::move(exerciseTimes))\ \{\}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_option_ae5c07005ba73043492e1c9443d84c14e}{reset}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ std::vector<Time>\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_option_a9eca7fbea61dd9099ea7ff9c99111bf0}{mandatoryTimes}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_option_a029f5811e35280143586dd0bbcbefd02}{postAdjustValuesImpl}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ applyExerciseCondition();}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ ext::shared\_ptr<DiscretizedAsset>\ underlying\_;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ Exercise::Type\ exerciseType\_;}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ std::vector<Time>\ exerciseTimes\_;}
+\DoxyCodeLine{00176\ \ \ \ \ \};}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ DiscretizedAsset::initialize(}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Lattice>\&\ method,}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ method\_\ =\ method;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ method\_-\/>initialize(*\textcolor{keyword}{this},\ t);}
+\DoxyCodeLine{00187\ \ \ \ \ \}}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ DiscretizedAsset::rollback(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ to)\ \{}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ method\_-\/>rollback(*\textcolor{keyword}{this},\ to);}
+\DoxyCodeLine{00191\ \ \ \ \ \}}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ DiscretizedAsset::partialRollback(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ to)\ \{}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ method\_-\/>partialRollback(*\textcolor{keyword}{this},\ to);}
+\DoxyCodeLine{00195\ \ \ \ \ \}}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ DiscretizedAsset::presentValue()\ \{}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ method\_-\/>presentValue(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00199\ \ \ \ \ \}}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_af9d63f3511be393f92de7770fe2b058f}{DiscretizedAsset::preAdjustValues}}()\ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!close\_enough(time(),latestPreAdjustment\_))\ \{}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_ae760c4f8673c95ebeda43f7bef83e12a}{preAdjustValuesImpl}}();}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ latestPreAdjustment\_\ =\ time();}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00206\ \ \ \ \ \}}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a0c3c8bdd418e754442145a8346bc0bce}{DiscretizedAsset::postAdjustValues}}()\ \{}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!close\_enough(time(),latestPostAdjustment\_))\ \{}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a977eeb69773ccb7e8dc16fc7d61f678c}{postAdjustValuesImpl}}();}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ latestPostAdjustment\_\ =\ time();}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00213\ \ \ \ \ \}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a36eb67653a2ca130274fbcdbf89deb59}{DiscretizedAsset::isOnTime}}(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_time_grid}{TimeGrid}}\&\ grid\ =\ method()-\/>timeGrid();}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ close\_enough(grid[grid.\mbox{\hyperlink{class_quant_lib_1_1_time_grid_ac95c7456057a0627560e9c9a7548939e}{index}}(t)],time());}
+\DoxyCodeLine{00218\ \ \ \ \ \}}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_option_ae5c07005ba73043492e1c9443d84c14e}{DiscretizedOption::reset}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size)\ \{}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(method()\ ==\ underlying\_-\/>method(),}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}option\ and\ underlying\ were\ initialized\ on\ "{}}}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}different\ methods"{}});}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ values\_\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(size,\ 0.0);}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_discretized_asset_a35b681c10038f1f62bad25e9b4915c4b}{adjustValues}}();}
+\DoxyCodeLine{00227\ \ \ \ \ \}}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00229\ \ \ \ \ \textcolor{keyword}{inline}\ std::vector<Time>\ \mbox{\hyperlink{class_quant_lib_1_1_discretized_option_a9eca7fbea61dd9099ea7ff9c99111bf0}{DiscretizedOption::mandatoryTimes}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ std::vector<Time>\ times\ =\ underlying\_-\/>mandatoryTimes();}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ discard\ negative\ times...}}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ i\ =\ std::find\_if(exerciseTimes\_.begin(),\ exerciseTimes\_.end(),}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [](\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\{\ return\ t\ >=\ 0.0;\ \});}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ and\ add\ the\ positive\ ones}}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ times.insert(times.end(),\ i,\ exerciseTimes\_.end());}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ times;}
+\DoxyCodeLine{00237\ \ \ \ \ \}}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ DiscretizedOption::applyExerciseCondition()\ \{}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<values\_.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ i++)}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ values\_[i]\ =\ std::max(underlying\_-\/>values()[i],\ values\_[i]);}
+\DoxyCodeLine{00242\ \ \ \ \ \}}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00245\ \}}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

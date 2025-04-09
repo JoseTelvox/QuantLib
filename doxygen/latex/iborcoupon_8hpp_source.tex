@@ -1,0 +1,165 @@
+\doxysection{iborcoupon.\+hpp}
+\hypertarget{iborcoupon_8hpp_source}{}\label{iborcoupon_8hpp_source}\index{ql/cashflows/iborcoupon.hpp@{ql/cashflows/iborcoupon.hpp}}
+\mbox{\hyperlink{iborcoupon_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2007,\ 2011\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2007\ Giorgio\ Facchinetti}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2007\ Cristina\ Duminuco}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ Copyright\ (C)\ 2007\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ Copyright\ (C)\ 2017\ Joseph\ Jeisman}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ Copyright\ (C)\ 2017\ Fabrice\ Lecuyer}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00013\ \textcolor{comment}{}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#ifndef\ quantlib\_ibor\_coupon\_hpp}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ quantlib\_ibor\_coupon\_hpp}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{floatingratecoupon_8hpp}{ql/cashflows/floatingratecoupon.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iborindex_8hpp}{ql/indexes/iborindex.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{singleton_8hpp}{ql/patterns/singleton.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{schedule_8hpp}{ql/time/schedule.hpp}}>}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{optional_8hpp}{ql/optional.hpp}}>}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keyword}{class\ }IborCoupon\ :\ \textcolor{keyword}{public}\ FloatingRateCoupon\ \{}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ IborCoupon(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ paymentDate,}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nominal,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ startDate,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ endDate,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a5bd01399d26793b2d33d7fda1b7c2972}{fixingDays}},}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<IborIndex>\&\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a633b38b802194cab11151d273375b28c}{index}},}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a1b7a794e6101afb7c3abac1e048c5bd9}{gearing}}\ =\ 1.0,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a9e3b8c6e6822bb248556c3b041eab229}{spread}}\ =\ 0.0,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodStart\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodEnd\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_aae98ff6468452fe4c07dde9978c6193c}{dayCounter}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}(),}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a10851788351436765f2df0f633af99b3}{isInArrears}}\ =\ \textcolor{keyword}{false},}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_coupon_a6278162ff5d79ca19655c7fbc4b702ca}{exCouponDate}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}());}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<IborIndex>\&\ iborIndex()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ iborIndex\_;\ \}}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ hasFixed()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_a09b24b94f05fc15d2e5c93da047ddb1a}{fixingDate}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ implemented\ in\ order\ to\ manage\ the\ case\ of\ par\ coupon}}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_aaaaea98381ae46af47229a65cc194b18}{indexFixing}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setPricer(\textcolor{keyword}{const}\ ext::shared\_ptr<FloatingRateCouponPricer>\&)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_a57b109d699e0683c67e3716c471342b9}{fixingValueDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_a0f019818aae5403445ff722a89a34b5b}{fixingMaturityDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_a5fcecbc4f3609131b06d943cf27901f5}{fixingEndDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_a8f7762ea444723a58039f52e73a9c644}{spanningTimeIndexMaturity}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_a89dc219b376aaaa0e329a9056da0c3bb}{spanningTime}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }IborCouponPricer;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ ext::shared\_ptr<IborIndex>\ iborIndex\_;}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ fixingDate\_;}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ computed\ by\ coupon\ pricer\ (depending\ on\ par\ coupon\ flag)\ and\ stored\ here}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ initializeCachedData()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \textcolor{keywordtype}{bool}\ cachedDataIsInitialized\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ fixingValueDate\_,\ fixingEndDate\_,\ fixingMaturityDate\_;}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ spanningTime\_,\ spanningTimeIndexMaturity\_;}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ IborCoupon::Settings\ forward\ declaration}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_1_1_settings}{Settings}};}
+\DoxyCodeLine{00105\ \ \ \ \ \};}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_1_1_settings}{IborCoupon::Settings}}\ :\ \textcolor{keyword}{public}\ Singleton<IborCoupon::Settings>\ \{}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Singleton<IborCoupon::Settings>;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ Settings()\ =\ default;}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ void\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_1_1_settings_aff71f34dd810cc7983ca26cfdefa2b01}{createAtParCoupons}}();}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ void\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_1_1_settings_a1f5aa3f0477a11cdb8f18b874b697cb5}{createIndexedCoupons}}();}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ bool\ \mbox{\hyperlink{class_quant_lib_1_1_ibor_coupon_1_1_settings_aadaaf8009157dab08253635e0c7bbfa4}{usingAtParCoupons}}()\ const;}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00127\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#ifndef\ QL\_USE\_INDEXED\_COUPON}}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ bool\ usingAtParCoupons\_\ =\ true;}
+\DoxyCodeLine{00129\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ bool\ usingAtParCoupons\_\ =\ false;}
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00132\ \ \ \ \ \};}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00135\ \ \ \ \ class\ IborLeg\ \{}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ IborLeg(\mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\ schedule,\ ext::shared\_ptr<IborIndex>\ index);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ IborLeg\&\ withNotionals(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notional);}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ IborLeg\&\ withNotionals(\textcolor{keyword}{const}\ std::vector<Real>\&\ notionals);}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ IborLeg\&\ withPaymentDayCounter(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ IborLeg\&\ withPaymentAdjustment(\mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}});}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ IborLeg\&\ withPaymentLag(\mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ lag);}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ IborLeg\&\ withPaymentCalendar(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&);}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ IborLeg\&\ withFixingDays(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ fixingDays);}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ IborLeg\&\ withFixingDays(\textcolor{keyword}{const}\ std::vector<Natural>\&\ fixingDays);}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ IborLeg\&\ withGearings(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ gearing);}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ IborLeg\&\ withGearings(\textcolor{keyword}{const}\ std::vector<Real>\&\ gearings);}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ IborLeg\&\ withSpreads(\mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ spread);}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ IborLeg\&\ withSpreads(\textcolor{keyword}{const}\ std::vector<Spread>\&\ spreads);}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ IborLeg\&\ withCaps(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ cap);}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ IborLeg\&\ withCaps(\textcolor{keyword}{const}\ std::vector<Rate>\&\ caps);}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ IborLeg\&\ withFloors(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ floor);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ IborLeg\&\ withFloors(\textcolor{keyword}{const}\ std::vector<Rate>\&\ floors);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ IborLeg\&\ inArrears(\textcolor{keywordtype}{bool}\ flag\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ IborLeg\&\ withZeroPayments(\textcolor{keywordtype}{bool}\ flag\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ IborLeg\&\ withExCouponPeriod(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&,}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&,}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}},}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ endOfMonth\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ IborLeg\&\ withIndexedCoupons(ext::optional<bool>\ b\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ IborLeg\&\ withAtParCoupons(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ \mbox{\hyperlink{namespace_quant_lib_a14f786c47ee979097c448d96b2defaab}{Leg}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\ schedule\_;}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ ext::shared\_ptr<IborIndex>\ index\_;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ std::vector<Real>\ notionals\_;}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ paymentDayCounter\_;}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ paymentAdjustment\_\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}};}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ paymentLag\_\ =\ 0;}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\ paymentCalendar\_;}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ std::vector<Natural>\ fixingDays\_;}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ std::vector<Real>\ gearings\_;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ std::vector<Spread>\ spreads\_;}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ std::vector<Rate>\ caps\_,\ floors\_;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ inArrears\_\ =\ \textcolor{keyword}{false},\ zeroPayments\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\ exCouponPeriod\_;}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\ exCouponCalendar\_;}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ exCouponAdjustment\_\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881a6a9f8f55985b149ed0c336c23bf03667}{Unadjusted}};}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ exCouponEndOfMonth\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ ext::optional<bool>\ useIndexedCoupons\_;}
+\DoxyCodeLine{00182\ \ \ \ \ \};}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \}}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

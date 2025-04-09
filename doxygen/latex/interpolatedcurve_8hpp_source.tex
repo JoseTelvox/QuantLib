@@ -1,0 +1,133 @@
+\doxysection{interpolatedcurve.\+hpp}
+\hypertarget{interpolatedcurve_8hpp_source}{}\label{interpolatedcurve_8hpp_source}\index{ql/termstructures/interpolatedcurve.hpp@{ql/termstructures/interpolatedcurve.hpp}}
+\mbox{\hyperlink{interpolatedcurve_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2009\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_interpolated\_curve\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_interpolated\_curve\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{interpolation_8hpp}{ql/math/interpolation.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{date_8hpp}{ql/time/date.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{daycounter_8hpp}{ql/time/daycounter.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Interpolator>}
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keyword}{class\ }InterpolatedCurve\ \{}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \string~InterpolatedCurve()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ InterpolatedCurve(std::vector<Time>\ times,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ data,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Interpolator\&\ i\ =\ Interpolator())}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ :\ times\_(std::move(times)),\ data\_(std::move(data)),\ interpolator\_(i)\ \{\}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ InterpolatedCurve(std::vector<Time>\ times,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Interpolator\&\ i\ =\ Interpolator())}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ :\ times\_(std::move(times)),\ data\_(times\_.size()),\ interpolator\_(i)\ \{\}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ InterpolatedCurve(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Interpolator\&\ i\ =\ Interpolator())}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ :\ times\_(n),\ data\_(n),\ interpolator\_(i)\ \{\}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ InterpolatedCurve(\textcolor{keyword}{const}\ Interpolator\&\ i\ =\ Interpolator())}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ :\ interpolator\_(i)\ \{\}}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ InterpolatedCurve(\textcolor{keyword}{const}\ InterpolatedCurve\&\ c)}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ :\ times\_(c.times\_),\ data\_(c.data\_),\ interpolator\_(c.interpolator\_)\ \{}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ setupInterpolation();}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ InterpolatedCurve\&\ operator=(\textcolor{keyword}{const}\ InterpolatedCurve\&\ c)\ \{}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ times\_\ =\ c.times\_;}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ data\_\ =\ c.data\_;}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ interpolator\_\ =\ c.interpolator\_;}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ setupInterpolation();}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ InterpolatedCurve(InterpolatedCurve\&\&\ c)\ noexcept}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ :\ times\_(std::move(c.times\_)),\ data\_(std::move(c.data\_)),\ interpolator\_(std::move(c.interpolator\_))\ \{}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ setupInterpolation();}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ InterpolatedCurve\&\ operator=(InterpolatedCurve\&\&\ c)\ \textcolor{keyword}{noexcept}\ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ times\_\ =\ std::move(c.times\_);}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ data\_\ =\ std::move(c.data\_);}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ interpolator\_\ =\ std::move(c.interpolator\_);}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ setupInterpolation();}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setupTimes(\textcolor{keyword}{const}\ std::vector<Date>\&\ dates,}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ referenceDate,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter)\ \{}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ times\_.resize(dates.size());}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ times\_[0]\ =\ dayCounter.\mbox{\hyperlink{class_quant_lib_1_1_day_counter_ae714645789e0daadefad81c135c03ffe}{yearFraction}}(referenceDate,\ dates[0]);}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 1;\ i\ <\ dates.size();\ i++)\ \{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(dates[i]\ >\ dates[i-\/1],}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}dates\ not\ sorted:\ "{}}\ <<\ dates[i]\ <<\ \textcolor{stringliteral}{"{}\ passed\ after\ "{}}\ <<\ dates[i-\/1]);}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ times\_[i]\ =\ dayCounter.\mbox{\hyperlink{class_quant_lib_1_1_day_counter_ae714645789e0daadefad81c135c03ffe}{yearFraction}}(referenceDate,\ dates[i]);}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(!close(this-\/>times\_[i],\ this-\/>times\_[i-\/1]),}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}two\ passed\ dates\ ("{}}\ <<\ dates[i-\/1]\ <<\ \textcolor{stringliteral}{"{}\ and\ "{}}\ <<\ dates[i]}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{})\ correspond\ to\ the\ same\ time\ "{}}}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}under\ this\ curve's\ day\ count\ convention\ ("{}}\ <<\ dayCounter\ <<\ \textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setupInterpolation()\ \{}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\_\ =\ interpolator\_.interpolate(times\_.begin(),}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ times\_.end(),}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_.begin());}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Time>\ times\_;}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Real>\ data\_;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{class_quant_lib_1_1_interpolation}{Interpolation}}\ interpolation\_;}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ Interpolator\ interpolator\_;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Usually,\ the\ maximum\ date\ is\ the\ one\ corresponding\ to\ the}}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ last\ node.\ However,\ it\ might\ happen\ that\ a\ bit\ of}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ extrapolation\ is\ used\ by\ construction;\ for\ instance,\ when\ a}}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ curve\ is\ bootstrapped\ and\ the\ last\ relevant\ date\ for\ an}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ instrument\ is\ after\ the\ corresponding\ pillar.}}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ We\ provide\ here\ a\ slot\ to\ store\ this\ information,\ so\ that}}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ it's\ available\ to\ all\ derived\ classes\ (we\ should\ have}}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ probably\ done\ the\ same\ with\ the\ dates\_\ vector,\ but\ moving}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ it\ here\ might\ not\ be\ entirely\ backwards-\/compatible).}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ maxDate\_;}
+\DoxyCodeLine{00137\ \ \ \ \ \};}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \}}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00142\ }
+
+\end{DoxyCode}

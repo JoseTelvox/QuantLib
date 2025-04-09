@@ -1,0 +1,230 @@
+\doxysection{piecewiseyieldcurve.\+hpp}
+\hypertarget{piecewiseyieldcurve_8hpp_source}{}\label{piecewiseyieldcurve_8hpp_source}\index{ql/termstructures/yield/piecewiseyieldcurve.hpp@{ql/termstructures/yield/piecewiseyieldcurve.hpp}}
+\mbox{\hyperlink{piecewiseyieldcurve_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2005,\ 2006,\ 2007,\ 2008\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2007,\ 2008,\ 2009\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2007\ Chris\ Kenyon}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_piecewise\_yield\_curve\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_piecewise\_yield\_curve\_hpp}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lazyobject_8hpp}{ql/patterns/lazyobject.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iterativebootstrap_8hpp}{ql/termstructures/iterativebootstrap.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{localbootstrap_8hpp}{ql/termstructures/localbootstrap.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{bootstraptraits_8hpp}{ql/termstructures/yield/bootstraptraits.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{class\ }MultiCurveSensitivities;}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class\ }Traits,\ \textcolor{keyword}{class\ }Interpolator,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }Bootstrap\ =\ \mbox{\hyperlink{class_quant_lib_1_1_iterative_bootstrap}{IterativeBootstrap}}>}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{class\ }PiecewiseYieldCurve}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ Traits::template\ curve<Interpolator>::type,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ LazyObject\ \{}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ Traits::template\ curve<Interpolator>::type\ base\_curve;}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ PiecewiseYieldCurve<Traits,Interpolator,Bootstrap>\ this\_curve;}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ Traits\ traits\_type;}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ Interpolator\ interpolator\_type;}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ Bootstrap<this\_curve>\ bootstrap\_type;}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ PiecewiseYieldCurve(}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ referenceDate,}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ instruments,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\&\ jumps\ =\ \{\},}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ jumpDates\ =\ \{\},}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Interpolator\&\ i\ =\ \{\},}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_type\ bootstrap\ =\ \{\})}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ :\ base\_curve(referenceDate,\ dayCounter,\ jumps,\ jumpDates,\ i),}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ instruments\_(std::move(instruments)),\ accuracy\_(1.0e-\/12),}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ bootstrap\_(std::move(bootstrap))\ \{}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_.setup(\textcolor{keyword}{this});}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ PiecewiseYieldCurve(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ referenceDate,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ instruments,}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Interpolator\&\ i,}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_type\ bootstrap\ =\ bootstrap\_type())}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ :\ base\_curve(}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ referenceDate,\ dayCounter,\ \{\},\ \{\},\ i),}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ instruments\_(std::move(instruments)),\ accuracy\_(1.0e-\/12),}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ bootstrap\_(std::move(bootstrap))\ \{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_.setup(\textcolor{keyword}{this});}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ PiecewiseYieldCurve(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ referenceDate,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ instruments,}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_type\ bootstrap)}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ :\ base\_curve(referenceDate,}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dayCounter),}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ instruments\_(std::move(instruments)),\ accuracy\_(1.0e-\/12),}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ bootstrap\_(std::move(bootstrap))\ \{}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_.setup(\textcolor{keyword}{this});}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ PiecewiseYieldCurve(}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ settlementDays,}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ calendar,}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ instruments,}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\&\ jumps\ =\ \{\},}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ jumpDates\ =\ \{\},}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Interpolator\&\ i\ =\ \{\},}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_type\ bootstrap\ =\ \{\})}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ :\ base\_curve(settlementDays,\ calendar,\ dayCounter,\ jumps,\ jumpDates,\ i),}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ instruments\_(std::move(instruments)),\ accuracy\_(1.0e-\/12),}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ bootstrap\_(std::move(bootstrap))\ \{}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_.setup(\textcolor{keyword}{this});}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ PiecewiseYieldCurve(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ settlementDays,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ calendar,}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ instruments,}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Interpolator\&\ i,}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_type\ bootstrap\ =\ bootstrap\_type())}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ :\ base\_curve(settlementDays,}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calendar,}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dayCounter,}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\},}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{\},}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i),}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ instruments\_(std::move(instruments)),\ accuracy\_(1.0e-\/12),}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ bootstrap\_(std::move(bootstrap))\ \{}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_.setup(\textcolor{keyword}{this});}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ PiecewiseYieldCurve(}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ settlementDays,}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&\ calendar,}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\&}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ instruments,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dayCounter,}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ bootstrap\_type\&\ bootstrap)}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ :\ base\_curve(settlementDays,\ calendar,\ dayCounter),}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ instruments\_(instruments),}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ accuracy\_(1.0e-\/12),\ bootstrap\_(bootstrap)\ \{}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ bootstrap\_.setup(\textcolor{keyword}{this});}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ maxDate()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ times()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ dates()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ data()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ std::vector<std::pair<Date,\ Real>\ >\ nodes()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_piecewise_yield_curve_ae55738a59107e37a042a0f3a6112f99c}{update}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ performCalculations()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ methods}}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discountImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ data\ members}}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ instruments\_;}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\_;}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bootstrapper\ classes\ are\ declared\ as\ friend\ to\ manipulate}}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ curve\ data.\ They\ might\ be\ passed\ the\ data\ instead,\ but}}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ it\ would\ increase\ the\ complexity-\/-\/-\/which\ is\ high\ enough}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ already.}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }MultiCurveSensitivities;}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Bootstrap<this\_curve>;}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_bootstrap_error}{BootstrapError}}<this\_curve>\ ;}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_penalty_function}{PenaltyFunction}}<this\_curve>;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ Bootstrap<this\_curve>\ bootstrap\_;}
+\DoxyCodeLine{00192\ \ \ \ \ \};}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ I,\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }B>}
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ PiecewiseYieldCurve<C,I,B>::maxDate()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ base\_curve::maxDate();}
+\DoxyCodeLine{00201\ \ \ \ \ \}}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ I,\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }B>}
+\DoxyCodeLine{00204\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ std::vector<Time>\&\ PiecewiseYieldCurve<C,I,B>::times()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ base\_curve::times();}
+\DoxyCodeLine{00207\ \ \ \ \ \}}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ I,\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }B>}
+\DoxyCodeLine{00210\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ std::vector<Date>\&\ PiecewiseYieldCurve<C,I,B>::dates()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ base\_curve::dates();}
+\DoxyCodeLine{00213\ \ \ \ \ \}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ I,\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }B>}
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ std::vector<Real>\&\ PiecewiseYieldCurve<C,I,B>::data()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ base\_curve::data();}
+\DoxyCodeLine{00219\ \ \ \ \ \}}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ I,\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }B>}
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{keyword}{inline}\ std::vector<std::pair<Date,\ Real>\ >}
+\DoxyCodeLine{00223\ \ \ \ \ PiecewiseYieldCurve<C,I,B>::nodes()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ base\_curve::nodes();}
+\DoxyCodeLine{00226\ \ \ \ \ \}}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ I,\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }B>}
+\DoxyCodeLine{00229\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_piecewise_yield_curve_ae55738a59107e37a042a0f3a6112f99c}{PiecewiseYieldCurve<C,I,B>::update}}()\ \{}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ it\ dispatches\ notifications\ only\ if\ (!calculated\_\ \&\&\ !frozen\_)}}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_adee2bf49be5c4c78736be293321a856d}{LazyObject::update}}();}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ do\ not\ use\ base\_curve::update()\ as\ it\ would\ always\ notify\ observers}}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TermStructure::update()\ update\ part}}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (this-\/>moving\_)}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>updated\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \ \ \ \ \}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ I,\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }B>}
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00244\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ PiecewiseYieldCurve<C,I,B>::discountImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ base\_curve::discountImpl(t);}
+\DoxyCodeLine{00247\ \ \ \ \ \}}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ I,\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }B>}
+\DoxyCodeLine{00250\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ PiecewiseYieldCurve<C,I,B>::performCalculations()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ just\ delegate\ to\ the\ bootstrapper}}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ bootstrap\_.calculate();}
+\DoxyCodeLine{00253\ \ \ \ \ \}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \}}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

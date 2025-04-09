@@ -1,0 +1,314 @@
+\doxysection{mc\+\_\+discr\+\_\+arith\+\_\+av\+\_\+price\+\_\+heston.\+hpp}
+\hypertarget{mc__discr__arith__av__price__heston_8hpp_source}{}\label{mc__discr__arith__av__price__heston_8hpp_source}\index{ql/pricingengines/asian/mc\_discr\_arith\_av\_price\_heston.hpp@{ql/pricingengines/asian/mc\_discr\_arith\_av\_price\_heston.hpp}}
+\mbox{\hyperlink{mc__discr__arith__av__price__heston_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00012\ \textcolor{comment}{}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#ifndef\ quantlib\_mc\_discrete\_arithmetic\_average\_price\_asian\_heston\_engine\_hpp}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#define\ quantlib\_mc\_discrete\_arithmetic\_average\_price\_asian\_heston\_engine\_hpp}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{exercise_8hpp}{ql/exercise.hpp}}>}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{analytic__discr__geom__av__price__heston_8hpp}{ql/experimental/asian/analytic\_discr\_geom\_av\_price\_heston.hpp}}>}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{mc__discr__geom__av__price__heston_8hpp}{ql/pricingengines/asian/mc\_discr\_geom\_av\_price\_heston.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{mcdiscreteasianenginebase_8hpp}{ql/pricingengines/asian/mcdiscreteasianenginebase.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{hestonprocess_8hpp}{ql/processes/hestonprocess.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class\ }RNG\ =\ \mbox{\hyperlink{namespace_quant_lib_a68b9aaf5f0c17983506b1a1db8575ab0}{PseudoRandom}},}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }S\ =\ \mbox{\hyperlink{namespace_quant_lib_ae2e788da35d2b866040a03b96227ee6e}{Statistics}},\ \textcolor{keyword}{class\ }P\ =\ \mbox{\hyperlink{class_quant_lib_1_1_heston_process}{HestonProcess}}>}
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keyword}{class\ }MCDiscreteArithmeticAPHestonEngine}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ MCDiscreteAveragingAsianEngineBase<MultiVariate,RNG,S>\ \{}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ MCDiscreteAveragingAsianEngineBase<MultiVariate,RNG,S>::path\_generator\_type\ path\_generator\_type;}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ MCDiscreteAveragingAsianEngineBase<MultiVariate,RNG,S>::path\_pricer\_type\ path\_pricer\_type;}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ MCDiscreteAveragingAsianEngineBase<MultiVariate,RNG,S>::stats\_type\ stats\_type;}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructor}}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ MCDiscreteArithmeticAPHestonEngine(}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<P>\&\ process,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antitheticVariate,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxSamples,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed,}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeStepsPerYear\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ controlVariate\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ ext::shared\_ptr<path\_pricer\_type>\ pathPricer()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Use\ the\ experimental\ analytic\ geometric\ asian\ option\ as\ a\ control\ variate.}}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ ext::shared\_ptr<path\_pricer\_type>\ controlPathPricer()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ ext::shared\_ptr<PricingEngine>\ controlPricingEngine()\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<P>\ process\ =\ ext::dynamic\_pointer\_cast<P>(this-\/>process\_);}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(process,\ \textcolor{stringliteral}{"{}Heston-\/like\ process\ required"{}});}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<PricingEngine>(\textcolor{keyword}{new}}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_analytic_discrete_geometric_average_price_asian_heston_engine}{AnalyticDiscreteGeometricAveragePriceAsianHestonEngine}}(process));}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00080\ \ \ \ \ \};}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class\ }RNG\ =\ \mbox{\hyperlink{namespace_quant_lib_a68b9aaf5f0c17983506b1a1db8575ab0}{PseudoRandom}},}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }S\ =\ \mbox{\hyperlink{namespace_quant_lib_ae2e788da35d2b866040a03b96227ee6e}{Statistics}},\ \textcolor{keyword}{class\ }P\ =\ \mbox{\hyperlink{class_quant_lib_1_1_heston_process}{HestonProcess}}>}
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{keyword}{class\ }MakeMCDiscreteArithmeticAPHestonEngine\ \{}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ MakeMCDiscreteArithmeticAPHestonEngine(ext::shared\_ptr<P>\ process);}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ named\ parameters}}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine\&\ withSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples);}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine\&\ withAbsoluteTolerance(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance);}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine\&\ withMaxSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples);}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine\&\ withSeed(\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed);}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine\&\ withAntitheticVariate(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine\&\ withSteps(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps);}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine\&\ withStepsPerYear(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps);}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine\&\ withControlVariate(\textcolor{keywordtype}{bool}\ b\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ conversion\ to\ pricing\ engine}}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ ext::shared\_ptr<PricingEngine>()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ ext::shared\_ptr<P>\ process\_;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antithetic\_\ =\ \textcolor{keyword}{false},\ controlVariate\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples\_,\ maxSamples\_,\ steps\_,\ stepsPerYear\_;}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance\_;}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\_\ =\ 0;}
+\DoxyCodeLine{00105\ \ \ \ \ \};}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keyword}{class\ }ArithmeticAPOHestonPathPricer\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_path_pricer}{PathPricer}}<MultiPath>\ \{}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ ArithmeticAPOHestonPathPricer(Option::Type\ type,}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discount,}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Size>\ fixingIndices,}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ runningSum\ =\ 0.0,}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ pastFixings\ =\ 0);}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator()(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_multi_path}{MultiPath}}\&\ multiPath)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_plain_vanilla_payoff}{PlainVanillaPayoff}}\ payoff\_;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discount\_;}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ std::vector<Size>\ fixingIndices\_;}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ runningSum\_;}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ pastFixings\_;}
+\DoxyCodeLine{00124\ \ \ \ \ \};}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00131\ \ \ \ \ MCDiscreteArithmeticAPHestonEngine<RNG,S,P>::MCDiscreteArithmeticAPHestonEngine(}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<P>\&\ process,}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ antitheticVariate,}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredSamples,}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ requiredTolerance,}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxSamples,}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed,}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps,}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeStepsPerYear,}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ controlVariate)}
+\DoxyCodeLine{00141\ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_m_c_discrete_averaging_asian_engine_base}{MCDiscreteAveragingAsianEngineBase}}<\mbox{\hyperlink{struct_quant_lib_1_1_multi_variate}{MultiVariate}},RNG,S>(process,}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ false,}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ antitheticVariate,}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ controlVariate,}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ requiredSamples,}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ requiredTolerance,}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxSamples,}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seed,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeSteps,}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeStepsPerYear)\ \{}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(timeSteps\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}()\ ||\ timeStepsPerYear\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}both\ time\ steps\ and\ time\ steps\ per\ year\ were\ provided"{}});}
+\DoxyCodeLine{00153\ \ \ \ \ \}}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keyword}{inline}\ ext::shared\_ptr<}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ MCDiscreteArithmeticAPHestonEngine<RNG,S,P>::path\_pricer\_type>}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ MCDiscreteArithmeticAPHestonEngine<RNG,S,P>::pathPricer()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Keep\ track\ of\ the\ fixing\ indices,\ the\ path\ pricer\ will\ need\ to\ sum\ only\ these}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ TimeGrid\ timeGrid\ =\ this-\/>timeGrid();}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ std::vector<Time>\ fixingTimes\ =\ timeGrid.mandatoryTimes();}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ std::vector<Size>\ fixingIndexes;}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ fixingIndexes.reserve(fixingTimes.size());}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ fixingTime\ :\ fixingTimes)\ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ fixingIndexes.push\_back(timeGrid.closestIndex(fixingTime));}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ ext::shared\_ptr<PlainVanillaPayoff>\ payoff\ =}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<PlainVanillaPayoff>(}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.payoff);}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(payoff,\ \textcolor{stringliteral}{"{}non-\/plain\ payoff\ given"{}});}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ ext::shared\_ptr<EuropeanExercise>\ exercise\ =}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<EuropeanExercise>(}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.exercise);}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(exercise,\ \textcolor{stringliteral}{"{}wrong\ exercise\ given"{}});}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ ext::shared\_ptr<P>\ process\ =}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<P>(this-\/>process\_);}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(process,\ \textcolor{stringliteral}{"{}Heston\ like\ process\ required"{}});}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<\textcolor{keyword}{typename}}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ MCDiscreteArithmeticAPHestonEngine<RNG,S,P>::path\_pricer\_type>(}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_arithmetic_a_p_o_heston_path_pricer}{ArithmeticAPOHestonPathPricer}}(}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>optionType(),}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>strike(),}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ process-\/>riskFreeRate()-\/>discount(exercise-\/>lastDate()),}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fixingIndexes,}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.runningAccumulator,}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.pastFixings));}
+\DoxyCodeLine{00192\ \ \ \ \ \}}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00195\ \ \ \ \ \textcolor{keyword}{inline}\ ext::shared\_ptr<}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ MCDiscreteArithmeticAPHestonEngine<RNG,S,P>::path\_pricer\_type>}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ MCDiscreteArithmeticAPHestonEngine<RNG,S,P>::controlPathPricer()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Keep\ track\ of\ the\ fixing\ indices,\ the\ path\ pricer\ will\ need\ to\ prod\ only\ these}}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_time_grid}{TimeGrid}}\ timeGrid\ =\ this-\/>timeGrid();}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ std::vector<Time>\ fixingTimes\ =\ timeGrid.mandatoryTimes();}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ std::vector<Size>\ fixingIndexes;}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ fixingIndexes.reserve(fixingTimes.size());}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ fixingTime\ :\ fixingTimes)\ \{}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ fixingIndexes.push\_back(timeGrid.closestIndex(fixingTime));}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ ext::shared\_ptr<PlainVanillaPayoff>\ payoff\ =}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<PlainVanillaPayoff>(}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.payoff);}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(payoff,\ \textcolor{stringliteral}{"{}non-\/plain\ payoff\ given"{}});}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ ext::shared\_ptr<EuropeanExercise>\ exercise\ =}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<EuropeanExercise>(}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>arguments\_.exercise);}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(exercise,\ \textcolor{stringliteral}{"{}wrong\ exercise\ given"{}});}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ ext::shared\_ptr<P>\ process\ =}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<P>(this-\/>process\_);}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(process,\ \textcolor{stringliteral}{"{}Heston\ like\ process\ required"{}});}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ TODO:\ Currently\ the\ analytic\ pricer\ does\ not\ support\ seasoned\ asian}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ options\ (coming\ soon).\ Once\ that\ is\ available,\ we\ will\ be\ able\ to}}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ pass\ seasoning\ details\ to\ the\ path\ pricer\ (NB.\ NEED\ to\ pass\ them\ to}}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ analytic\ pricer\ as\ well\ in\ that\ case).}}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<\textcolor{keyword}{typename}}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ MCDiscreteArithmeticAPHestonEngine<RNG,S,P>::path\_pricer\_type>(}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_geometric_a_p_o_heston_path_pricer}{GeometricAPOHestonPathPricer}}(}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>optionType(),}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ payoff-\/>strike(),}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ process-\/>riskFreeRate()-\/>discount(exercise-\/>lastDate()),}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fixingIndexes));}
+\DoxyCodeLine{00234\ \ \ \ \ \}}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00237\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,\ S,\ P>::}}}
+\DoxyCodeLine{00238\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{\ \ \ \ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine}}(ext::shared\_ptr<P>\ process)}
+\DoxyCodeLine{00239\ \ \ \ \ :\ process\_(std::move(process)),\ samples\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ maxSamples\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ steps\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ stepsPerYear\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}>()),\ tolerance\_(\mbox{\hyperlink{class_quant_lib_1_1_null}{Null}}<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}>())\ \{\}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}\&}
+\DoxyCodeLine{00244\ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::withSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples)\ \{}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(tolerance\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}tolerance\ already\ set"{}});}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ samples\_\ =\ samples;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00249\ \ \ \ \ \}}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}\&}
+\DoxyCodeLine{00253\ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::withAbsoluteTolerance(}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tolerance)\ \{}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(samples\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ samples\ already\ set"{}});}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(RNG::allowsErrorEstimate,}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}chosen\ random\ generator\ policy\ "{}}}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}does\ not\ allow\ an\ error\ estimate"{}});}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ tolerance\_\ =\ tolerance;}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00262\ \ \ \ \ \}}
+\DoxyCodeLine{00263\ }
+\DoxyCodeLine{00264\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00265\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}\&}
+\DoxyCodeLine{00266\ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::withMaxSamples(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ samples)\ \{}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ maxSamples\_\ =\ samples;}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00269\ \ \ \ \ \}}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00271\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00272\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}\&}
+\DoxyCodeLine{00273\ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::withSeed(\mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed)\ \{}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ seed\_\ =\ seed;}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00276\ \ \ \ \ \}}
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00278\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00279\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}\&}
+\DoxyCodeLine{00280\ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::withAntitheticVariate(\textcolor{keywordtype}{bool}\ b)\ \{}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ antithetic\_\ =\ b;}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00283\ \ \ \ \ \}}
+\DoxyCodeLine{00284\ }
+\DoxyCodeLine{00285\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00286\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}\&}
+\DoxyCodeLine{00287\ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::withSteps(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps)\ \{}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(stepsPerYear\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ steps\ per\ year\ already\ set"{}});}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ steps\_\ =\ steps;}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00292\ \ \ \ \ \}}
+\DoxyCodeLine{00293\ }
+\DoxyCodeLine{00294\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00295\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}\&}
+\DoxyCodeLine{00296\ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::withStepsPerYear(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ steps)\ \{}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(steps\_\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Size>}}(),}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}number\ of\ steps\ already\ set"{}});}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ stepsPerYear\_\ =\ steps;}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00301\ \ \ \ \ \}}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}\&}
+\DoxyCodeLine{00305\ \ \ \ \ MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::withControlVariate(\textcolor{keywordtype}{bool}\ b)\ \{}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ controlVariate\_\ =\ b;}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00308\ \ \ \ \ \}}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ RNG,\ \textcolor{keyword}{class}\ S,\ \textcolor{keyword}{class}\ P>}
+\DoxyCodeLine{00311\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_make_m_c_discrete_arithmetic_a_p_heston_engine}{MakeMCDiscreteArithmeticAPHestonEngine<RNG,S,P>::operator}}\ ext::shared\_ptr<PricingEngine>()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<PricingEngine>(\textcolor{keyword}{new}}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_m_c_discrete_arithmetic_a_p_heston_engine}{MCDiscreteArithmeticAPHestonEngine<RNG,S,P>}}(process\_,}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ antithetic\_,}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ samples\_,}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tolerance\_,}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxSamples\_,}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ seed\_,}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ steps\_,}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ stepsPerYear\_,}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ controlVariate\_));}
+\DoxyCodeLine{00322\ \ \ \ \ \}}
+\DoxyCodeLine{00323\ \}}
+\DoxyCodeLine{00324\ }
+\DoxyCodeLine{00325\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

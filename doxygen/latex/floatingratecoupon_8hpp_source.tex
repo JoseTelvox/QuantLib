@@ -1,0 +1,138 @@
+\doxysection{floatingratecoupon.\+hpp}
+\hypertarget{floatingratecoupon_8hpp_source}{}\label{floatingratecoupon_8hpp_source}\index{ql/cashflows/floatingratecoupon.hpp@{ql/cashflows/floatingratecoupon.hpp}}
+\mbox{\hyperlink{floatingratecoupon_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2000,\ 2001,\ 2002,\ 2003\ RiskMap\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2003,\ 2004\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2003\ Nicolas\ Di\ Césaré}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ Copyright\ (C)\ 2006,\ 2007\ Cristina\ Duminuco}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ Copyright\ (C)\ 2006\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ Copyright\ (C)\ 2007\ Giorgio\ Facchinetti}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00013\ \textcolor{comment}{}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#ifndef\ quantlib\_floating\_rate\_coupon\_hpp}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ quantlib\_floating\_rate\_coupon\_hpp}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{coupon_8hpp}{ql/cashflows/coupon.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{visitor_8hpp}{ql/patterns/visitor.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lazyobject_8hpp}{ql/patterns/lazyobject.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{daycounter_8hpp}{ql/time/daycounter.hpp}}>}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{handle_8hpp}{ql/handle.hpp}}>}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_interest_rate_index}{InterestRateIndex}};}
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_yield_term_structure}{YieldTermStructure}};}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_pricer}{FloatingRateCouponPricer}};}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{class\ }FloatingRateCoupon\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_coupon_a37d50b6041a918e6422a0e0e9974ab05}{Coupon}}\ \{}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ FloatingRateCoupon(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ paymentDate,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nominal,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ startDate,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ endDate,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a5bd01399d26793b2d33d7fda1b7c2972}{fixingDays}},}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<InterestRateIndex>\&\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a633b38b802194cab11151d273375b28c}{index}},}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a1b7a794e6101afb7c3abac1e048c5bd9}{gearing}}\ =\ 1.0,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a9e3b8c6e6822bb248556c3b041eab229}{spread}}\ =\ 0.0,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodStart\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodEnd\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_aae98ff6468452fe4c07dde9978c6193c}{dayCounter}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}(),}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a10851788351436765f2df0f633af99b3}{isInArrears}}\ =\ \textcolor{keyword}{false},}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_coupon_a6278162ff5d79ca19655c7fbc4b702ca}{exCouponDate}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}());}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a3f7ee3568dc84eb3d5a4f167a7db5d76}{performCalculations}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_aa1ac510c7ebc2cc0f8ab5906ed911049}{amount}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a5ae0817af91111a7748e787463f25297}{rate}}()\ *\ \mbox{\hyperlink{class_quant_lib_1_1_coupon_a971dd3951a6fca68e16d4c00fccd2eab}{accrualPeriod}}()\ *\ nominal();\ \}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a5ae0817af91111a7748e787463f25297}{rate}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ price(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ discountingCurve)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_aae98ff6468452fe4c07dde9978c6193c}{dayCounter}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ dayCounter\_;\ \}}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a31376566a50354d7d6e58e76ebd24193}{accruedAmount}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<InterestRateIndex>\&\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a633b38b802194cab11151d273375b28c}{index}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a5bd01399d26793b2d33d7fda1b7c2972}{fixingDays}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ fixingDays\_;\ \}}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a16703eb6819bfdda25a86c97e7776358}{fixingDate}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a1b7a794e6101afb7c3abac1e048c5bd9}{gearing}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ gearing\_;\ \}}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a9e3b8c6e6822bb248556c3b041eab229}{spread}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ spread\_;\ \}}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a49e3fcc138f632ad605486cb4756074e}{indexFixing}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a90978da4260ed35edc96450c3704b46f}{convexityAdjustment}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a0d35e4e06f2e1b31e23e461dfa3a4812}{adjustedFixing}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a10851788351436765f2df0f633af99b3}{isInArrears}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ isInArrears\_;\ \}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ setPricer(\textcolor{keyword}{const}\ ext::shared\_ptr<FloatingRateCouponPricer>\&);}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ ext::shared\_ptr<FloatingRateCouponPricer>\ pricer()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a901ee61ae4fafeb13eb18cd773101a55}{convexityAdjustmentImpl}}(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ fixing)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ ext::shared\_ptr<InterestRateIndex>\ index\_;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ dayCounter\_;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ fixingDays\_;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ gearing\_;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ spread\_;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isInArrears\_;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ ext::shared\_ptr<FloatingRateCouponPricer>\ pricer\_;}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rate\_;}
+\DoxyCodeLine{00118\ \ \ \ \ \};}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ ext::shared\_ptr<InterestRateIndex>\&}
+\DoxyCodeLine{00123\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a633b38b802194cab11151d273375b28c}{FloatingRateCoupon::index}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ index\_;}
+\DoxyCodeLine{00125\ \ \ \ \ \}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a90978da4260ed35edc96450c3704b46f}{FloatingRateCoupon::convexityAdjustment}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a901ee61ae4fafeb13eb18cd773101a55}{convexityAdjustmentImpl}}(\mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a49e3fcc138f632ad605486cb4756074e}{indexFixing}}());}
+\DoxyCodeLine{00129\ \ \ \ \ \}}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a0d35e4e06f2e1b31e23e461dfa3a4812}{FloatingRateCoupon::adjustedFixing}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (\mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a5ae0817af91111a7748e787463f25297}{rate}}()-\/\mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a9e3b8c6e6822bb248556c3b041eab229}{spread}}())/\mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a1b7a794e6101afb7c3abac1e048c5bd9}{gearing}}();}
+\DoxyCodeLine{00133\ \ \ \ \ \}}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keyword}{inline}\ ext::shared\_ptr<FloatingRateCouponPricer>}
+\DoxyCodeLine{00136\ \ \ \ \ FloatingRateCoupon::pricer()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ pricer\_;}
+\DoxyCodeLine{00138\ \ \ \ \ \}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}}
+\DoxyCodeLine{00141\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a901ee61ae4fafeb13eb18cd773101a55}{FloatingRateCoupon::convexityAdjustmentImpl}}(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ fixing)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (\mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a1b7a794e6101afb7c3abac1e048c5bd9}{gearing}}()\ ==\ 0.0\ ?\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}(0.0)\ :\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}(\mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a0d35e4e06f2e1b31e23e461dfa3a4812}{adjustedFixing}}()-\/fixing));}
+\DoxyCodeLine{00143\ \ \ \ \ \}}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ FloatingRateCoupon::accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&\ v)\ \{}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}*\ v1\ =\ \textcolor{keyword}{dynamic\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_visitor}{Visitor<FloatingRateCoupon>}}*\textcolor{keyword}{>}(\&v);}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v1\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ v1-\/>visit(*\textcolor{keyword}{this});}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ Coupon::accept(v);}
+\DoxyCodeLine{00151\ \ \ \ \ \}}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \}}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

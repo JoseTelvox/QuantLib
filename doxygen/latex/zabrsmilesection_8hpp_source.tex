@@ -1,0 +1,340 @@
+\doxysection{zabrsmilesection.\+hpp}
+\hypertarget{zabrsmilesection_8hpp_source}{}\label{zabrsmilesection_8hpp_source}\index{ql/experimental/volatility/zabrsmilesection.hpp@{ql/experimental/volatility/zabrsmilesection.hpp}}
+\mbox{\hyperlink{zabrsmilesection_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Peter\ Caspers}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_zabr\_smile\_section\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_zabr\_smile\_section\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{zabr_8hpp}{ql/experimental/volatility/zabr.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackformula_8hpp}{ql/pricingengines/blackformula.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{smilesection_8hpp}{ql/termstructures/volatility/smilesection.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{smilesectionutils_8hpp}{ql/termstructures/volatility/smilesectionutils.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{actual365fixed_8hpp}{ql/time/daycounters/actual365fixed.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{using\ }std::exp;}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{comment}{//\ Evaluation\ Tags}}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}}\ \{\};}
+\DoxyCodeLine{00042\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}}\ \{\};}
+\DoxyCodeLine{00043\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}}\ \{\};}
+\DoxyCodeLine{00044\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}}\ \{\};}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>\ \textcolor{keyword}{class\ }ZabrSmileSection\ :\ \textcolor{keyword}{public}\ SmileSection\ \{}
+\DoxyCodeLine{00047\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00048\ \ \ \ \ ZabrSmileSection(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ timeToExpiry,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ forward,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ zabrParameters,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ moneyness\ =\ std::vector<Real>(),}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ fdRefinement\ =\ 5);}
+\DoxyCodeLine{00053\ \ \ \ \ ZabrSmileSection(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ forward,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ zabrParameters,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_actual365_fixed}{Actual365Fixed}}(),}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ moneyness\ =\ std::vector<Real>(),}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ fdRefinement\ =\ 5);}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minStrike()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ 0.0;\ \}}
+\DoxyCodeLine{00061\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxStrike()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}};\ \}}
+\DoxyCodeLine{00062\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ atmLevel()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ model\_-\/>forward();\ \}}
+\DoxyCodeLine{00063\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}}
+\DoxyCodeLine{00064\ \ \ \ \ optionPrice(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ Option::Type\ type\ =\ Option::Call,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount\ =\ 1.0)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ optionPrice(strike,\ type,\ discount,\ Evaluation());}
+\DoxyCodeLine{00066\ \ \ \ \ \}}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ ext::shared\_ptr<ZabrModel>\ model()\ \{\ \textcolor{keywordflow}{return}\ model\_;\ \}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00071\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ volatilityImpl(strike,\ Evaluation());}
+\DoxyCodeLine{00073\ \ \ \ \ \}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordtype}{void}\ init(\textcolor{keyword}{const}\ std::vector<Real>\ \&moneyness)\ \{}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ init(moneyness,\ Evaluation());}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ init2(Evaluation());}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ init3(Evaluation());}
+\DoxyCodeLine{00080\ \ \ \ \ \}}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keywordtype}{void}\ init(\textcolor{keyword}{const}\ std::vector<Real>\ \&moneyness,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}});}
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{keywordtype}{void}\ init(\textcolor{keyword}{const}\ std::vector<Real>\ \&moneyness,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}});}
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keywordtype}{void}\ init(\textcolor{keyword}{const}\ std::vector<Real>\ \&moneyness,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}});}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{void}\ init(\textcolor{keyword}{const}\ std::vector<Real>\ \&moneyness,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}});}
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{keywordtype}{void}\ init2(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}});}
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{keywordtype}{void}\ init2(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}});}
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keywordtype}{void}\ init2(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}});}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keywordtype}{void}\ init2(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}});}
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keywordtype}{void}\ init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}});}
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{keywordtype}{void}\ init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}});}
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keywordtype}{void}\ init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}});}
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keywordtype}{void}\ init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}});}
+\DoxyCodeLine{00093\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ optionPrice(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ Option::Type\ type,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount,}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00095\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ optionPrice(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ Option::Type\ type,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount,}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00097\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ optionPrice(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ Option::Type\ type,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount,}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00099\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ optionPrice(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ Option::Type\ type,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount,}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00101\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00102\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00103\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00104\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00105\ \ \ \ \ ext::shared\_ptr<ZabrModel>\ model\_;}
+\DoxyCodeLine{00106\ \ \ \ \ Evaluation\ evaluation\_;}
+\DoxyCodeLine{00107\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ forward\_;}
+\DoxyCodeLine{00108\ \ \ \ \ std::vector<Real>\ params\_;}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ fdRefinement\_;}
+\DoxyCodeLine{00110\ \ \ \ \ std::vector<Real>\ strikes\_,\ callPrices\_;}
+\DoxyCodeLine{00111\ \ \ \ \ ext::shared\_ptr<Interpolation>\ callPriceFct\_;}
+\DoxyCodeLine{00112\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ a\_,\ b\_;}
+\DoxyCodeLine{00113\ \};}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00116\ ZabrSmileSection<Evaluation>::ZabrSmileSection(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ timeToExpiry,}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ forward,}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ zabrParams,}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ moneyness,}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ fdRefinement)}
+\DoxyCodeLine{00121\ :\ \mbox{\hyperlink{class_quant_lib_1_1_smile_section}{SmileSection}}(timeToExpiry,\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}()),\ forward\_(forward),\ params\_(std::move(zabrParams)),}
+\DoxyCodeLine{00122\ \ \ fdRefinement\_(fdRefinement)\ \{}
+\DoxyCodeLine{00123\ \ \ \ \ init(moneyness);}
+\DoxyCodeLine{00124\ \}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00127\ ZabrSmileSection<Evaluation>::ZabrSmileSection(\textcolor{keyword}{const}\ Date\&\ d,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ forward,}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ zabrParams,}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ DayCounter\&\ dc,}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ moneyness,}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ fdRefinement)}
+\DoxyCodeLine{00133\ :\ SmileSection(d,\ dc,\ Date()),\ forward\_(forward),\ params\_(std::move(zabrParams)),}
+\DoxyCodeLine{00134\ \ \ fdRefinement\_(fdRefinement)\ \{}
+\DoxyCodeLine{00135\ \ \ \ \ init(moneyness);}
+\DoxyCodeLine{00136\ \}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00139\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init(\textcolor{keyword}{const}\ std::vector<Real>\ \&,}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}})\ \{}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ model\_\ =\ ext::make\_shared<ZabrModel>(}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ exerciseTime(),\ forward\_,\ params\_[0],\ params\_[1],}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ params\_[2],\ params\_[3],\ params\_[4]);}
+\DoxyCodeLine{00145\ \}}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00148\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init(\textcolor{keyword}{const}\ std::vector<Real>\ \&a,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}})\ \{}
+\DoxyCodeLine{00150\ \ \ \ \ init(a,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}}());}
+\DoxyCodeLine{00151\ \}}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00154\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init(\textcolor{keyword}{const}\ std::vector<Real>\ \&moneyness,}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}})\ \{}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(params\_.size()\ >=\ 5,}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}zabr\ expects\ 5\ parameters\ (alpha,beta,nu,rho,gamma)\ but\ ("{}}}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ params\_.size()\ <<\ \textcolor{stringliteral}{"{})\ given"{}});}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ model\_\ =\ ext::make\_shared<ZabrModel>(}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ exerciseTime(),\ forward\_,\ params\_[0],\ params\_[1],}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ params\_[2],\ params\_[3],\ params\_[4]);}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \ \ \textcolor{comment}{//\ set\ up\ strike\ grid\ for\ local\ vol\ or\ full\ fd\ flavour\ of\ this\ section}}
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{comment}{//\ this\ is\ shared\ with\ SmileSectionUtils\ -\/\ unify\ later\ ?}}
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ defaultMoney[]\ =\ \{}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ 0.0,\ 0.01,\ 0.05,\ 0.10,\ 0.25,\ 0.40,\ 0.50,\ 0.60,\ 0.70,\ 0.80,\ 0.90,}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ 1.0,\ 1.25,\ 1.5,\ \ 1.75,\ 2.0,\ \ 5.0,\ \ 7.5,\ \ 10.0,\ 15.0,\ 20.0\};}
+\DoxyCodeLine{00170\ \ \ \ \ std::vector<Real>\ tmp;}
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keywordflow}{if}\ (moneyness.empty())}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ tmp\ =\ std::vector<Real>(defaultMoney,\ defaultMoney\ +\ 21);}
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ tmp\ =\ std::vector<Real>(moneyness);}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00176\ \ \ \ \ strikes\_.clear();\ \textcolor{comment}{//\ should\ not\ be\ necessary,\ anyway}}
+\DoxyCodeLine{00177\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lastF\ =\ 0.0;}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keywordtype}{bool}\ firstStrike\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ i\ :\ tmp)\ \{}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ f\ =\ i\ *\ forward\_;}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (f\ >\ 0.0)\ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!firstStrike)\ \{}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 1;\ j\ <=\ fdRefinement\_;\ ++j)\ \{}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strikes\_.push\_back(lastF\ +}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ((\textcolor{keywordtype}{double})j)\ *\ (f\ -\/\ lastF)\ /}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (fdRefinement\_\ +\ 1));}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ firstStrike\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ lastF\ =\ f;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ strikes\_.push\_back(f);}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00193\ \ \ \ \ \}}
+\DoxyCodeLine{00194\ \}}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00197\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init(\textcolor{keyword}{const}\ std::vector<Real>\ \&moneyness,}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}})\ \{}
+\DoxyCodeLine{00199\ \ \ \ \ init(moneyness,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}}());}
+\DoxyCodeLine{00200\ \}}
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00202\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00203\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init2(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}})\ \{\}}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00206\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init2(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}})\ \{\}}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00209\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init2(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}})\ \{}
+\DoxyCodeLine{00210\ \ \ \ \ callPrices\_\ =\ model\_-\/>fdPrice(strikes\_);}
+\DoxyCodeLine{00211\ \}}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00214\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init2(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}})\ \{}
+\DoxyCodeLine{00215\ \ \ \ \ callPrices\_.resize(strikes\_.size());}
+\DoxyCodeLine{00216\ \textcolor{preprocessor}{\#pragma\ omp\ parallel\ for}}
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{long}\ i\ =\ 0;\ i\ <\ (long)strikes\_.size();\ i++)\ \{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ callPrices\_[i]\ =\ model\_-\/>fullFdPrice(strikes\_[i]);}
+\DoxyCodeLine{00219\ \ \ \ \ \}}
+\DoxyCodeLine{00220\ \}}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00223\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}})\ \{\}}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00226\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}})\ \{\}}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00229\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}})\ \{}
+\DoxyCodeLine{00230\ \ \ \ \ strikes\_.insert(strikes\_.begin(),\ 0.0);}
+\DoxyCodeLine{00231\ \ \ \ \ callPrices\_.insert(callPrices\_.begin(),\ forward\_);}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \ \ \ \ callPriceFct\_\ =\ ext::shared\_ptr<Interpolation>(\textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_cubic_interpolation}{CubicInterpolation}}(}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ strikes\_.begin(),\ strikes\_.end(),\ callPrices\_.begin(),}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_cubic_interpolation_a6897ea07ce6993b4df934091a3723d28aaa6b6cbb8010b02172412742c21ce2d7}{CubicInterpolation::Spline}},\ \textcolor{keyword}{true},\ \mbox{\hyperlink{class_quant_lib_1_1_cubic_interpolation_ae300e9cdeef2bc60889b474f01eae4c2af4b281a5218c4674a7539bf071bfca0d}{CubicInterpolation::SecondDerivative}},}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ 0.0,\ \mbox{\hyperlink{class_quant_lib_1_1_cubic_interpolation_ae300e9cdeef2bc60889b474f01eae4c2af4b281a5218c4674a7539bf071bfca0d}{CubicInterpolation::SecondDerivative}},\ 0.0));}
+\DoxyCodeLine{00237\ \ \ \ \ \textcolor{comment}{//\ callPriceFct\_\ =}}
+\DoxyCodeLine{00238\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ ext::shared\_ptr<Interpolation>(new\ LinearInterpolation(}}
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ strikes\_.begin(),\ strikes\_.end(),\ callPrices\_.begin()));}}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \ \ \ \ callPriceFct\_-\/>enableExtrapolation();}
+\DoxyCodeLine{00242\ }
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{comment}{//\ on\ the\ right\ side\ we\ extrapolate\ exponetially\ (because\ spline}}
+\DoxyCodeLine{00244\ \ \ \ \ \textcolor{comment}{//\ does\ not\ make\ sense)}}
+\DoxyCodeLine{00245\ \ \ \ \ \textcolor{comment}{//\ we\ precompute\ the\ necessary\ parameters\ here}}
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ eps\ =\ 1E-\/5;\ \textcolor{comment}{//\ gap\ for\ first\ derivative\ computation}}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0\ =\ (*callPriceFct\_)(strikes\_.back());}
+\DoxyCodeLine{00249\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0p\ =\ ((*callPriceFct\_)(strikes\_.back()\ -\/\ eps)\ -\/\ c0)\ /\ eps;}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \ \ a\_\ =\ c0p\ /\ c0;}
+\DoxyCodeLine{00252\ \ \ \ \ b\_\ =\ std::log(c0)\ +\ a\_\ *\ strikes\_.back();}
+\DoxyCodeLine{00253\ \}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00256\ \textcolor{keywordtype}{void}\ ZabrSmileSection<Evaluation>::init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}})\ \{}
+\DoxyCodeLine{00257\ \ \ \ \ init3(\mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}}());}
+\DoxyCodeLine{00258\ \}}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00261\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}}
+\DoxyCodeLine{00262\ ZabrSmileSection<Evaluation>::optionPrice(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,\ Option::Type\ type,}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount,}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00265\ \ \ \ \ \textcolor{keywordflow}{return}\ SmileSection::optionPrice(strike,\ type,\ discount);}
+\DoxyCodeLine{00266\ \}}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00268\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00269\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ ZabrSmileSection<Evaluation>::optionPrice(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike,\ Option::Type\ type,}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount,}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00272\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespace_quant_lib_acf8dfb8e43d3908d96e687d0e54a17e9}{bachelierBlackFormula}}(}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ type,\ strike,\ forward\_,}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ model\_-\/>normalVolatility(strike)\ *\ std::sqrt(exerciseTime()),\ discount);}
+\DoxyCodeLine{00275\ \}}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00278\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ ZabrSmileSection<Evaluation>::optionPrice(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ Option::Type\ type,}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount,}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00281\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ call\ =\ strike\ <=\ strikes\_.back()\ ?\ (*callPriceFct\_)(strike)}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ :\ exp(-\/a\_\ *\ strike\ +\ b\_);}
+\DoxyCodeLine{00283\ \ \ \ \ \textcolor{keywordflow}{if}\ (type\ ==\ Option::Call)}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ call\ *\ discount;}
+\DoxyCodeLine{00285\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (call\ -\/\ (forward\_\ -\/\ strike))\ *\ discount;}
+\DoxyCodeLine{00287\ \}}
+\DoxyCodeLine{00288\ }
+\DoxyCodeLine{00289\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00290\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ ZabrSmileSection<Evaluation>::optionPrice(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,\ Option::Type\ type,}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ discount,}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00293\ \ \ \ \ \textcolor{keywordflow}{return}\ optionPrice(strike,\ type,\ discount,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}}());}
+\DoxyCodeLine{00294\ \}}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00297\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}}
+\DoxyCodeLine{00298\ ZabrSmileSection<Evaluation>::volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_lognormal}{ZabrShortMaturityLognormal}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00300\ \ \ \ \ strike\ =\ std::max(1E-\/6,\ strike);}
+\DoxyCodeLine{00301\ \ \ \ \ \textcolor{keywordflow}{return}\ model\_-\/>lognormalVolatility(strike);}
+\DoxyCodeLine{00302\ \}}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00305\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}}
+\DoxyCodeLine{00306\ ZabrSmileSection<Evaluation>::volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00308\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ impliedVol\ =\ 0.0;}
+\DoxyCodeLine{00309\ \ \ \ \ \textcolor{keywordflow}{try}\ \{}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ Option::Type\ type;}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (strike\ >=\ model\_-\/>forward())}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ type\ =\ Option::Call;}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ type\ =\ Option::Put;}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ impliedVol\ =}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ab7dc9597aa22d082d8e1d78b027afef7}{blackFormulaImpliedStdDev}}(type,\ strike,\ model\_-\/>forward(),}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionPrice(strike,\ type,\ 1.0),\ 1.0)\ /}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ \ std::sqrt(exerciseTime());}
+\DoxyCodeLine{00319\ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (...)\ \{}
+\DoxyCodeLine{00320\ \ \ \ \ \}}
+\DoxyCodeLine{00321\ \ \ \ \ \textcolor{keywordflow}{return}\ impliedVol;}
+\DoxyCodeLine{00322\ \}}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00325\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ ZabrSmileSection<Evaluation>::volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_local_volatility}{ZabrLocalVolatility}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00327\ \ \ \ \ \textcolor{keywordflow}{return}\ volatilityImpl(strike,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}}());}
+\DoxyCodeLine{00328\ \}}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \textcolor{keyword}{template}\ <\textcolor{keyword}{typename}\ Evaluation>}
+\DoxyCodeLine{00331\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ ZabrSmileSection<Evaluation>::volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike,}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_full_fd}{ZabrFullFd}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00333\ \ \ \ \ \textcolor{keywordflow}{return}\ volatilityImpl(strike,\ \mbox{\hyperlink{struct_quant_lib_1_1_zabr_short_maturity_normal}{ZabrShortMaturityNormal}}());}
+\DoxyCodeLine{00334\ \}}
+\DoxyCodeLine{00335\ \}}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

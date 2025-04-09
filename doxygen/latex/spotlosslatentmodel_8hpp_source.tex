@@ -1,0 +1,339 @@
+\doxysection{spotlosslatentmodel.\+hpp}
+\hypertarget{spotlosslatentmodel_8hpp_source}{}\label{spotlosslatentmodel_8hpp_source}\index{ql/experimental/credit/spotlosslatentmodel.hpp@{ql/experimental/credit/spotlosslatentmodel.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#ifndef\ quantlib\_spotlosslatentmodel\_hpp}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ quantlib\_spotlosslatentmodel\_hpp}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultprobabilitylatentmodel.hpp>}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ copulaPolicy>}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_aadbba4dea8b91ba2987f37bb0a7e29ee}{SpotRecoveryLatentModel}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\ \{}
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ resolve\ LM\ interface:}}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{::factorWeights}};}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{::inverseCumulativeY}};}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\mbox{\hyperlink{class_quant_lib_1_1_latent_model_af159333d575c0b252de3c71371919dc2}{::cumulativeY}};}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\mbox{\hyperlink{class_quant_lib_1_1_latent_model_aede4740894962881f21e1522349eb287}{::latentVarValue}};}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<copulaPolicy>\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f73847f26e632e54de23dc218e44875}{::integratedExpectedValue}};}
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ recoveries\_;}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ modelA\_;}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ products\ of\ default\ and\ recoveries\ factors,\ see\ refs\ ('covariances')}}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ std::vector<Real>\ crossIdiosyncFctrs\_;}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numNames\_;}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<Basket>\ basket\_;}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ ext::shared\_ptr<LMIntegration>\ integration\_;}
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<LMIntegration>\&\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_aa425c196023713f9809c02b9f896aaf5}{integration}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ integration\_;\ \}}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ copulaPolicy::initTraits\ initTraits;}
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_aadbba4dea8b91ba2987f37bb0a7e29ee}{SpotRecoveryLatentModel}}(}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ modelA,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ integralType,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ initTraits\&\ ini\ =\ initTraits()}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ resetBasket(\textcolor{keyword}{const}\ ext::shared\_ptr<Basket>\&\ basket)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ conditionalDefaultProbability(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ conditionalDefaultProbability(\mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ prob,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ conditionalDefaultProbabilityInvP(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invCumYProb,\ }
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ m)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_a29fe3902f367bfbd9f4f145f2c9caf12}{expCondRecovery}}\textcolor{comment}{/*conditionalRecovery*/}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expCondRecoveryP(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ uncondDefP,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expCondRecoveryInvPinvRR(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invUncondDefP,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invUncondRR,}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_a142667e298380df891ce027eff427b79}{conditionalRecovery}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ latentVarSample,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_acd31d1e5570a5b9a1bf5af75616bcc84}{latentRRVarValue}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ allFactors,\ }
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ conditionalExpLossRR(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ conditionalExpLossRRInv(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invP,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invRR,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_a8c19d179b30d77e39189b1d35a7296e3}{expectedLoss}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00127\ \ \ \ \ \};}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model}{SpotRecoveryLatentModel<GaussianCopulaPolicy>}}\ GaussianSpotLossLM;}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model}{SpotRecoveryLatentModel<TCopulaPolicy>}}\ TSpotLossLM;}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00137\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00138\ \ \ \ \ SpotRecoveryLatentModel<CP>::resetBasket(\textcolor{keyword}{const}\ ext::shared\_ptr<Basket>\&\ basket)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ basket\_\ =\ basket;}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ in\ the\ future\ change\ 'size'\ to\ 'liveSize'}}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(basket\_-\/>size()\ ==\ numNames\_,\ }
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Incompatible\ new\ basket\ and\ model\ sizes."{}});}
+\DoxyCodeLine{00143\ \ \ \ \ \}}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ }
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ SpotRecoveryLatentModel<CP>::conditionalDefaultProbability(}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Date\&\ date,\ }
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00150\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pDefUncond\ =}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ pool-\/>get(pool-\/>names()[iName]).}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[iName])}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(date);}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ conditionalDefaultProbability(pDefUncond,\ iName,\ mktFactors);}
+\DoxyCodeLine{00157\ \ \ \ \ \}}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ }
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ SpotRecoveryLatentModel<CP>::conditionalDefaultProbability(}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ prob,\ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00164\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ we\ can\ be\ called\ from\ the\ outside\ (from\ an\ integrable\ loss\ model)}}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ but\ we\ are\ called\ often\ at\ integration\ points.\ This\ or}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ consider\ a\ list\ of\ friends.}}
+\DoxyCodeLine{00168\ \textcolor{preprocessor}{\ \ \ \ \#if\ defined(QL\_EXTRA\_SAFETY\_CHECKS)}}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(basket\_,\ \textcolor{stringliteral}{"{}No\ portfolio\ basket\ set."{}});}
+\DoxyCodeLine{00170\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*Avoid\ redundant\ call\ to\ minimum\ value\ inversion\ (might\ be\ \(\backslash\)infty),}}
+\DoxyCodeLine{00172\ \textcolor{comment}{\ \ \ \ \ \ \ \ and\ this\ independently\ of\ the\ copula\ function.}}
+\DoxyCodeLine{00173\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (prob\ <\ 1.e-\/10)\ \textcolor{keywordflow}{return}\ 0.;\textcolor{comment}{//\ use\ library\ macro...}}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ inverseCumulativeY(prob,\ iName),\ iName,\ mktFactors);}
+\DoxyCodeLine{00177\ \ \ \ \ \}}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ }
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ SpotRecoveryLatentModel<CP>::conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invCumYProb,\ }
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ m)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00185\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sumMs\ =\ }
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ std::inner\_product(this-\/>factorWeights\_[iName].begin(),\ }
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>factorWeights\_[iName].end(),\ m.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.));}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ res\ =\ this-\/>cumulativeZ((invCumYProb\ -\/\ sumMs)\ /\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>idiosyncFctrs\_[iName]\ );}
+\DoxyCodeLine{00191\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(QL\_EXTRA\_SAFETY\_CHECKS)}}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}\ (res\ >=\ 0.\ \&\&\ res\ <=\ 1.,}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}conditional\ probability\ "{}}\ <<\ res\ <<\ \textcolor{stringliteral}{"{}out\ of\ range"{}});}
+\DoxyCodeLine{00194\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00195\ \ \ \ \ }
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{00197\ \ \ \ \ \}}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00200\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ }
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_a29fe3902f367bfbd9f4f145f2c9caf12}{SpotRecoveryLatentModel<CP>::expCondRecovery}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ }
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00204\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00205\ \textcolor{preprocessor}{\ \ \ \ \#if\ defined(QL\_EXTRA\_SAFETY\_CHECKS)}}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(mktFactors.size()\ ==\ this-\/>numFactors(),\ }
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Realization\ of\ market\ factors\ and\ latent\ model\ size\ do\ not\ match"{}});}
+\DoxyCodeLine{00208\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pDefUncond\ =}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ pool-\/>get(pool-\/>names()[iName]).}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[iName])}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(d);}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ expCondRecoveryP(pDefUncond,\ iName,\ mktFactors);}
+\DoxyCodeLine{00216\ \ \ \ \ \}}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00219\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SpotRecoveryLatentModel<CP>::expCondRecoveryP(}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ uncondDefP,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00221\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ expCondRecoveryInvPinvRR(}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ inverseCumulativeY(uncondDefP,\ iName),\ }
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ inverseCumulativeY(recoveries\_[iName],\ iName\ +\ numNames\_),}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactors);}
+\DoxyCodeLine{00226\ \ \ \ \ \}}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00229\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SpotRecoveryLatentModel<CP>::expCondRecoveryInvPinvRR(}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invUncondDefP,\ }
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invUncondRR,\ }
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00234\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ fctrs\_\ =\ factorWeights();}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \textcolor{comment}{//Size\ iRR\ =\ iName\ +\ basket\_-\/>size();//\ should\ be\ live\ pool}}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sumMs\ =}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ std::inner\_product(fctrs\_[iName].begin(),\ fctrs\_[iName].end(),\ }
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactors.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.));}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sumBetaLoss\ =\ }
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ std::inner\_product(fctrs\_[iName\ +\ numNames\_].begin(),}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fctrs\_[iName\ +\ numNames\_].end(),}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fctrs\_[iName\ +\ numNames\_].begin(),\ }
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.));}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ this-\/>cumulativeZ((sumMs\ +\ std::sqrt(1.-\/crossIdiosyncFctrs\_[iName])}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ std::sqrt(1.+modelA\_*modelA\_)\ *\ }
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondRR}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ std::sqrt(crossIdiosyncFctrs\_[iName])\ *\ }
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondDefP}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ /\ std::sqrt(1.-\/\ sumBetaLoss\ +\ modelA\_*modelA\_\ *\ }
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/crossIdiosyncFctrs\_[iName]))\ );}
+\DoxyCodeLine{00253\ \ \ \ \ \}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00256\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_a142667e298380df891ce027eff427b79}{SpotRecoveryLatentModel<CP>::conditionalRecovery}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ latentVarSample,}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00258\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ retrieve\ the\ default\ probability\ for\ this\ name}}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<DefaultProbabilityTermStructure>}}\&\ dfts\ =\ }
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ pool-\/>get(basket\_-\/>names()[iName]).defaultProbability(}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>defaultKeys()[iName]);}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pdef\ =\ dfts-\/>defaultProbability(d,\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ before\ asking\ for\ -\/\(\backslash\)infty}}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (pdef\ <\ 1.e-\/10)\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.);}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iRecovery\ =\ iName\ +\ numNames\_;\textcolor{comment}{//\ should\ be\ live\ pool}}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_af159333d575c0b252de3c71371919dc2}{cumulativeY}}(}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ (latentVarSample\ -\/\ std::sqrt(crossIdiosyncFctrs\_[iName])\ }
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(pdef,\ iName))\ /\ }
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (modelA\_\ *\ std::sqrt(1.-\/crossIdiosyncFctrs\_[iName]))}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cache\ the\ sqrts}}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cache\ this\ factor.}}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ +std::sqrt(1.+\ 1./(modelA\_*modelA\_))\ *\ }
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(recoveries\_[iName],\ iRecovery)\ }
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ ,\ iRecovery);}
+\DoxyCodeLine{00279\ \ \ \ \ \}}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00282\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_acd31d1e5570a5b9a1bf5af75616bcc84}{SpotRecoveryLatentModel<CP>::latentRRVarValue}}(}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ allFactors,\ }
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00285\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iRecovery\ =\ iName\ +\ numNames\_;\textcolor{comment}{//\ should\ be\ live\ pool}}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_aede4740894962881f21e1522349eb287}{latentVarValue}}(allFactors,\ iRecovery);}
+\DoxyCodeLine{00288\ \ \ \ \ \}}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00290\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00291\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SpotRecoveryLatentModel<CP>::conditionalExpLossRR(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00294\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pDefUncond\ =}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ \ pool-\/>get(pool-\/>names()[iName]).}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[iName])}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(d);}
+\DoxyCodeLine{00300\ }
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invP\ =\ inverseCumulativeY(pDefUncond,\ iName);}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invRR\ =\ inverseCumulativeY(recoveries\_[iName],\ iName\ +\ numNames\_);}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ conditionalExpLossRRInv(invP,\ invRR,\ iName,\ mktFactors);}
+\DoxyCodeLine{00305\ \ \ \ \ \}}
+\DoxyCodeLine{00306\ }
+\DoxyCodeLine{00307\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00308\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SpotRecoveryLatentModel<CP>::conditionalExpLossRRInv(}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invP,\ }
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invRR,}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ }
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00313\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ conditionalDefaultProbabilityInvP(invP,\ iName,\ mktFactors)}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ \ *\ (1.-\/this-\/>conditionalRecoveryInvPinvRR(invP,\ invRR,\ iName,\ mktFactors));}
+\DoxyCodeLine{00316\ \ \ \ \ \}}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00318\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00319\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_a8c19d179b30d77e39189b1d35a7296e3}{SpotRecoveryLatentModel<CP>::expectedLoss}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ }
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00321\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ basket\_-\/>pool();}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pDefUncond\ =}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ pool-\/>get(pool-\/>names()[iName]).}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(basket\_-\/>defaultKeys()[iName])}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(d);}
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invP\ =\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(pDefUncond,\ iName);}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ invRR\ =\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(recoveries\_[iName],\ iName\ +\ numNames\_);}
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f73847f26e632e54de23dc218e44875}{integratedExpectedValue}}(}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v)\{}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ conditionalExpLossRRInv(invP,\ invRR,\ iName,\ v);}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00335\ \ \ \ \ \}}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00338\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_spot_recovery_latent_model_aadbba4dea8b91ba2987f37bb0a7e29ee}{SpotRecoveryLatentModel<CP>::SpotRecoveryLatentModel}}(}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries,}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ modelA,}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ integralType,}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ CP::initTraits\&\ ini}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ )\ }
+\DoxyCodeLine{00345\ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<CP>(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}},\ ini),}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ recoveries\_(recoveries),\ }
+\DoxyCodeLine{00347\ \ \ \ \ \ \ modelA\_(modelA),}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ numNames\_(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}.size()/2),}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ integration\_(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<CP>::IntegrationFactory::}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ createLMIntegration(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[0].size(),\ integralType))}
+\DoxyCodeLine{00351\ \ \ \ \ \{}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}.size()\ \%\ 2\ ==\ 0,\ }
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Number\ of\ RR\ variables\ must\ be\ equal\ to\ number\ of\ default\ variables"{}});}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(recoveries.size()\ ==\ numNames\_\ ,\ }
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Number\ of\ recoveries\ does\ not\ match\ number\ of\ defaultable\ entities."{}});}
+\DoxyCodeLine{00356\ }
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ reminder:\ first\ betas\ are\ default,\ last\ ones\ are\ recovery\ }}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<numNames\_;\ iName++)\ }
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Corresponds\ to:\ (k\ denotes\ factor,\ i\ denotes\ modelled\ }}
+\DoxyCodeLine{00360\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ variable\ -\/default\ and\ recoveries))}}
+\DoxyCodeLine{00361\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)sum\_k\ a\string^2\_\{i,k\}\ a\string^2\_\{N+i,k\}}}
+\DoxyCodeLine{00362\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ cumul\ =\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.);}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iB=0;\ iB<\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[iName].size();\ iB++)}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ actually\ this\ size\ is\ unique}}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cumul\ +=\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[iName][iB]\ *\ }
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[iName][iB]\ *\ }
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[iName\ +\ numNames\_][iB]\ *\ }
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[iName\ +\ numNames\_][iB];}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \ \ crossIdiosyncFctrs\_.push\_back(cumul);}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00373\ }
+\DoxyCodeLine{00374\ \ \ \ \ \}}
+\DoxyCodeLine{00375\ }
+\DoxyCodeLine{00376\ }
+\DoxyCodeLine{00377\ \}}
+\DoxyCodeLine{00378\ }
+\DoxyCodeLine{00379\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

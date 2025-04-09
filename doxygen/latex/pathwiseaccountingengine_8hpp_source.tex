@@ -1,0 +1,284 @@
+\doxysection{pathwiseaccountingengine.\+hpp}
+\hypertarget{pathwiseaccountingengine_8hpp_source}{}\label{pathwiseaccountingengine_8hpp_source}\index{ql/models/marketmodels/pathwiseaccountingengine.hpp@{ql/models/marketmodels/pathwiseaccountingengine.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Mark\ Joshi}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#ifndef\ quantlib\_pathwise\_accounting\_engine\_hpp}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#define\ quantlib\_pathwise\_accounting\_engine\_hpp}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <ql/models/marketmodels/pathwisemultiproduct.hpp>}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <ql/models/marketmodels/pathwisediscounter.hpp>}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{sequencestatistics_8hpp}{ql/math/statistics/sequencestatistics.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <ql/models/marketmodels/pathwisegreeks/ratepseudorootjacobian.hpp>}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{clone_8hpp}{ql/utilities/clone.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{types_8hpp}{ql/types.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_log_normal_fwd_rate_euler}{LogNormalFwdRateEuler}};}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_market_model}{MarketModel}};}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{comment}{//\ using\ Giles-\/-\/Glasserman\ smoking\ adjoints\ method}}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{comment}{//\ note\ only\ works\ with\ displaced\ LMM,\ and\ requires\ knowledge\ of\ pseudo-\/roots\ and\ displacements\ }}
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{comment}{//\ This\ is\ tested\ in\ MarketModelTest::testPathwiseGreeks}}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{class\ }PathwiseAccountingEngine\ }
+\DoxyCodeLine{00045\ \ \ \ \ \{}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ PathwiseAccountingEngine(}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<LogNormalFwdRateEuler>\ evolver,\ \textcolor{comment}{//\ method\ relies\ heavily\ on\ LMM\ Euler}}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_clone}{Clone<MarketModelPathwiseMultiProduct>}}\&\ product,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<MarketModel>}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pseudoRootStructure,\ \textcolor{comment}{//\ we\ need\ pseudo-\/roots\ and\ displacements}}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialNumeraireValue);}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ multiplePathValues(SequenceStatisticsInc\&\ stats,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberOfPaths);}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ singlePathValues(std::vector<Real>\&\ values);}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ ext::shared\_ptr<LogNormalFwdRateEuler>\ evolver\_;}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_clone}{Clone<MarketModelPathwiseMultiProduct>}}\ product\_;}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ ext::shared\_ptr<MarketModel>\ pseudoRootStructure\_;}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialNumeraireValue\_;}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberProducts\_;}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberRates\_;}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberCashFlowTimes\_;}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberSteps\_;}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ std::vector<Real>\ currentForwards\_,\ lastForwards\_;}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ doDeflation\_;}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ workspace}}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ std::vector<Real>\ numerairesHeld\_;}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ std::vector<Size>\ numberCashFlowsThisStep\_;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ std::vector<std::vector<MarketModelPathwiseMultiProduct::CashFlow>\ >}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cashFlowsGenerated\_;}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ std::vector<MarketModelPathwiseDiscounter>\ discounters\_;}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ V\_;\ \ \textcolor{comment}{//\ one\ V\ for\ each\ product,\ with\ components\ for\ each\ time\ step\ and\ rate}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \textcolor{comment}{//\ \ \ \ \ std::vector<std::vector<std::vector<Real>\ >\ >\ V\_;\ //\ one\ V\ for\ each\ product,\ with\ components\ for\ each\ time\ step\ and\ rate}}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ LIBORRatios\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ Discounts\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number,\ goes\ from\ 0\ to\ n.\ P(t\_0,\ t\_j)}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ StepsDiscountsSquared\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ LIBORRates\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ partials\_;\ \textcolor{comment}{//\ dimensions\ are\ factor\ and\ rate}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ std::vector<Real>\ deflatorAndDerivatives\_;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ std::vector<std::vector<Size>\ >\ numberCashFlowsThisIndex\_;}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ totalCashFlowsThisIndex\_;\ \textcolor{comment}{//\ need\ product\ cross\ times\ cross\ which\ sensitivity}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ std::vector<std::vector<Size>\ >\ cashFlowIndicesThisStep\_;}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \};}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{comment}{//\ using\ Giles-\/-\/Glasserman\ smoking\ adjoints\ method}}
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{comment}{//\ note\ only\ works\ with\ displaced\ LMM,\ }}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{comment}{//\ }}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{comment}{//\ The\ method\ is\ intimately\ connected\ with\ log-\/normal\ Euler\ evolution\ }}
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{comment}{//\ }}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{comment}{//\ We\ must\ work\ with\ discretely\ compounding\ MM\ account}}
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{comment}{//\ To\ compute\ a\ vega\ means\ changing\ the\ pseudo-\/square\ root\ at\ each\ time\ step}}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{comment}{//\ So\ for\ each\ vega,\ we\ have\ a\ vector\ of\ matrices.\ So\ we\ need\ a\ vector\ of\ vectors\ of\ matrices\ to\ compute\ all\ the\ vegas.}}
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{comment}{//\ We\ do\ the\ outermost\ vector\ by\ time\ step\ and\ inner\ one\ by\ which\ vega.}}
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{comment}{//\ This\ is\ tested\ in\ MarketModelTest::testPathwiseVegas}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{keyword}{class\ }PathwiseVegasAccountingEngine\ }
+\DoxyCodeLine{00116\ \ \ \ \ \{}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ PathwiseVegasAccountingEngine(}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<LogNormalFwdRateEuler>\ evolver,\ \textcolor{comment}{//\ method\ relies\ heavily\ on\ LMM\ Euler}}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_clone}{Clone<MarketModelPathwiseMultiProduct>}}\&\ product,}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<MarketModel>}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pseudoRootStructure,\ \textcolor{comment}{//\ we\ need\ pseudo-\/roots\ and\ displacements}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Matrix>\ >\&\ VegaBumps,}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialNumeraireValue);}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ multiplePathValues(std::vector<Real>\&\ means,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\&\ errors,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberOfPaths);}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ singlePathValues(std::vector<Real>\&\ values);}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ ext::shared\_ptr<LogNormalFwdRateEuler>\ evolver\_;}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_clone}{Clone<MarketModelPathwiseMultiProduct>}}\ product\_;}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ ext::shared\_ptr<MarketModel>\ pseudoRootStructure\_;}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ std::vector<Size>\ numeraires\_;}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialNumeraireValue\_;}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberProducts\_;}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberRates\_;}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberCashFlowTimes\_;}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberSteps\_;}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberBumps\_;}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ std::vector<RatePseudoRootJacobian>\ jacobianComputers\_;}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ doDeflation\_;}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ workspace}}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ std::vector<Real>\ currentForwards\_,\ lastForwards\_;}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ std::vector<Real>\ numerairesHeld\_;}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ std::vector<Size>\ numberCashFlowsThisStep\_;}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ std::vector<std::vector<MarketModelPathwiseMultiProduct::CashFlow>\ >}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cashFlowsGenerated\_;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ std::vector<MarketModelPathwiseDiscounter>\ discounters\_;}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ V\_;\ \ \textcolor{comment}{//\ one\ V\ for\ each\ product,\ with\ components\ for\ each\ time\ step\ and\ rate}}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ LIBORRatios\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ Discounts\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number,\ goes\ from\ 0\ to\ n.\ P(t\_0,\ t\_j)}}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ StepsDiscountsSquared\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ std::vector<Real>\ stepsDiscounts\_;}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ LIBORRates\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ partials\_;\ \textcolor{comment}{//\ dimensions\ are\ factor\ and\ rate}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ vegasThisPath\_;\ \textcolor{comment}{//\ dimensions\ are\ product\ and\ which\ vega}}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ jacobiansThisPaths\_;\ \textcolor{comment}{//\ dimensions\ are\ step,\ rate\ and\ factor}}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ std::vector<Real>\ deflatorAndDerivatives\_;}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ std::vector<Real>\ fullDerivatives\_;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ std::vector<std::vector<Size>\ >\ numberCashFlowsThisIndex\_;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ totalCashFlowsThisIndex\_;\ \textcolor{comment}{//\ need\ product\ cross\ times\ cross\ which\ sensitivity}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ std::vector<std::vector<Size>\ >\ cashFlowIndicesThisStep\_;}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \};}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{comment}{//\ using\ Giles-\/-\/Glasserman\ smoking\ adjoints\ method}}
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{comment}{//\ note\ only\ works\ with\ displaced\ LMM,\ }}
+\DoxyCodeLine{00185\ \ \ \ \ \textcolor{comment}{//\ }}
+\DoxyCodeLine{00186\ \ \ \ \ \textcolor{comment}{//\ The\ method\ is\ intimately\ connected\ with\ log-\/normal\ Euler\ evolution\ }}
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{comment}{//\ }}
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{comment}{//\ We\ must\ work\ with\ discretely\ compounding\ MM\ account}}
+\DoxyCodeLine{00189\ \ \ \ \ \textcolor{comment}{//\ To\ compute\ a\ vega\ means\ changing\ the\ pseudo-\/square\ root\ at\ each\ time\ step}}
+\DoxyCodeLine{00190\ \ \ \ \ \textcolor{comment}{//\ So\ for\ each\ vega,\ we\ have\ a\ vector\ of\ matrices.\ So\ we\ need\ a\ vector\ of\ vectors\ of\ matrices\ to\ compute\ all\ the\ vegas.}}
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{comment}{//\ We\ do\ the\ outermost\ vector\ by\ time\ step\ and\ inner\ one\ by\ which\ vega.}}
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{comment}{//\ This\ implementation\ is\ different\ in\ that\ all\ the\ linear\ combinations\ by\ the\ bumps\ are\ done\ as\ late\ as\ possible,}}
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{comment}{//\ whereas\ PathwiseVegasAccountingEngine\ does\ them\ as\ early\ as\ possible.\ }}
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{comment}{//\ This\ is\ tested\ in\ MarketModelTest::testPathwiseVegas}}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ \textcolor{keyword}{class\ }PathwiseVegasOuterAccountingEngine\ }
+\DoxyCodeLine{00197\ \ \ \ \ \{}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ PathwiseVegasOuterAccountingEngine(}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<LogNormalFwdRateEuler>\ evolver,\ \textcolor{comment}{//\ method\ relies\ heavily\ on\ LMM\ Euler}}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_clone}{Clone<MarketModelPathwiseMultiProduct>}}\&\ product,}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<MarketModel>}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pseudoRootStructure,\ \textcolor{comment}{//\ we\ need\ pseudo-\/roots\ and\ displacements}}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Matrix>\ >\&\ VegaBumps,}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialNumeraireValue);}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_pathwise_vegas_outer_accounting_engine_a8abb012e75709c1e7a797a0f56d26ea1}{multiplePathValues}}(std::vector<Real>\&\ means,}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\&\ errors,}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberOfPaths);}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_pathwise_vegas_outer_accounting_engine_ae888c3266c3e83520c4d1c1660e0f685}{multiplePathValuesElementary}}(std::vector<Real>\&\ means,}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\&\ errors,}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberOfPaths);}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ singlePathValues(std::vector<Real>\&\ values);}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ ext::shared\_ptr<LogNormalFwdRateEuler>\ evolver\_;}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_clone}{Clone<MarketModelPathwiseMultiProduct>}}\ product\_;}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ ext::shared\_ptr<MarketModel>\ pseudoRootStructure\_;}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ std::vector<std::vector<Matrix>\ >\ vegaBumps\_;\ }
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ std::vector<Size>\ numeraires\_;}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ initialNumeraireValue\_;}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberProducts\_;}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberRates\_;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberCashFlowTimes\_;}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberSteps\_;}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ factors\_;}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberBumps\_;}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberElementaryVegas\_;}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ std::vector<RatePseudoRootJacobianAllElements>\ jacobianComputers\_;}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ doDeflation\_;}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ workspace}}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ std::vector<Real>\ currentForwards\_,\ lastForwards\_;}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ std::vector<Real>\ numerairesHeld\_;}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ std::vector<Size>\ numberCashFlowsThisStep\_;}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ std::vector<std::vector<MarketModelPathwiseMultiProduct::CashFlow>\ >}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cashFlowsGenerated\_;}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ std::vector<MarketModelPathwiseDiscounter>\ discounters\_;}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ V\_;\ \ \textcolor{comment}{//\ one\ V\ for\ each\ product,\ with\ components\ for\ each\ time\ step\ and\ rate}}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ LIBORRatios\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ Discounts\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number,\ goes\ from\ 0\ to\ n.\ P(t\_0,\ t\_j)}}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ StepsDiscountsSquared\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ std::vector<Real>\ stepsDiscounts\_;}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ LIBORRates\_;\ \textcolor{comment}{//\ dimensions\ are\ step\ and\ rate\ number}}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ partials\_;\ \textcolor{comment}{//\ dimensions\ are\ factor\ and\ rate}}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ std::vector<std::vector<Matrix>\ \ \ >\ elementary\_vegas\_ThisPath\_;\ \ \textcolor{comment}{//\ dimensions\ are\ product,\ step,\ \ rate\ and\ factor}}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ std::vector<std::vector<Matrix>\ >\ jacobiansThisPaths\_;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ dimensions\ are\ step,\ rate,\ rate\ and\ factor}}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ std::vector<Real>\ deflatorAndDerivatives\_;}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ std::vector<Real>\ fullDerivatives\_;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ std::vector<std::vector<Size>\ >\ numberCashFlowsThisIndex\_;}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ totalCashFlowsThisIndex\_;\ \textcolor{comment}{//\ need\ product\ cross\ times\ cross\ which\ sensitivity}}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ std::vector<std::vector<Size>\ >\ cashFlowIndicesThisStep\_;}
+\DoxyCodeLine{00270\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00271\ \textcolor{comment}{\ \ \ \ \ \ \ \ //\ experimental}}
+\DoxyCodeLine{00272\ \textcolor{comment}{}}
+\DoxyCodeLine{00273\ \textcolor{comment}{\ \ \ \ \ \ \ \ std::vector<std::vector<Real>\ >\ gaussians\_;}}
+\DoxyCodeLine{00274\ \textcolor{comment}{\ \ \ \ \ \ \ \ int\ distinguishedFactor\_;}}
+\DoxyCodeLine{00275\ \textcolor{comment}{\ \ \ \ \ \ \ \ int\ distinguishedRate\_;}}
+\DoxyCodeLine{00276\ \textcolor{comment}{\ \ \ \ \ \ \ \ int\ \ distinguishedStep\_;}}
+\DoxyCodeLine{00277\ \textcolor{comment}{}}
+\DoxyCodeLine{00278\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00279\ \ \ \ \ \};}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \}}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

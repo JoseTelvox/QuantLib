@@ -1,0 +1,330 @@
+\doxysection{globalbootstrap.\+hpp}
+\hypertarget{globalbootstrap_8hpp_source}{}\label{globalbootstrap_8hpp_source}\index{ql/termstructures/globalbootstrap.hpp@{ql/termstructures/globalbootstrap.hpp}}
+\mbox{\hyperlink{globalbootstrap_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2019\ SoftSolutions!\ S.r.l.}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_global\_bootstrap\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_global\_bootstrap\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{functional_8hpp}{ql/functional.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{linearinterpolation_8hpp}{ql/math/interpolations/linearinterpolation.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{levenbergmarquardt_8hpp}{ql/math/optimization/levenbergmarquardt.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{bootstraperror_8hpp}{ql/termstructures/bootstraperror.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{bootstraphelper_8hpp}{ql/termstructures/bootstraphelper.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{dataformatters_8hpp}{ql/utilities/dataformatters.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_additional_bootstrap_variables}{AdditionalBootstrapVariables}}\ \{}
+\DoxyCodeLine{00039\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_additional_bootstrap_variables}{\string~AdditionalBootstrapVariables}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{comment}{//\ Initialize\ variables\ to\ initial\ guesses\ and\ return\ them.}}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ initialize(\textcolor{keywordtype}{bool}\ validData)\ =\ 0;}
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{comment}{//\ Update\ variables\ to\ given\ values.}}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ update(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x)\ =\ 0;}
+\DoxyCodeLine{00045\ \};}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00074\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>\ \textcolor{keyword}{class\ }GlobalBootstrap\ \{}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ Curve::traits\_type\ Traits;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ZeroYield,\ Discount,\ ForwardRate}}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ Curve::interpolator\_type\ Interpolator;\ \textcolor{comment}{//\ Linear,\ LogLinear,\ ...}}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keyword}{typedef}\ std::function<\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(\textcolor{keyword}{const}\ std::vector<Time>\&,\ \textcolor{keyword}{const}\ std::vector<Real>\&)>}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ AdditionalPenalties;}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00081\ \ \ \ \ GlobalBootstrap(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optimizer\ =\ \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00084\ \ \ \ \ GlobalBootstrap(std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ additionalHelpers,}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::function<std::vector<Date>()>\ additionalDates,}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ AdditionalPenalties\ additionalPenalties,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optimizer\ =\ \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria\ =\ \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<AdditionalBootstrapVariables>\ additionalVariables\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00091\ \ \ \ \ GlobalBootstrap(std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ additionalHelpers,}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::function<std::vector<Date>()>\ additionalDates,}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::function<\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}()>\ additionalPenalties,}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optimizer\ =\ \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria\ =\ \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<AdditionalBootstrapVariables>\ additionalVariables\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordtype}{void}\ setup(Curve\ *ts);}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keywordtype}{void}\ calculate()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keywordtype}{void}\ initialize()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00103\ \ \ \ \ Curve\ *ts\_;}
+\DoxyCodeLine{00104\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\_;}
+\DoxyCodeLine{00105\ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optimizer\_;}
+\DoxyCodeLine{00106\ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria\_;}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ additionalHelpers\_;}
+\DoxyCodeLine{00108\ \ \ \ \ std::function<std::vector<Date>()>\ additionalDates\_;}
+\DoxyCodeLine{00109\ \ \ \ \ AdditionalPenalties\ additionalPenalties\_;}
+\DoxyCodeLine{00110\ \ \ \ \ ext::shared\_ptr<AdditionalBootstrapVariables>\ additionalVariables\_;}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{keyword}{mutable}\ \textcolor{keywordtype}{bool}\ initialized\_\ =\ \textcolor{keyword}{false},\ validCurve\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ firstHelper\_,\ numberHelpers\_;}
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ firstAdditionalHelper\_,\ numberAdditionalHelpers\_;}
+\DoxyCodeLine{00114\ \};}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \textcolor{comment}{//\ template\ definitions}}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00119\ GlobalBootstrap<Curve>::GlobalBootstrap(}
+\DoxyCodeLine{00120\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy,}
+\DoxyCodeLine{00121\ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optimizer,}
+\DoxyCodeLine{00122\ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria)}
+\DoxyCodeLine{00123\ :\ ts\_(nullptr),\ accuracy\_(accuracy),\ optimizer\_(std::move(optimizer)),}
+\DoxyCodeLine{00124\ \ \ endCriteria\_(std::move(endCriteria))\ \{\}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00127\ GlobalBootstrap<Curve>::GlobalBootstrap(}
+\DoxyCodeLine{00128\ \ \ \ \ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ additionalHelpers,}
+\DoxyCodeLine{00129\ \ \ \ \ std::function<std::vector<Date>()>\ additionalDates,}
+\DoxyCodeLine{00130\ \ \ \ \ AdditionalPenalties\ additionalPenalties,}
+\DoxyCodeLine{00131\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy,}
+\DoxyCodeLine{00132\ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optimizer,}
+\DoxyCodeLine{00133\ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria,}
+\DoxyCodeLine{00134\ \ \ \ \ ext::shared\_ptr<AdditionalBootstrapVariables>\ additionalVariables)}
+\DoxyCodeLine{00135\ :\ ts\_(nullptr),\ accuracy\_(accuracy),\ optimizer\_(std::move(optimizer)),}
+\DoxyCodeLine{00136\ \ \ endCriteria\_(std::move(endCriteria)),\ additionalHelpers\_(std::move(additionalHelpers)),}
+\DoxyCodeLine{00137\ \ \ additionalDates\_(std::move(additionalDates)),\ additionalPenalties\_(std::move(additionalPenalties)),}
+\DoxyCodeLine{00138\ \ \ additionalVariables\_(std::move(additionalVariables))\ \{\}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00141\ GlobalBootstrap<Curve>::GlobalBootstrap(}
+\DoxyCodeLine{00142\ \ \ \ \ std::vector<ext::shared\_ptr<typename\ Traits::helper>\ >\ additionalHelpers,}
+\DoxyCodeLine{00143\ \ \ \ \ std::function<std::vector<Date>()>\ additionalDates,}
+\DoxyCodeLine{00144\ \ \ \ \ std::function<\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}()>\ additionalPenalties,}
+\DoxyCodeLine{00145\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy,}
+\DoxyCodeLine{00146\ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optimizer,}
+\DoxyCodeLine{00147\ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria,}
+\DoxyCodeLine{00148\ \ \ \ \ ext::shared\_ptr<AdditionalBootstrapVariables>\ additionalVariables)}
+\DoxyCodeLine{00149\ :\ \mbox{\hyperlink{class_quant_lib_1_1_global_bootstrap}{GlobalBootstrap}}(std::move(additionalHelpers),\ std::move(additionalDates),}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ additionalPenalties}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ?\ [f=std::move(additionalPenalties)](const\ std::vector<\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}>\&,\ const\ std::vector<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}>\&)\ \{}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ f();}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ :\ AdditionalPenalties(),}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ accuracy,\ std::move(optimizer),\ std::move(endCriteria),}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::move(additionalVariables))\ \{\}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>\ \textcolor{keywordtype}{void}\ GlobalBootstrap<Curve>::setup(Curve\ *ts)\ \{}
+\DoxyCodeLine{00159\ \ \ \ \ ts\_\ =\ ts;}
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ ts\_-\/>instruments\_.size();\ ++j)}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ ts\_-\/>registerWithObservables(ts\_-\/>instruments\_[j]);}
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ additionalHelpers\_.size();\ ++j)}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ ts\_-\/>registerWithObservables(additionalHelpers\_[j]);}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \ \ \textcolor{comment}{//\ setup\ optimizer\ and\ EndCriteria}}
+\DoxyCodeLine{00166\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ accuracy\_\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}()\ ?\ accuracy\_\ :\ ts\_-\/>accuracy\_;}
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keywordflow}{if}\ (!optimizer\_)\ \{}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ optimizer\_\ =\ ext::make\_shared<LevenbergMarquardt>(accuracy,\ accuracy,\ accuracy);}
+\DoxyCodeLine{00169\ \ \ \ \ \}}
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keywordflow}{if}\ (!endCriteria\_)\ \{}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ endCriteria\_\ =\ ext::make\_shared<EndCriteria>(1000,\ 10,\ accuracy,\ accuracy,\ accuracy);}
+\DoxyCodeLine{00172\ \ \ \ \ \}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \textcolor{comment}{//\ do\ not\ initialize\ yet:\ instruments\ could\ be\ invalid\ here}}
+\DoxyCodeLine{00175\ \ \ \ \ \textcolor{comment}{//\ but\ valid\ later\ when\ bootstrapping\ is\ actually\ required}}
+\DoxyCodeLine{00176\ \}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>\ \textcolor{keywordtype}{void}\ GlobalBootstrap<Curve>::initialize()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{comment}{//\ ensure\ helpers\ are\ sorted}}
+\DoxyCodeLine{00181\ \ \ \ \ std::sort(ts\_-\/>instruments\_.begin(),\ ts\_-\/>instruments\_.end(),\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1_bootstrap_helper_sorter}{detail::BootstrapHelperSorter}}());}
+\DoxyCodeLine{00182\ \ \ \ \ std::sort(additionalHelpers\_.begin(),\ additionalHelpers\_.end(),\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1_bootstrap_helper_sorter}{detail::BootstrapHelperSorter}}());}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{comment}{//\ skip\ expired\ helpers}}
+\DoxyCodeLine{00185\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ firstDate\ =\ Traits::initialDate(ts\_);}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ firstHelper\_\ =\ 0;}
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{keywordflow}{if}\ (!ts\_-\/>instruments\_.empty())\ \{}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (firstHelper\_\ <\ ts\_-\/>instruments\_.size()\ \&\&\ ts\_-\/>instruments\_[firstHelper\_]-\/>pillarDate()\ <=\ firstDate)}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ ++firstHelper\_;}
+\DoxyCodeLine{00191\ \ \ \ \ \}}
+\DoxyCodeLine{00192\ \ \ \ \ numberHelpers\_\ =\ ts\_-\/>instruments\_.size()\ -\/\ firstHelper\_;}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{comment}{//\ skip\ expired\ additional\ helpers}}
+\DoxyCodeLine{00195\ \ \ \ \ firstAdditionalHelper\_\ =\ 0;}
+\DoxyCodeLine{00196\ \ \ \ \ \textcolor{keywordflow}{if}\ (!additionalHelpers\_.empty())\ \{}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (firstAdditionalHelper\_\ <\ additionalHelpers\_.size()\ \&\&}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ additionalHelpers\_[firstAdditionalHelper\_]-\/>pillarDate()\ <=\ firstDate)}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ ++firstAdditionalHelper\_;}
+\DoxyCodeLine{00200\ \ \ \ \ \}}
+\DoxyCodeLine{00201\ \ \ \ \ numberAdditionalHelpers\_\ =\ additionalHelpers\_.size()\ -\/\ firstAdditionalHelper\_;}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ \textcolor{comment}{//\ skip\ expired\ additional\ dates}}
+\DoxyCodeLine{00204\ \ \ \ \ std::vector<Date>\ additionalDates;}
+\DoxyCodeLine{00205\ \ \ \ \ \textcolor{keywordflow}{if}\ (additionalDates\_)}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ additionalDates\ =\ additionalDates\_();}
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keywordflow}{if}\ (!additionalDates.empty())\ \{}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ additionalDates.erase(}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ std::remove\_if(additionalDates.begin(),\ additionalDates.end(),}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [=](\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date)\ \{\ return\ date\ <=\ firstDate;\ \}),}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ additionalDates.end()}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{00213\ \ \ \ \ \}}
+\DoxyCodeLine{00214\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberAdditionalDates\ =\ additionalDates.size();}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(numberHelpers\_\ +\ numberAdditionalDates\ >=\ Interpolator::requiredPoints\ -\/\ 1,}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}not\ enough\ alive\ instruments\ ("{}}\ <<\ numberHelpers\_\ <<\ \textcolor{stringliteral}{"{})\ +\ additional\ dates\ ("{}}\ <<\ numberAdditionalDates}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{})\ =\ "{}}\ <<\ numberHelpers\_\ +\ numberAdditionalDates\ <<\ \textcolor{stringliteral}{"{}\ provided,\ "{}}}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ Interpolator::requiredPoints\ -\/\ 1\ <<\ \textcolor{stringliteral}{"{}\ required"{}});}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \textcolor{comment}{//\ calculate\ dates\ and\ times}}
+\DoxyCodeLine{00222\ \ \ \ \ std::vector<Date>\ \&dates\ =\ ts\_-\/>dates\_;}
+\DoxyCodeLine{00223\ \ \ \ \ std::vector<Time>\ \&times\ =\ ts\_-\/>times\_;}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \ \ \ \ \textcolor{comment}{//\ first\ populate\ the\ dates\ vector\ and\ make\ sure\ they\ are\ sorted\ and\ there\ are\ no\ duplicates}}
+\DoxyCodeLine{00226\ \ \ \ \ dates.clear();}
+\DoxyCodeLine{00227\ \ \ \ \ dates.push\_back(firstDate);}
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ numberHelpers\_;\ ++j)}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ dates.push\_back(ts\_-\/>instruments\_[firstHelper\_\ +\ j]-\/>pillarDate());}
+\DoxyCodeLine{00230\ \ \ \ \ dates.insert(dates.end(),\ additionalDates.begin(),\ additionalDates.end());}
+\DoxyCodeLine{00231\ \ \ \ \ std::sort(dates.begin(),\ dates.end());}
+\DoxyCodeLine{00232\ \ \ \ \ \textcolor{keyword}{auto}\ it\ =\ std::unique(dates.begin(),\ dates.end());}
+\DoxyCodeLine{00233\ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(it\ ==\ dates.end(),\ \textcolor{stringliteral}{"{}duplicate\ dates\ among\ alive\ instruments\ and\ additional\ dates"{}});}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00235\ \ \ \ \ \textcolor{comment}{//\ build\ times\ vector}}
+\DoxyCodeLine{00236\ \ \ \ \ times.clear();}
+\DoxyCodeLine{00237\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\&\ date\ :\ dates)}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ times.push\_back(ts\_-\/>timeFromReference(date));}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{comment}{//\ determine\ maxDate}}
+\DoxyCodeLine{00241\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ maxDate\ =\ dates.back();}
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ numberHelpers\_;\ ++j)\ \{}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ maxDate\ =\ std::max(ts\_-\/>instruments\_[firstHelper\_\ +\ j]-\/>latestRelevantDate(),\ maxDate);}
+\DoxyCodeLine{00244\ \ \ \ \ \}}
+\DoxyCodeLine{00245\ \ \ \ \ ts\_-\/>maxDate\_\ =\ maxDate;}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{comment}{//\ set\ initial\ guess\ only\ if\ the\ current\ curve\ cannot\ be\ used\ as\ guess}}
+\DoxyCodeLine{00248\ \ \ \ \ \textcolor{keywordflow}{if}\ (!validCurve\_\ ||\ ts\_-\/>data\_.size()\ !=\ dates.size())\ \{}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ts\_-\/>data\_[0]\ is\ the\ only\ relevant\ item,}}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ but\ reasonable\ numbers\ might\ be\ needed\ for\ the\ whole\ data\ vector}}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ because,\ e.g.,\ of\ interpolation's\ early\ checks}}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ ts\_-\/>data\_\ =\ std::vector<Real>(dates.size(),\ Traits::initialValue(ts\_));}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ validCurve\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00254\ \ \ \ \ \}}
+\DoxyCodeLine{00255\ \ \ \ \ initialized\_\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00256\ \}}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>\ \textcolor{keywordtype}{void}\ GlobalBootstrap<Curve>::calculate()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \textcolor{comment}{//\ we\ might\ have\ to\ call\ initialize\ even\ if\ the\ curve\ is\ initialized}}
+\DoxyCodeLine{00261\ \ \ \ \ \textcolor{comment}{//\ and\ not\ moving,\ just\ because\ helpers\ might\ be\ date\ relative\ and\ change}}
+\DoxyCodeLine{00262\ \ \ \ \ \textcolor{comment}{//\ with\ evaluation\ date\ change.}}
+\DoxyCodeLine{00263\ \ \ \ \ \textcolor{comment}{//\ anyway\ it\ makes\ little\ sense\ to\ use\ date\ relative\ helpers\ with\ a}}
+\DoxyCodeLine{00264\ \ \ \ \ \textcolor{comment}{//\ non-\/moving\ curve\ if\ the\ evaluation\ date\ changes}}
+\DoxyCodeLine{00265\ \ \ \ \ \textcolor{keywordflow}{if}\ (!initialized\_\ ||\ ts\_-\/>moving\_)}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ initialize();}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00268\ \ \ \ \ \textcolor{comment}{//\ setup\ helpers}}
+\DoxyCodeLine{00269\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ numberHelpers\_;\ ++j)\ \{}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<typename\ Traits::helper>\ \&helper\ =\ ts\_-\/>instruments\_[firstHelper\_\ +\ j];}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ check\ for\ valid\ quote}}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(helper-\/>quote()-\/>isValid(),\ \mbox{\hyperlink{group__manips_ga9645f8136bf2eabd3bca2955ce5be730}{io::ordinal}}(j\ +\ 1)}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ instrument\ (maturity:\ "{}}\ <<\ helper-\/>maturityDate()}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{},\ pillar:\ "{}}\ <<\ helper-\/>pillarDate()\ <<\ \textcolor{stringliteral}{"{})\ has\ an\ invalid\ quote"{}});}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ don't\ try\ this\ at\ home!}}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ This\ call\ creates\ helpers,\ and\ removes\ "{}const"{}.}}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ There\ is\ a\ significant\ interaction\ with\ observability.}}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ helper-\/>setTermStructure(\textcolor{keyword}{const\_cast<}Curve\ *\textcolor{keyword}{>}(ts\_));}
+\DoxyCodeLine{00279\ \ \ \ \ \}}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ \ \textcolor{comment}{//\ setup\ additional\ helpers}}
+\DoxyCodeLine{00282\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ numberAdditionalHelpers\_;\ ++j)\ \{}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<typename\ Traits::helper>\ \&helper\ =\ additionalHelpers\_[firstAdditionalHelper\_\ +\ j];}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(helper-\/>quote()-\/>isValid(),\ \mbox{\hyperlink{group__manips_ga9645f8136bf2eabd3bca2955ce5be730}{io::ordinal}}(j\ +\ 1)}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ additional\ instrument\ (maturity:\ "{}}\ <<\ helper-\/>maturityDate()}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{})\ has\ an\ invalid\ quote"{}});}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ helper-\/>setTermStructure(\textcolor{keyword}{const\_cast<}Curve\ *\textcolor{keyword}{>}(ts\_));}
+\DoxyCodeLine{00288\ \ \ \ \ \}}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00290\ \ \ \ \ \textcolor{comment}{//\ setup\ interpolation}}
+\DoxyCodeLine{00291\ \ \ \ \ \textcolor{keywordflow}{if}\ (!validCurve\_)\ \{}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ ts\_-\/>interpolation\_\ =}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>interpolator\_.interpolate(ts\_-\/>times\_.begin(),\ ts\_-\/>times\_.end(),\ ts\_-\/>data\_.begin());}
+\DoxyCodeLine{00294\ \ \ \ \ \}}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{comment}{//\ Setup\ initial\ guess.\ We\ have\ guesses\ for\ the\ curve\ values\ first\ (numberPillars),}}
+\DoxyCodeLine{00297\ \ \ \ \ \textcolor{comment}{//\ followed\ by\ guesses\ for\ the\ additional\ variables.}}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numberPillars\ =\ ts\_-\/>times\_.size()\ -\/\ 1;}
+\DoxyCodeLine{00299\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ additionalGuesses;}
+\DoxyCodeLine{00300\ \ \ \ \ \textcolor{keywordflow}{if}\ (additionalVariables\_)\ \{}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ additionalGuesses\ =\ additionalVariables\_-\/>initialize(validCurve\_);}
+\DoxyCodeLine{00302\ \ \ \ \ \}}
+\DoxyCodeLine{00303\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ guess(numberPillars\ +\ additionalGuesses.size());}
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ numberPillars;\ ++i)\ \{}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ just\ pass\ zero\ as\ the\ first\ alive\ helper,\ it's\ not\ used\ in\ the\ standard\ QL\ traits\ anyway}}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ ts\_-\/>data\_\ since\ Traits::guess()\ usually\ depends\ on\ previous\ values}}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ Traits::updateGuess(ts\_-\/>data\_,\ Traits::guess(i\ +\ 1,\ ts\_,\ validCurve\_,\ 0),\ i\ +\ 1);}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ guess[i]\ =\ Traits::transformInverse(ts\_-\/>data\_[i\ +\ 1],\ i\ +\ 1,\ ts\_);}
+\DoxyCodeLine{00309\ \ \ \ \ \}}
+\DoxyCodeLine{00310\ \ \ \ \ std::copy(additionalGuesses.begin(),\ additionalGuesses.end(),\ guess.begin()\ +\ numberPillars);}
+\DoxyCodeLine{00311\ }
+\DoxyCodeLine{00312\ \ \ \ \ \textcolor{comment}{//\ setup\ cost\ function}}
+\DoxyCodeLine{00313\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_simple_cost_function}{SimpleCostFunction}}\ cost([\&](\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x)\ \{}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ x\ has\ the\ same\ layout\ as\ guess\ above:\ the\ first\ numberPillars\ values\ go\ into}}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ curve,\ while\ the\ rest\ are\ new\ values\ for\ the\ additional\ variables.}}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ numberPillars;\ ++i)\ \{}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ Traits::updateGuess(ts\_-\/>data\_,\ Traits::transformDirect(x[i],\ i\ +\ 1,\ ts\_),\ i\ +\ 1);}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ ts\_-\/>interpolation\_.update();}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (additionalVariables\_)\ \{}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ additionalVariables\_-\/>update(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(x.begin()\ +\ numberPillars,\ x.end()));}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ additionalErrors;}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (additionalPenalties\_)\ \{}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ additionalErrors\ =\ additionalPenalties\_(ts\_-\/>times\_,\ ts\_-\/>data\_);}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ result(numberHelpers\_\ +\ additionalErrors.size());}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ std::transform(ts\_-\/>instruments\_.begin()\ +\ firstHelper\_,\ ts\_-\/>instruments\_.end(),}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result.begin(),}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [](\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ helper)\ \{\ return\ helper-\/>quoteError();\ \});}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ std::copy(additionalErrors.begin(),\ additionalErrors.end(),}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result.begin()\ +\ numberHelpers\_);}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00335\ \ \ \ \ \});}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \ \ \textcolor{comment}{//\ setup\ problem}}
+\DoxyCodeLine{00338\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}\ noConstraint;}
+\DoxyCodeLine{00339\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\ problem(cost,\ noConstraint,\ guess);}
+\DoxyCodeLine{00340\ }
+\DoxyCodeLine{00341\ \ \ \ \ \textcolor{comment}{//\ run\ optimization}}
+\DoxyCodeLine{00342\ \ \ \ \ EndCriteria::Type\ endType\ =\ optimizer\_-\/>minimize(problem,\ *endCriteria\_);}
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{comment}{//\ check\ the\ end\ criteria}}
+\DoxyCodeLine{00345\ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(EndCriteria::succeeded(endType),}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}global\ bootstrap\ failed\ to\ minimize\ to\ required\ accuracy:\ "{}}\ <<\ endType);}
+\DoxyCodeLine{00347\ }
+\DoxyCodeLine{00348\ \ \ \ \ \textcolor{comment}{//\ set\ valid\ flag}}
+\DoxyCodeLine{00349\ \ \ \ \ validCurve\_\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00350\ \}}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \}\ \textcolor{comment}{//\ namespace\ QuantLib}}
+\DoxyCodeLine{00353\ }
+\DoxyCodeLine{00354\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

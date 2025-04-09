@@ -1,0 +1,358 @@
+\doxysection{particleswarmoptimization.\+hpp}
+\hypertarget{particleswarmoptimization_8hpp_source}{}\label{particleswarmoptimization_8hpp_source}\index{ql/experimental/math/particleswarmoptimization.hpp@{ql/experimental/math/particleswarmoptimization.hpp}}
+\mbox{\hyperlink{particleswarmoptimization_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{Copyright\ (C)\ 2015\ Andres\ Hernandez}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{<quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{<http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#ifndef\ quantlib\_optimization\_particleswarmoptimization\_hpp}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ quantlib\_optimization\_particleswarmoptimization\_hpp}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{problem_8hpp}{ql/math/optimization/problem.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{constraint_8hpp}{ql/math/optimization/constraint.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{mt19937uniformrng_8hpp}{ql/math/randomnumbers/mt19937uniformrng.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{isotropicrandomwalk_8hpp}{ql/experimental/math/isotropicrandomwalk.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{levyflightdistribution_8hpp}{ql/experimental/math/levyflightdistribution.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{seedgenerator_8hpp}{ql/math/randomnumbers/seedgenerator.hpp}}>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <random>}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keyword}{class\ }ParticleSwarmOptimization\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{OptimizationMethod}}\ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia}{Inertia}};}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_topology}{Topology}};}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ ParticleSwarmOptimization(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Topology>\ topology,}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Inertia>\ inertia,}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c1\ =\ 2.05,}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c2\ =\ 2.05,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get());}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ ParticleSwarmOptimization(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Topology>\ topology,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Inertia>\ inertia,}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ omega,}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c1,}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c2,}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get());}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ startState(\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\ \&P,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\ \&endCriteria);}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ EndCriteria::Type\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_a9639eb90822fc91ac0d97d3f6fa279d8}{minimize}}(\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\&\ P,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ endCriteria)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ std::vector<Array>\ X\_,\ V\_,\ pBX\_,\ gBX\_;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ pBF\_,\ gBF\_;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lX\_,\ uX\_;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_,\ N\_;}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0\_,\ c1\_,\ c2\_;}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_mersenne_twister_uniform_rng}{MersenneTwisterUniformRng}}\ rng\_;}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Topology>\ topology\_;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Inertia>\ inertia\_;}
+\DoxyCodeLine{00121\ \ \ \ \ \};}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia}{ParticleSwarmOptimization::Inertia}}\ \{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }ParticleSwarmOptimization;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia}{\string~Inertia}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia_acce7660fa598fb7b27e261ad1a661c97}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ N,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\ \&endCriteria)\ =\ 0;}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia_a0bb27e39d6dba1adad3489831f690fd7}{setValues}}()\ =\ 0;}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ ParticleSwarmOptimization\ *pso\_;}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ std::vector<Array>\ *X\_,\ *V\_,\ *pBX\_,\ *gBX\_;}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ *pBF\_,\ *gBF\_;}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ *lX\_,\ *uX\_;}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ init(ParticleSwarmOptimization\ *pso)\ \{}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ pso\_\ =\ pso;}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \ \ X\_\ =\ \&pso\_-\/>X\_;}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ V\_\ =\ \&pso\_-\/>V\_;}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ pBX\_\ =\ \&pso\_-\/>pBX\_;}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ gBX\_\ =\ \&pso\_-\/>gBX\_;}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ pBF\_\ =\ \&pso\_-\/>pBF\_;}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ gBF\_\ =\ \&pso\_-\/>gBF\_;}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ lX\_\ =\ \&pso\_-\/>lX\_;}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ uX\_\ =\ \&pso\_-\/>uX\_;}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00152\ \ \ \ \ \};}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{comment}{/*\ \ \ \ \ Inertia\ is\ a\ static\ value}}
+\DoxyCodeLine{00156\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_trivial_inertia}{TrivialInertia}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia}{ParticleSwarmOptimization::Inertia}}\ \{}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_trivial_inertia_a05c28c5856bc61a645663e8fd88c79cd}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ N,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ endCriteria)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ c0\_\ =\ c0;}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ M\_\ =\ M;}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_trivial_inertia_a4081d7261f20a92e772303edd2bc3bf4}{setValues}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ M\_;\ i++)\ \{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (*V\_)[i]\ *=\ c0\_;}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0\_;}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_;}
+\DoxyCodeLine{00172\ \ \ \ \ \};}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00175\ \ \ \ \ \textcolor{comment}{/*\ \ \ \ \ Inertia\ value\ gets\ multiplied\ with\ a\ random\ number}}
+\DoxyCodeLine{00176\ \textcolor{comment}{\ \ \ \ between\ (threshold,\ 1)}}
+\DoxyCodeLine{00177\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{keyword}{class\ }SimpleRandomInertia\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia}{ParticleSwarmOptimization::Inertia}}\ \{}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ SimpleRandomInertia(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ threshold\ =\ 0.5,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ :\ threshold\_(threshold),\ rng\_(seed)\ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(threshold\_\ >=\ 0.0\ \&\&\ threshold\_\ <\ 1.0,\ \textcolor{stringliteral}{"{}Threshold\ must\ be\ a\ Real\ in\ [0,\ 1)"{}});}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_simple_random_inertia_ab4ac36b5495b250ce35e6c461557c91b}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ N,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ endCriteria)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ M\_\ =\ M;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ c0\_\ =\ c0;}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_simple_random_inertia_a0956ca06229c1caf34e79779a2d9c84a}{setValues}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ M\_;\ i++)\ \{}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ val\ =\ c0\_*(threshold\_\ +\ (1.0\ -\/\ threshold\_)*rng\_.nextReal());}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (*V\_)[i]\ *=\ val;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0\_,\ threshold\_;}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_;}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_mersenne_twister_uniform_rng}{MersenneTwisterUniformRng}}\ rng\_;}
+\DoxyCodeLine{00199\ \ \ \ \ \};}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00202\ \ \ \ \ \textcolor{comment}{/*\ \ \ \ \ Inertia\ value\ gets\ decreased\ every\ iteration\ until\ it\ reaches}}
+\DoxyCodeLine{00203\ \textcolor{comment}{\ \ \ \ a\ value\ of\ threshold\ when\ iteration\ reaches\ the\ maximum\ level}}
+\DoxyCodeLine{00204\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00205\ \ \ \ \ \textcolor{keyword}{class\ }DecreasingInertia\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia}{ParticleSwarmOptimization::Inertia}}\ \{}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ DecreasingInertia(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ threshold\ =\ 0.5)}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ :\ threshold\_(threshold)\ \{}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(threshold\_\ >=\ 0.0\ \&\&\ threshold\_\ <\ 1.0,\ \textcolor{stringliteral}{"{}Threshold\ must\ be\ a\ Real\ in\ [0,\ 1)"{}});}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_decreasing_inertia_a8f36c6e21a349383dfa0d98a273ca765}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ N,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ endCriteria)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ N\_\ =\ N;}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ c0\_\ =\ c0;}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ iteration\_\ =\ 0;}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ maxIterations\_\ =\ endCriteria.maxIterations();}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_decreasing_inertia_ab842907e34bc23a58e2f39e726b9a425}{setValues}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0\ =\ c0\_*(threshold\_\ +\ (1.0\ -\/\ threshold\_)*(maxIterations\_\ -\/\ iteration\_)\ /\ maxIterations\_);}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ M\_;\ i++)\ \{}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (*V\_)[i]\ *=\ c0;}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0\_,\ threshold\_;}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_,\ N\_,\ maxIterations\_,\ iteration\_;}
+\DoxyCodeLine{00227\ \ \ \ \ \};}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{comment}{/*\ \ \ \ Alen\ Lukic,\ Approximating\ Kinetic\ Parameters\ Using\ Particle}}
+\DoxyCodeLine{00231\ \textcolor{comment}{\ \ \ \ Swarm\ Optimization.}}
+\DoxyCodeLine{00232\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00233\ \ \ \ \ \textcolor{keyword}{class\ }AdaptiveInertia\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia}{ParticleSwarmOptimization::Inertia}}\ \{}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ AdaptiveInertia(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minInertia,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxInertia,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ sh\ =\ 5,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ sl\ =\ 2)}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ :minInertia\_(minInertia),\ maxInertia\_(maxInertia),}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ sh\_(sh),\ sl\_(sl)\ \{\};}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_adaptive_inertia_ac56d3de6618c726b842b2a61ee854f31}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ N,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ endCriteria)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ M\_\ =\ M;}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ c0\_\ =\ c0;}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ adaptiveCounter\ =\ 0;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ best\_\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}};}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ started\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_adaptive_inertia_adab9db1f2290e7e576381e0b4f29da24}{setValues}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0\_,\ best\_;}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minInertia\_,\ maxInertia\_;}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_;}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ sh\_,\ sl\_;}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ adaptiveCounter;}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ started\_;}
+\DoxyCodeLine{00254\ \ \ \ \ \};}
+\DoxyCodeLine{00255\ }
+\DoxyCodeLine{00257\ \ \ \ \ \textcolor{comment}{/*\ \ \ \ As\ long\ as\ the\ particle\ keeps\ getting\ frequent\ updates\ to\ its}}
+\DoxyCodeLine{00258\ \textcolor{comment}{\ \ \ \ personal\ best\ value,\ the\ inertia\ behaves\ like\ a\ SimpleRandomInertia,}}
+\DoxyCodeLine{00259\ \textcolor{comment}{\ \ \ \ but\ after\ a\ number\ of\ iterations\ without\ improvement,\ the\ behaviour}}
+\DoxyCodeLine{00260\ \textcolor{comment}{\ \ \ \ changes\ to\ that\ of\ a\ Levy\ flight\ \string~\ u\string^\{-\/1/\(\backslash\)alpha\}}}
+\DoxyCodeLine{00261\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00262\ \ \ \ \ \textcolor{keyword}{class\ }LevyFlightInertia\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_inertia}{ParticleSwarmOptimization::Inertia}}\ \{}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ LevyFlightInertia(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ alpha,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ threshold,}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ :rng\_(seed),\ generator\_(seed),\ flight\_(generator\_,\ \mbox{\hyperlink{class_quant_lib_1_1_levy_flight_distribution}{LevyFlightDistribution}}(1.0,\ alpha),}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1,\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(1,\ 1.0),\ seed),}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ threshold\_(threshold)\ \{\};}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_levy_flight_inertia_a9a48b67fc942a64cb3cf1015c3e178ac}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ N,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ endCriteria)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ M\_\ =\ M;}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ N\_\ =\ N;}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ c0\_\ =\ c0;}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ adaptiveCounter\_\ =\ std::vector<Size>(M\_,\ 0);}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_levy_flight_inertia_ad87ac6f5a583391002b3696373c3a55e}{setValues}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ M\_;\ i++)\ \{}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((*pBF\_)[i]\ <\ personalBestF\_[i])\ \{}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ personalBestF\_[i]\ =\ (*pBF\_)[i];}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ adaptiveCounter\_[i]\ =\ 0;}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ adaptiveCounter\_[i]++;}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (adaptiveCounter\_[i]\ <=\ threshold\_)\ \{}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Simple\ Random\ Inertia}}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (*V\_)[i]\ *=\ c0\_*(0.5\ +\ 0.5*rng\_.nextReal());}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//If\ particle\ has\ not\ found\ a\ new\ personal\ best\ after\ threshold\_\ iterations}}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//then\ trigger\ a\ Levy\ flight\ pattern\ for\ the\ speed}}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ flight\_.nextReal<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ *>(\&(*V\_)[i][0]);}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ init(\mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization}{ParticleSwarmOptimization}}*\ pso)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ \ ParticleSwarmOptimization::Inertia::init(pso);}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ personalBestF\_\ =\ *pBF\_;}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ flight\_.setDimension(N\_,\ *lX\_,\ *uX\_);}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ MersenneTwisterUniformRng\ rng\_;}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ IsotropicRandomWalk<LevyFlightDistribution,\ std::mt19937>\ flight\_;}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ Array\ personalBestF\_;}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ std::vector<Size>\ adaptiveCounter\_;}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ c0\_;}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_,\ N\_;}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ threshold\_;}
+\DoxyCodeLine{00312\ \ \ \ \ \};}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00318\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_topology}{ParticleSwarmOptimization::Topology}}\ \{}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }ParticleSwarmOptimization;}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_topology}{\string~Topology}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_topology_a75fdfdd071bc8f137c4d7155db8dcd8e}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M)\ =\ 0;}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_topology_a244dd7cc23d3fd5289ec67ab1f8b15c7}{findSocialBest}}()\ =\ 0;}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ ParticleSwarmOptimization\ *pso\_;}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ std::vector<Array>\ *X\_,\ *V\_,\ *pBX\_,\ *gBX\_;}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ *pBF\_,\ *gBF\_;}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ init(ParticleSwarmOptimization\ *pso)\ \{}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ pso\_\ =\ pso;}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ X\_\ =\ \&pso\_-\/>X\_;}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \ \ \ \ V\_\ =\ \&pso\_-\/>V\_;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \ \ \ \ pBX\_\ =\ \&pso\_-\/>pBX\_;}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ gBX\_\ =\ \&pso\_-\/>gBX\_;}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ pBF\_\ =\ \&pso\_-\/>pBF\_;}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ gBF\_\ =\ \&pso\_-\/>gBF\_;}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00340\ \ \ \ \ \};}
+\DoxyCodeLine{00341\ }
+\DoxyCodeLine{00343\ \ \ \ \ \textcolor{comment}{/*\ \ The\ global\ best\ as\ seen\ by\ each\ particle\ is\ the\ best\ from\ amongst}}
+\DoxyCodeLine{00344\ \textcolor{comment}{\ \ \ \ all\ particles}}
+\DoxyCodeLine{00345\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00346\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_global_topology}{GlobalTopology}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_topology}{ParticleSwarmOptimization::Topology}}\ \{}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_global_topology_ac316e01e408b5eec59a08711b2d35754}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M)\textcolor{keyword}{\ override\ }\{\ M\_\ =\ M;\ \}}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_global_topology_a5980d84293c5b6d5c853f887a4b0682d}{findSocialBest}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ bestF\ =\ (*pBF\_)[0];}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ bestP\ =\ 0;}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 1;\ i\ <\ M\_;\ i++)\ \{}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (bestF\ <\ (*pBF\_)[i])\ \{}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bestF\ =\ (*pBF\_)[i];}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bestP\ =\ i;}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x\ =\ (*pBX\_)[bestP];}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ M\_;\ i++)\ \{}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (i\ !=\ bestP)\ \{}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (*gBX\_)[i]\ =\ x;}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (*gBF\_)[i]\ =\ bestF;}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_;}
+\DoxyCodeLine{00369\ \ \ \ \ \};}
+\DoxyCodeLine{00370\ }
+\DoxyCodeLine{00372\ \ \ \ \ \textcolor{comment}{/*\ \ The\ global\ best\ as\ seen\ by\ each\ particle\ is\ the\ best\ from\ amongst}}
+\DoxyCodeLine{00373\ \textcolor{comment}{\ \ \ \ the\ previous\ K\ and\ next\ K\ neighbors.\ For\ particle\ I,\ the\ best\ is}}
+\DoxyCodeLine{00374\ \textcolor{comment}{\ \ \ \ then\ taken\ from\ amongst\ the\ [I\ -\/\ K,\ I\ +\ K]\ particles.}}
+\DoxyCodeLine{00375\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00376\ \ \ \ \ \textcolor{keyword}{class\ }KNeighbors\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_topology}{ParticleSwarmOptimization::Topology}}\ \{}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ KNeighbors(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ K\ =\ 1)\ :K\_(K)\ \{}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(K\ >\ 0,\ \textcolor{stringliteral}{"{}Neighbors\ need\ to\ be\ larger\ than\ 0"{}});}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_k_neighbors_a7b728a08c2f0024652ad424674920eb6}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \ \ \ \ M\_\ =\ M;}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a394b39aa396098345f86d243f207f7af}{QL\_ENSURE}}(K\_\ <\ M,\ \textcolor{stringliteral}{"{}Number\ of\ neighbors\ need\ to\ be\ smaller\ than\ total\ particles\ in\ swarm"{}});}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_k_neighbors_aad865a07ddb3bcc3bfc018e110b43314}{findSocialBest}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ K\_,\ M\_;}
+\DoxyCodeLine{00389\ \ \ \ \ \};}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00392\ \ \ \ \ \textcolor{comment}{/*\ \ H.M.\ Emara,\ \ Adaptive\ Clubs-\/based\ Particle\ Swarm\ Optimization}}
+\DoxyCodeLine{00393\ \textcolor{comment}{\ \ \ \ Each\ particle\ is\ originally\ assigned\ to\ a\ default\ number\ of\ clubs}}
+\DoxyCodeLine{00394\ \textcolor{comment}{\ \ \ \ from\ among\ the\ total\ set.\ The\ best\ as\ seen\ by\ each\ particle\ is\ the}}
+\DoxyCodeLine{00395\ \textcolor{comment}{\ \ \ \ best\ from\ amongst\ the\ clubs\ to\ which\ the\ particle\ belongs.}}
+\DoxyCodeLine{00396\ \textcolor{comment}{\ \ \ \ Underperforming\ particles\ join\ more\ clubs\ randomly\ (up\ to\ a\ maximum}}
+\DoxyCodeLine{00397\ \textcolor{comment}{\ \ \ \ number)\ to\ widen\ the\ particles\ that\ influence\ them,\ while}}
+\DoxyCodeLine{00398\ \textcolor{comment}{\ \ \ \ overperforming\ particles\ leave\ clubs\ randomly\ (down\ to\ a\ minimum}}
+\DoxyCodeLine{00399\ \textcolor{comment}{\ \ \ \ number)\ to\ avoid\ early\ convergence\ to\ local\ minima.}}
+\DoxyCodeLine{00400\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00401\ \ \ \ \ \textcolor{keyword}{class\ }ClubsTopology\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_particle_swarm_optimization_1_1_topology}{ParticleSwarmOptimization::Topology}}\ \{}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ ClubsTopology(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ defaultClubs,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ totalClubs,}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxClubs,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ minClubs,}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ resetIteration,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get());}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_clubs_topology_a1086e932f0f42019ec305916cb4584ff}{setSize}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_clubs_topology_ab3464aacbc44fd647c3f5a26569137bd}{findSocialBest}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00408\ }
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ totalClubs\_,\ maxClubs\_,\ minClubs\_,\ defaultClubs\_;}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iteration\_\ =\ 0,\ resetIteration\_;}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_;}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ std::vector<std::vector<bool>\ >\ clubs4particles\_;}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ std::vector<std::vector<bool>\ >\ particles4clubs\_;}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ std::vector<Size>\ bestByClub\_;}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ std::vector<Size>\ worstByClub\_;}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ std::uniform\_int\_distribution<QuantLib::Size>\ distribution\_;}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }param\_type\ =\ \textcolor{keyword}{decltype}(distribution\_)::param\_type;}
+\DoxyCodeLine{00420\ }
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ leaveRandomClub(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ particle,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ currentClubs);}
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ joinRandomClub(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ particle,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ currentClubs);}
+\DoxyCodeLine{00423\ \ \ \ \ \};}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \}}
+\DoxyCodeLine{00426\ }
+\DoxyCodeLine{00427\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,190 @@
+\doxysection{sviinterpolatedsmilesection.\+hpp}
+\hypertarget{sviinterpolatedsmilesection_8hpp_source}{}\label{sviinterpolatedsmilesection_8hpp_source}\index{ql/experimental/volatility/sviinterpolatedsmilesection.hpp@{ql/experimental/volatility/sviinterpolatedsmilesection.hpp}}
+\mbox{\hyperlink{sviinterpolatedsmilesection_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Peter\ Caspers}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_svi\_interpolated\_smile\_section\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_svi\_interpolated\_smile\_section\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{handle_8hpp}{ql/handle.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lazyobject_8hpp}{ql/patterns/lazyobject.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{smilesection_8hpp}{ql/termstructures/volatility/smilesection.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{sviinterpolation_8hpp}{ql/experimental/volatility/sviinterpolation.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{actual365fixed_8hpp}{ql/time/daycounters/actual365fixed.hpp}}>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_quote}{Quote}};}
+\DoxyCodeLine{00036\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_a783ec33d467688423137d8be1b50ead9}{SviInterpolatedSmileSection}}\ :\ \textcolor{keyword}{public}\ SmileSection,\ \textcolor{keyword}{public}\ LazyObject\ \{}
+\DoxyCodeLine{00037\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_a783ec33d467688423137d8be1b50ead9}{SviInterpolatedSmileSection}}(}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ optionDate,}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ forward,}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Rate>\&\ strikes,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ hasFloatingStrikes,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ atmVolatility,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\&\ volHandles,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ a,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ b,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sigma,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ m,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ aIsFixed,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ bIsFixed,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ sigmaIsFixed,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ rhoIsFixed,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ mIsFixed,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ vegaWeighted\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria\ =\ ext::shared\_ptr<EndCriteria>(),}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ method\ =\ ext::shared\_ptr<OptimizationMethod>(),}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_actual365_fixed}{Actual365Fixed}}());}
+\DoxyCodeLine{00063\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_a783ec33d467688423137d8be1b50ead9}{SviInterpolatedSmileSection}}(}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ optionDate,}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\&\ forward,}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Rate>\&\ strikes,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ hasFloatingStrikes,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\&\ atmVolatility,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Volatility>\&\ vols,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ a,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ b,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sigma,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho,}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ m,}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isAFixed,}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isBFixed,}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isSigmaFixed,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isRhoFixed,}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isMFixed,}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ vegaWeighted\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria\ =\ ext::shared\_ptr<EndCriteria>(),}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ method\ =\ ext::shared\_ptr<OptimizationMethod>(),}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ dc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_actual365_fixed}{Actual365Fixed}}());}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_ab2652b08b984443909307f5d0a727cb3}{performCalculations}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_a464e4516d105d2b317f11ed5ca3f1071}{update}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00092\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minStrike()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00093\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxStrike()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00094\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ atmLevel()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00096\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ varianceImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00097\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ a()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00101\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ b()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00102\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sigma()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00103\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00104\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ m()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00105\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rmsError()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00106\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxError()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00107\ \ \ \ \ EndCriteria::Type\ endCriteria()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_ad6156b35f9b943b3ef5224ca7b356079}{createInterpolation}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<SviInterpolation>\ sviInterpolation\_;}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_a6acac3ed9e5a6d4f3fde5e3d1b9472c8}{forward\_}};}
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ atmVolatility\_;}
+\DoxyCodeLine{00118\ \ \ \ \ std::vector<Handle<Quote>\ >\ volHandles\_;}
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Rate>\ strikes\_;}
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Rate>\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_acb2459b004920dc26c387b48d11693d3}{actualStrikes\_}};}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keywordtype}{bool}\ hasFloatingStrikes\_;}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forwardValue\_;}
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Volatility>\ vols\_;}
+\DoxyCodeLine{00127\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_ab8e6d77bdfcd9ab1dd47929cb9e6b335}{a\_}},\ b\_,\ sigma\_,\ rho\_,\ m\_;}
+\DoxyCodeLine{00129\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_aa58143eab42a52e35857737e98efedf0}{isAFixed\_}},\ isBFixed\_,\ isSigmaFixed\_,\ isRhoFixed\_,\ isMFixed\_;}
+\DoxyCodeLine{00130\ \ \ \ \ \textcolor{keywordtype}{bool}\ vegaWeighted\_;}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<EndCriteria>\ endCriteria\_;}
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<OptimizationMethod>\ method\_;}
+\DoxyCodeLine{00133\ \};}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_a464e4516d105d2b317f11ed5ca3f1071}{SviInterpolatedSmileSection::update}}()\ \{}
+\DoxyCodeLine{00136\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_adee2bf49be5c4c78736be293321a856d}{LazyObject::update}}();}
+\DoxyCodeLine{00137\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_smile_section_adecc5abf2867e2291878329b0256b08a}{SmileSection::update}}();}
+\DoxyCodeLine{00138\ \}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::volatilityImpl(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ strike)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00141\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keywordflow}{return}\ (*sviInterpolation\_)(strike,\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00143\ \}}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::a()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00146\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keywordflow}{return}\ sviInterpolation\_-\/>a();}
+\DoxyCodeLine{00148\ \}}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::b()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00151\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{keywordflow}{return}\ sviInterpolation\_-\/>b();}
+\DoxyCodeLine{00153\ \}}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::sigma()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00156\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keywordflow}{return}\ sviInterpolation\_-\/>sigma();}
+\DoxyCodeLine{00158\ \}}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::rho()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00161\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{keywordflow}{return}\ sviInterpolation\_-\/>rho();}
+\DoxyCodeLine{00163\ \}}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::m()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00166\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keywordflow}{return}\ sviInterpolation\_-\/>m();}
+\DoxyCodeLine{00168\ \}}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::rmsError()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00171\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keywordflow}{return}\ sviInterpolation\_-\/>rmsError();}
+\DoxyCodeLine{00173\ \}}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::maxError()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00176\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00177\ \ \ \ \ \textcolor{keywordflow}{return}\ sviInterpolation\_-\/>maxError();}
+\DoxyCodeLine{00178\ \}}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \textcolor{keyword}{inline}\ EndCriteria::Type\ SviInterpolatedSmileSection::endCriteria()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00181\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keywordflow}{return}\ sviInterpolation\_-\/>endCriteria();}
+\DoxyCodeLine{00183\ \}}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::minStrike()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00186\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00187\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_acb2459b004920dc26c387b48d11693d3}{actualStrikes\_}}.front();}
+\DoxyCodeLine{00188\ \}}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::maxStrike()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00191\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_svi_interpolated_smile_section_acb2459b004920dc26c387b48d11693d3}{actualStrikes\_}}.back();}
+\DoxyCodeLine{00193\ \}}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SviInterpolatedSmileSection::atmLevel()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00196\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keywordflow}{return}\ forwardValue\_;}
+\DoxyCodeLine{00198\ \}}
+\DoxyCodeLine{00199\ \}}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

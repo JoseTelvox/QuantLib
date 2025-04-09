@@ -1,0 +1,173 @@
+\doxysection{fdmndimsolver.\+hpp}
+\hypertarget{fdmndimsolver_8hpp_source}{}\label{fdmndimsolver_8hpp_source}\index{ql/methods/finitedifferences/solvers/fdmndimsolver.hpp@{ql/methods/finitedifferences/solvers/fdmndimsolver.hpp}}
+\mbox{\hyperlink{fdmndimsolver_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2011\ Klaus\ Spanderen}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#ifndef\ quantlib\_fdm\_n\_dim\_solver\_hpp}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#define\ quantlib\_fdm\_n\_dim\_solver\_hpp}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{lazyobject_8hpp}{ql/patterns/lazyobject.hpp}}>}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{multicubicspline_8hpp}{ql/math/interpolations/multicubicspline.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{finitedifferencemodel_8hpp}{ql/methods/finitedifferences/finitedifferencemodel.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdmmesher_8hpp}{ql/methods/finitedifferences/meshers/fdmmesher.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdmsolverdesc_8hpp}{ql/methods/finitedifferences/solvers/fdmsolverdesc.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdmlinearoplayout_8hpp}{ql/methods/finitedifferences/operators/fdmlinearoplayout.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdmbackwardsolver_8hpp}{ql/methods/finitedifferences/solvers/fdmbackwardsolver.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdmsnapshotcondition_8hpp}{ql/methods/finitedifferences/stepconditions/fdmsnapshotcondition.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdminnervaluecalculator_8hpp}{ql/methods/finitedifferences/utilities/fdminnervaluecalculator.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fdmstepconditioncomposite_8hpp}{ql/methods/finitedifferences/stepconditions/fdmstepconditioncomposite.hpp}}>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <numeric>}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ N>}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{class\ }FdmNdimSolver\ :\ \textcolor{keyword}{public}\ LazyObject\ \{}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ FdmNdimSolver(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_solver_desc}{FdmSolverDesc}}\&\ solverDesc,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_scheme_desc}{FdmSchemeDesc}}\&\ schemeDesc,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<FdmLinearOpComposite>\ op);}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_fdm_ndim_solver_a6174867c6cefae012cbf806c34c97a56}{performCalculations}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ interpolateAt(\textcolor{keyword}{const}\ std::vector<Real>\&\ x)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ thetaAt(\textcolor{keyword}{const}\ std::vector<Real>\&\ x)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ template\ meta\ programming}}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ MultiCubicSpline<N>::data\_table\ data\_table;}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \textcolor{keyword}{static}\ setValue(data\_table\&\ f,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Size>\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ value);}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_solver_desc}{FdmSolverDesc}}\ solverDesc\_;}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_scheme_desc}{FdmSchemeDesc}}\ schemeDesc\_;}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<FdmLinearOpComposite>\ op\_;}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<FdmSnapshotCondition>\ thetaCondition\_;}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<FdmStepConditionComposite>\ conditions\_;}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ std::vector<std::vector<Real>\ >\ x\_;}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ std::vector<Real>\ initialValues\_;}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<bool>\ extrapolation\_;}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<data\_table>\ f\_;}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<MultiCubicSpline<N>\ >\ interp\_;}
+\DoxyCodeLine{00072\ \ \ \ \ \};}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ N>}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keyword}{inline}\ FdmNdimSolver<N>::FdmNdimSolver(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_solver_desc}{FdmSolverDesc}}\&\ solverDesc,}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_fdm_scheme_desc}{FdmSchemeDesc}}\&\ schemeDesc,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<FdmLinearOpComposite>\ op)}
+\DoxyCodeLine{00079\ \ \ \ \ :\ solverDesc\_(solverDesc),\ schemeDesc\_(schemeDesc),\ op\_(std::move(op)),}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ thetaCondition\_(new\ \mbox{\hyperlink{class_quant_lib_1_1_fdm_snapshot_condition}{FdmSnapshotCondition}}(}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ 0.99\ *\ std::min(1.0\ /\ 365.0,}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ solverDesc.condition-\/>stoppingTimes().empty()\ ?}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ solverDesc.maturity\ :}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ solverDesc.condition-\/>stoppingTimes().front()))),}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ conditions\_(\mbox{\hyperlink{class_quant_lib_1_1_fdm_step_condition_composite}{FdmStepConditionComposite}}::joinConditions(thetaCondition\_,\ solverDesc.condition)),}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ x\_(solverDesc.mesher-\/>layout()-\/>dim().size()),}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ initialValues\_(solverDesc.mesher-\/>layout()-\/>size()),}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ extrapolation\_(std::vector<bool>(N,\ false))\ \{}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(solverDesc.mesher-\/>layout()-\/>dim().size()\ ==\ N,\ \textcolor{stringliteral}{"{}solver\ dim\ "{}}\ <<\ N}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}does\ not\ fit\ to\ layout\ dim\ "{}}\ <<\ solverDesc.mesher-\/>layout()-\/>size());}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i\ <\ N;\ ++i)\ \{}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ x\_[i].reserve(solverDesc.mesher-\/>layout()-\/>dim()[i]);}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ iter\ :\ *solverDesc.mesher-\/>layout())\ \{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ initialValues\_[iter.index()]\ =\ solverDesc\_.calculator}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/>avgInnerValue(iter,\ solverDesc.maturity);}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Size>\&\ c\ =\ iter.coordinates();}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i\ <\ N;\ ++i)\ \{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((std::accumulate(c.begin(),\ c.end(),\ 0UL)\ -\/\ c[i])\ ==\ 0U)\ \{}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_[i].push\_back(solverDesc.mesher-\/>location(iter,\ i));}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ f\_\ =\ ext::shared\_ptr<data\_table>(\textcolor{keyword}{new}\ data\_table(x\_));}
+\DoxyCodeLine{00110\ \ \ \ \ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ N>\ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_fdm_ndim_solver_a6174867c6cefae012cbf806c34c97a56}{FdmNdimSolver<N>::performCalculations}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ rhs(initialValues\_.size());}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ std::copy(initialValues\_.begin(),\ initialValues\_.end(),\ rhs.begin());}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_fdm_backward_solver}{FdmBackwardSolver}}(op\_,\ solverDesc\_.bcSet,\ conditions\_,\ schemeDesc\_)}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .rollback(rhs,\ solverDesc\_.maturity,\ 0.0,}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ solverDesc\_.timeSteps,\ solverDesc\_.dampingSteps);}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ iter\ :\ *solverDesc\_.mesher-\/>layout())\ \{}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ setValue(*f\_,\ iter.coordinates(),\ rhs[iter.index()]);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ interp\_\ =\ ext::shared\_ptr<MultiCubicSpline<N>\ >(}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ \mbox{\hyperlink{class_quant_lib_1_1_multi_cubic_spline}{MultiCubicSpline<N>}}(x\_,\ *f\_,\ extrapolation\_));}
+\DoxyCodeLine{00128\ \ \ \ \ \}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ N>\ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00132\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ FdmNdimSolver<N>::thetaAt(\textcolor{keyword}{const}\ std::vector<Real>\&\ x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (conditions\_-\/>stoppingTimes().front()\ ==\ 0.0)}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}();}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ rhs\ =\ thetaCondition\_-\/>getValues();}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_multi_cubic_spline}{data\_table}}\ f(x\_);}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ iter\ :\ *solverDesc\_.mesher-\/>layout())\ \{}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ setValue(f,\ iter.coordinates(),\ rhs[iter.index()]);}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (MultiCubicSpline<N>(x\_,\ f)(x)}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ interpolateAt(x))\ /\ thetaCondition\_-\/>getTime();}
+\DoxyCodeLine{00147\ \ \ \ \ \}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ N>\ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00150\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ FdmNdimSolver<N>::interpolateAt(\textcolor{keyword}{const}\ std::vector<Real>\&\ x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (*interp\_)(x);}
+\DoxyCodeLine{00154\ \ \ \ \ \}}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ N>\ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keywordtype}{void}\ FdmNdimSolver<N>::setValue(\mbox{\hyperlink{class_quant_lib_1_1_multi_cubic_spline}{data\_table}}\&\ f,}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Size>\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ value)\ \{}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ FdmNdimSolver<N-\/1>::setValue(f[x[x.size()-\/N]],\ x,\ value);}
+\DoxyCodeLine{00160\ \ \ \ \ \}}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{keyword}{template}\ <>\ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00163\ \ \ \ \ \textcolor{keywordtype}{void}\ FdmNdimSolver<1>::setValue(\mbox{\hyperlink{class_quant_lib_1_1_multi_cubic_spline}{data\_table}}\&\ f,}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Size>\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ value)\ \{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ f[x.back()]\ =\ value;}
+\DoxyCodeLine{00166\ \ \ \ \ \}}
+\DoxyCodeLine{00167\ \}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

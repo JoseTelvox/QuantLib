@@ -1,0 +1,186 @@
+\doxysection{qldefines.\+hpp}
+\hypertarget{qldefines_8hpp_source}{}\label{qldefines_8hpp_source}\index{ql/qldefines.hpp@{ql/qldefines.hpp}}
+\mbox{\hyperlink{qldefines_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2000,\ 2001,\ 2002,\ 2003\ RiskMap\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2003,\ 2004,\ 2005,\ 2006,\ 2007\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2015\ CompatibL}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_defines\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{comment}{/*\ install-\/hook\ */}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ quantlib\_defines\_hpp}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#ifdef\ \_MSC\_VER}}
+\DoxyCodeLine{00031\ \textcolor{comment}{/*\ Microsoft-\/specific,\ but\ needs\ to\ be\ defined\ before}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ \ \ including\ <boost/config.hpp>\ which\ somehow\ includes}}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ \ \ <math.h>\ under\ VC++10}}
+\DoxyCodeLine{00034\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#define\ \_USE\_MATH\_DEFINES}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#include\ <boost/config.hpp>}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <boost/version.hpp>}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#if\ BOOST\_VERSION\ <\ 104800}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\ \ \ \ \#error\ using\ an\ old\ version\ of\ Boost,\ please\ update.}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#if\ !defined(BOOST\_ENABLE\_ASSERT\_HANDLER)}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\ \ \ \ \#define\ BOOST\_ENABLE\_ASSERT\_HANDLER}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \textcolor{comment}{/*\ This\ allows\ one\ to\ include\ a\ given\ file\ at\ this\ point\ by}}
+\DoxyCodeLine{00048\ \textcolor{comment}{\ \ \ passing\ it\ as\ a\ compiler\ define\ (e.g.,\ -\/DQL\_INCLUDE\_FIRST=foo.hpp).}}
+\DoxyCodeLine{00049\ \textcolor{comment}{}}
+\DoxyCodeLine{00050\ \textcolor{comment}{\ \ \ The\ idea\ is\ to\ provide\ a\ hook\ for\ defining\ QL\_REAL\ and\ at\ the}}
+\DoxyCodeLine{00051\ \textcolor{comment}{\ \ \ same\ time\ including\ any\ necessary\ headers\ for\ the\ new\ type.}}
+\DoxyCodeLine{00052\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#define\ INCLUDE\_FILE(F)\ INCLUDE\_FILE\_(F)}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#define\ INCLUDE\_FILE\_(F)\ \#F}}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#ifdef\ QL\_INCLUDE\_FIRST}}
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#\ \ \ \ include\ INCLUDE\_FILE(QL\_INCLUDE\_FIRST)}}
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#undef\ INCLUDE\_FILE\_}}
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\#undef\ INCLUDE\_FILE}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \textcolor{comment}{/*\ Eventually\ these\ might\ go\ into\ userconfig.hpp.}}
+\DoxyCodeLine{00062\ \textcolor{comment}{\ \ \ For\ the\ time\ being,\ we\ hard\ code\ them\ here.}}
+\DoxyCodeLine{00063\ \textcolor{comment}{\ \ \ They\ can\ be\ overridden\ by\ passing\ the\ \#define\ to\ the\ compiler.}}
+\DoxyCodeLine{00064\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00065\ \textcolor{preprocessor}{\#ifndef\ QL\_INTEGER}}
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_INTEGER\ int}}
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \textcolor{preprocessor}{\#ifndef\ QL\_BIG\_INTEGER}}
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_BIG\_INTEGER\ long}}
+\DoxyCodeLine{00071\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#ifndef\ QL\_REAL}}
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#\ \ \ define\ QL\_REAL\ double}}
+\DoxyCodeLine{00075\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \textcolor{preprocessor}{\#if\ (defined(\_DEBUG)\ ||\ defined(DEBUG))}}
+\DoxyCodeLine{00087\ \textcolor{preprocessor}{\ \ \ \ \#define\ QL\_DEBUG}}
+\DoxyCodeLine{00088\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \textcolor{preprocessor}{\#if\ \ \ defined(HAVE\_CONFIG\_H)\ \ \ \ }\textcolor{comment}{//\ Dynamically\ created\ by\ configure}}
+\DoxyCodeLine{00091\ \textcolor{preprocessor}{\ \ \ \#include\ <ql/config.hpp>}}
+\DoxyCodeLine{00092\ \textcolor{comment}{/*\ Use\ BOOST\_MSVC\ instead\ of\ \_MSC\_VER\ since\ some\ other\ vendors\ (Metrowerks,}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ \ \ for\ example)\ also\ \#define\ \_MSC\_VER}}
+\DoxyCodeLine{00094\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00095\ \textcolor{preprocessor}{\#elif\ defined(BOOST\_MSVC)\ \ \ \ \ \ \ }\textcolor{comment}{//\ Microsoft\ Visual\ C++}}
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\ \ \ \#include\ <ql/config.msvc.hpp>}}
+\DoxyCodeLine{00097\ \textcolor{preprocessor}{\#elif\ defined(\_\_MINGW32\_\_)\ \ \ \ \ \ }\textcolor{comment}{//\ Minimalistic\ GNU\ for\ Windows}}
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{\ \ \ \#include\ <ql/config.mingw.hpp>}}
+\DoxyCodeLine{00099\ \textcolor{preprocessor}{\#elif\ defined(\_\_SUNPRO\_CC)\ \ \ \ \ \ }\textcolor{comment}{//\ Sun\ Studio}}
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\ \ \ \#include\ <ql/config.sun.hpp>}}
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\#else\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ We\ hope\ that\ the\ compiler\ follows\ ANSI}}
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\ \ \ \#include\ <ql/config.ansi.hpp>}}
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \textcolor{comment}{//\ extra\ debug\ checks}}
+\DoxyCodeLine{00107\ \textcolor{preprocessor}{\#ifdef\ QL\_DEBUG}}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\ \ \ \ \#ifndef\ QL\_EXTRA\_SAFETY\_CHECKS}}
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#define\ QL\_EXTRA\_SAFETY\_CHECKS}}
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00111\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\#ifdef\ QL\_ENABLE\_THREAD\_SAFE\_OBSERVER\_PATTERN}}
+\DoxyCodeLine{00114\ \textcolor{preprocessor}{\ \ \ \ \#if\ BOOST\_VERSION\ <\ 105800}}
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#error\ Boost\ version\ 1.58\ or\ higher\ is\ required\ for\ the\ thread-\/safe\ observer\ pattern}}
+\DoxyCodeLine{00116\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00117\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#ifdef\ QL\_ENABLE\_PARALLEL\_UNIT\_TEST\_RUNNER}}
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\ \ \ \ \#if\ BOOST\_VERSION\ <\ 105900}}
+\DoxyCodeLine{00121\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#error\ Boost\ version\ 1.59\ or\ higher\ is\ required\ for\ the\ parallel\ unit\ test\ runner}}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00123\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ \textcolor{comment}{//\ ensure\ that\ needed\ math\ constants\ are\ defined}}
+\DoxyCodeLine{00126\ \textcolor{preprocessor}{\#include\ <ql/mathconstants.hpp>}}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \textcolor{comment}{//\ import\ global\ functions\ into\ std\ namespace}}
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#if\ defined(BOOST\_NO\_STDC\_NAMESPACE)}}
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\ \ \ \ \#include\ <cmath>}}
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{keyword}{namespace\ }std\ \{}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }::sqrt;\ \textcolor{keyword}{using\ }::abs;\ \textcolor{keyword}{using\ }::fabs;}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }::exp;\ \textcolor{keyword}{using\ }::log;\ \textcolor{keyword}{using\ }::pow;}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }::sin;\ \textcolor{keyword}{using\ }::cos;\ \textcolor{keyword}{using\ }::asin;\ \textcolor{keyword}{using\ }::acos;}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }::sinh;\ \textcolor{keyword}{using\ }::cosh;}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \textcolor{keyword}{using\ }::floor;\ \textcolor{keyword}{using\ }::fmod;\ \textcolor{keyword}{using\ }::modf;}
+\DoxyCodeLine{00138\ \ \ \ \ \}}
+\DoxyCodeLine{00139\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00171\ \textcolor{preprocessor}{\#include\ <limits>}}
+\DoxyCodeLine{00172\ \textcolor{comment}{//\ limits\ used\ as\ such}}
+\DoxyCodeLine{00173\ \textcolor{preprocessor}{\#define\ QL\_MIN\_INTEGER\ \ \ \ \ \ \ \ \ ((std::numeric\_limits<QL\_INTEGER>::min)())}}
+\DoxyCodeLine{00174\ \textcolor{preprocessor}{\#define\ QL\_MAX\_INTEGER\ \ \ \ \ \ \ \ \ ((std::numeric\_limits<QL\_INTEGER>::max)())}}
+\DoxyCodeLine{00175\ \textcolor{preprocessor}{\#define\ QL\_MIN\_REAL\ \ \ \ \ \ \ \ \ \ \ -\/((std::numeric\_limits<QL\_REAL>::max)())}}
+\DoxyCodeLine{00176\ \textcolor{preprocessor}{\#define\ QL\_MAX\_REAL\ \ \ \ \ \ \ \ \ \ \ \ ((std::numeric\_limits<QL\_REAL>::max)())}}
+\DoxyCodeLine{00177\ \textcolor{preprocessor}{\#define\ QL\_MIN\_POSITIVE\_REAL\ \ \ ((std::numeric\_limits<QL\_REAL>::min)())}}
+\DoxyCodeLine{00178\ \textcolor{preprocessor}{\#define\ QL\_EPSILON\ \ \ \ \ \ \ \ \ \ \ \ \ ((std::numeric\_limits<QL\_REAL>::epsilon)())}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \textcolor{comment}{//\ For\ the\ time\ being\ we're\ keeping\ a\ QL\_DEPRECATED\ macro\ because}}
+\DoxyCodeLine{00185\ \textcolor{comment}{//\ of\ <https://stackoverflow.com/questions/38378693/>.\ \ We\ need\ to}}
+\DoxyCodeLine{00186\ \textcolor{comment}{//\ use\ it\ to\ deprecate\ constructors\ until\ we\ drop\ support\ for\ VC++2015.}}
+\DoxyCodeLine{00187\ \textcolor{comment}{//\ Other\ features\ (methods,\ typedefs\ etc.)\ can\ use\ [[deprecated]]\ and}}
+\DoxyCodeLine{00188\ \textcolor{comment}{//\ possibly\ add\ a\ message.}}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \textcolor{comment}{//\ emit\ warning\ when\ using\ deprecated\ features}}
+\DoxyCodeLine{00191\ \textcolor{comment}{//\ clang-\/format\ off}}
+\DoxyCodeLine{00192\ \textcolor{preprocessor}{\#if\ defined(BOOST\_MSVC)\ \ \ \ \ \ \ }\textcolor{comment}{//\ Microsoft\ Visual\ C++}}
+\DoxyCodeLine{00193\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\ \_\_declspec(deprecated)}}
+\DoxyCodeLine{00194\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\_DISABLE\_WARNING\ \(\backslash\)}}
+\DoxyCodeLine{00195\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(push))\ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00196\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(disable\ :\ 4996))}}
+\DoxyCodeLine{00197\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\_ENABLE\_WARNING\ \(\backslash\)}}
+\DoxyCodeLine{00198\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(pop))}}
+\DoxyCodeLine{00199\ \textcolor{preprocessor}{\#elif\ defined(\_\_clang\_\_)}}
+\DoxyCodeLine{00200\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\ \_\_attribute\_\_((deprecated))}}
+\DoxyCodeLine{00201\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\_DISABLE\_WARNING\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00202\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_Pragma("{}clang\ diagnostic\ push"{})\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00203\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_Pragma("{}clang\ diagnostic\ ignored\ \(\backslash\)"{}-\/Wdeprecated-\/declarations\(\backslash\)"{}"{})}}
+\DoxyCodeLine{00204\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\_ENABLE\_WARNING\ \(\backslash\)}}
+\DoxyCodeLine{00205\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_Pragma("{}clang\ diagnostic\ pop"{})}}
+\DoxyCodeLine{00206\ \textcolor{preprocessor}{\#elif\ defined(\_\_GNUC\_\_)}}
+\DoxyCodeLine{00207\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\ \_\_attribute\_\_((deprecated))}}
+\DoxyCodeLine{00208\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\_DISABLE\_WARNING\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00209\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_Pragma("{}GCC\ diagnostic\ push"{})\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00210\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_Pragma("{}GCC\ diagnostic\ ignored\ \(\backslash\)"{}-\/Wdeprecated-\/declarations\(\backslash\)"{}"{})}}
+\DoxyCodeLine{00211\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\_ENABLE\_WARNING\ \(\backslash\)}}
+\DoxyCodeLine{00212\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_Pragma("{}GCC\ diagnostic\ pop"{})}}
+\DoxyCodeLine{00213\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00214\ \textcolor{comment}{//\ we\ don't\ know\ how\ to\ enable\ it,\ just\ define\ the\ macros\ away}}
+\DoxyCodeLine{00215\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED}}
+\DoxyCodeLine{00216\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\_DISABLE\_WARNING}}
+\DoxyCodeLine{00217\ \textcolor{preprocessor}{\#\ \ \ \ define\ QL\_DEPRECATED\_ENABLE\_WARNING}}
+\DoxyCodeLine{00218\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00219\ \textcolor{comment}{//\ clang-\/format\ on}}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

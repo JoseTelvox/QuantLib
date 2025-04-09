@@ -1,0 +1,241 @@
+\doxysection{tridiagonaloperator.\+hpp}
+\hypertarget{tridiagonaloperator_8hpp_source}{}\label{tridiagonaloperator_8hpp_source}\index{ql/methods/finitedifferences/tridiagonaloperator.hpp@{ql/methods/finitedifferences/tridiagonaloperator.hpp}}
+\mbox{\hyperlink{tridiagonaloperator_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2000,\ 2001,\ 2002,\ 2003\ RiskMap\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2003,\ 2004,\ 2005,\ 2006\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2011\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_tridiagonal\_operator\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_tridiagonal\_operator\_hpp}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{array_8hpp}{ql/math/array.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{comparison_8hpp}{ql/math/comparison.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{shared__ptr_8hpp}{ql/shared\_ptr.hpp}}>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{class\ }TridiagonalOperator\ \{}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ unary\ operators}}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ TridiagonalOperator\ operator+(\textcolor{keyword}{const}\ TridiagonalOperator\&);}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ TridiagonalOperator\ operator-\/(\textcolor{keyword}{const}\ TridiagonalOperator\&);}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ binary\ operators}}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ TridiagonalOperator\ operator+(\textcolor{keyword}{const}\ TridiagonalOperator\&,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ TridiagonalOperator\&);}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ TridiagonalOperator\ operator-\/(\textcolor{keyword}{const}\ TridiagonalOperator\&,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ TridiagonalOperator\&);}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ TridiagonalOperator\ operator*(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ TridiagonalOperator\&);}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ TridiagonalOperator\ operator*(\textcolor{keyword}{const}\ TridiagonalOperator\&,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}});}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ TridiagonalOperator\ operator/(\textcolor{keyword}{const}\ TridiagonalOperator\&,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}});}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ array\_type;}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructors}}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ TridiagonalOperator(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size\ =\ 0);}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ TridiagonalOperator(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ low,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ mid,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ high);}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ TridiagonalOperator(\textcolor{keyword}{const}\ TridiagonalOperator\&)\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ TridiagonalOperator(TridiagonalOperator\&\&)\ \textcolor{keyword}{noexcept};}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ TridiagonalOperator\&\ operator=(\textcolor{keyword}{const}\ TridiagonalOperator\&);}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ TridiagonalOperator\&\ operator=(TridiagonalOperator\&\&)\ \textcolor{keyword}{noexcept};}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \string~TridiagonalOperator()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator_a7d26513f46390309815eab0cd6bf29e8}{applyTo}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ v)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator_a035a8cd7cee526f2600787f149ddc682}{solveFor}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ rhs)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator_a035a8cd7cee526f2600787f149ddc682}{solveFor}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ rhs,}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ result)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator_a0a6759881262044e8c51f9758d6a07af}{SOR}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ rhs,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tol)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ TridiagonalOperator\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator_a0ff9a73ceb6b1c5618c1bec0be1e0597}{identity}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size);}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ n\_;\ \}}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isTimeDependent()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ !!timeSetter\_;\ \}}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ lowerDiagonal()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ lowerDiagonal\_;\ \}}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ diagonal()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ diagonal\_;\ \}}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ upperDiagonal()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ upperDiagonal\_;\ \}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setFirstRow(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}});}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setMidRow(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}},\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}});}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setMidRows(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}});}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setLastRow(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}});}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setTime(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ swap(TridiagonalOperator\&)\ \textcolor{keyword}{noexcept};}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator_1_1_time_setter}{TimeSetter}}\ \{}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator_1_1_time_setter}{\string~TimeSetter}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ setTime(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ TridiagonalOperator\&\ L)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n\_;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ diagonal\_,\ lowerDiagonal\_,\ upperDiagonal\_;}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ temp\_;}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ ext::shared\_ptr<TimeSetter>\ timeSetter\_;}
+\DoxyCodeLine{00119\ \ \ \ \ \};}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{comment}{/*\ \(\backslash\)relates\ TridiagonalOperator\ */}}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{keywordtype}{void}\ swap(\mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&,\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&)\ \textcolor{keyword}{noexcept};}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keyword}{inline}\ TridiagonalOperator::TridiagonalOperator(\mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\&\ from)\ noexcept\ :\ n\_(0)\ \{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ swap(from);}
+\DoxyCodeLine{00129\ \ \ \ \ \}}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{inline}\ TridiagonalOperator\&\ TridiagonalOperator::operator=(}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ TridiagonalOperator\&\ from)\ \{}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ TridiagonalOperator\ temp(from);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ swap(temp);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00136\ \ \ \ \ \}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&}
+\DoxyCodeLine{00139\ \ \ \ \ TridiagonalOperator::operator=(\mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\&\ from)\ \textcolor{keyword}{noexcept}\ \{}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ swap(from);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00142\ \ \ \ \ \}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ TridiagonalOperator::setFirstRow(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valB,}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valC)\ \{}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ diagonal\_[0]\ \ \ \ \ \ =\ valB;}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ upperDiagonal\_[0]\ =\ valC;}
+\DoxyCodeLine{00148\ \ \ \ \ \}}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ TridiagonalOperator::setMidRow(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i,}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valA,}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valB,}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valC)\ \{}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(i>=1\ \&\&\ i<=n\_-\/2,}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}out\ of\ range\ in\ TridiagonalSystem::setMidRow"{}});}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ lowerDiagonal\_[i-\/1]\ =\ valA;}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ diagonal\_[i]\ \ \ \ \ \ \ \ =\ valB;}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ upperDiagonal\_[i]\ \ \ =\ valC;}
+\DoxyCodeLine{00159\ \ \ \ \ \}}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ TridiagonalOperator::setMidRows(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valA,}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valB,}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valC)\ \{}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=1;\ i<=n\_-\/2;\ i++)\ \{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ lowerDiagonal\_[i-\/1]\ =\ valA;}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ diagonal\_[i]\ \ \ \ \ \ \ \ =\ valB;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \ upperDiagonal\_[i]\ \ \ =\ valC;}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00169\ \ \ \ \ \}}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ TridiagonalOperator::setLastRow(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valA,}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valB)\ \{}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ lowerDiagonal\_[n\_-\/2]\ =\ valA;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ diagonal\_[n\_-\/1]\ \ \ \ \ \ =\ valB;}
+\DoxyCodeLine{00175\ \ \ \ \ \}}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ TridiagonalOperator::setTime(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (timeSetter\_\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ timeSetter\_-\/>setTime(t,\ *\textcolor{keyword}{this});}
+\DoxyCodeLine{00180\ \ \ \ \ \}}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ TridiagonalOperator::swap(\mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ from)\ \textcolor{keyword}{noexcept}\ \{}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ std::swap(n\_,\ from.n\_);}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ diagonal\_.swap(from.diagonal\_);}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ lowerDiagonal\_.swap(from.lowerDiagonal\_);}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ upperDiagonal\_.swap(from.upperDiagonal\_);}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ temp\_.swap(from.temp\_);}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ timeSetter\_.swap(from.timeSetter\_);}
+\DoxyCodeLine{00189\ \ \ \ \ \}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{comment}{//\ Time\ constant\ algebra}}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ operator+(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D)\ \{}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ D1\ =\ D;}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ D1;}
+\DoxyCodeLine{00197\ \ \ \ \ \}}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ operator-\/(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D)\ \{}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ low\ =\ -\/D.lowerDiagonal\_,}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ mid\ =\ -\/D.diagonal\_,}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ \ high\ =\ -\/D.upperDiagonal\_;}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ result(low,\ mid,\ high);}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00205\ \ \ \ \ \}}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ operator+(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D1,}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D2)\ \{}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ low\ =\ D1.lowerDiagonal\_\ +\ D2.lowerDiagonal\_,}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ mid\ =\ D1.diagonal\_\ +\ D2.diagonal\_,}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ high\ =\ D1.upperDiagonal\_\ +\ D2.upperDiagonal\_;}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ result(low,\ mid,\ high);}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00214\ \ \ \ \ \}}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ operator-\/(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D1,}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D2)\ \{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ low\ =\ D1.lowerDiagonal\_\ -\/\ D2.lowerDiagonal\_,}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ mid\ =\ D1.diagonal\_\ -\/\ D2.diagonal\_,}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ high\ =\ D1.upperDiagonal\_\ -\/\ D2.upperDiagonal\_;}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ result(low,\ mid,\ high);}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00223\ \ \ \ \ \}}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ operator*(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ a,}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D)\ \{}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ low\ =\ D.lowerDiagonal\_\ *\ a,}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ mid\ =\ D.diagonal\_\ *\ a,}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ high\ =\ D.upperDiagonal\_\ *\ a;}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ result(low,\ mid,\ high);}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00232\ \ \ \ \ \}}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ operator*(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D,}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ a)\ \{}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ low\ =\ D.lowerDiagonal\_\ *\ a,}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ mid\ =\ D.diagonal\_\ *\ a,}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ high\ =\ D.upperDiagonal\_\ *\ a;}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ result(low,\ mid,\ high);}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00241\ \ \ \ \ \}}
+\DoxyCodeLine{00242\ }
+\DoxyCodeLine{00243\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ operator/(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ D,}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ a)\ \{}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ low\ =\ D.lowerDiagonal\_\ /\ a,}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ mid\ =\ D.diagonal\_\ /\ a,}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ high\ =\ D.upperDiagonal\_\ /\ a;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\ result(low,\ mid,\ high);}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00250\ \ \ \ \ \}}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00252\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ swap(\mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ L1,}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_tridiagonal_operator}{TridiagonalOperator}}\&\ L2)\ \textcolor{keyword}{noexcept}\ \{}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ L1.swap(L2);}
+\DoxyCodeLine{00255\ \ \ \ \ \}}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \}}
+\DoxyCodeLine{00258\ }
+\DoxyCodeLine{00259\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,154 @@
+\doxysection{yoyinflationcoupon.\+hpp}
+\hypertarget{yoyinflationcoupon_8hpp_source}{}\label{yoyinflationcoupon_8hpp_source}\index{ql/cashflows/yoyinflationcoupon.hpp@{ql/cashflows/yoyinflationcoupon.hpp}}
+\mbox{\hyperlink{yoyinflationcoupon_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2009\ Chris\ Kenyon}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_newyoy\_coupon\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_newyoy\_coupon\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{inflationcoupon_8hpp}{ql/cashflows/inflationcoupon.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{inflationindex_8hpp}{ql/indexes/inflationindex.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{schedule_8hpp}{ql/time/schedule.hpp}}>}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_pricer}{YoYInflationCouponPricer}};}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{keyword}{class\ }YoYInflationCoupon\ :\ \textcolor{keyword}{public}\ InflationCoupon\ \{}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ YoYInflationCoupon(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ paymentDate,}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nominal,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ startDate,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ endDate,}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a0e67390d5065280adea4c197d34cf464}{fixingDays}},}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<YoYInflationIndex>\&\ \mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a245ccc1b7c2bfcb897af546dd613e09a}{index}},}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a787bb517a1a463b36d97b55bd81a1b9b}{observationLag}},}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_c_p_i_adaf018681fd1d9478c984348c82c9013}{CPI::InterpolationType}}\ interpolation,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a68ebb497c1a0e62cf4097ff804d954bc}{dayCounter}},}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a4f0ef5809aca526e2f3cb486f894b5ba}{gearing}}\ =\ 1.0,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ \mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a3c437f8c6f0e49f807f8ae196ed54ef1}{spread}}\ =\ 0.0,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodStart\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodEnd\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}());}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ [[deprecated(\textcolor{stringliteral}{"{}Use\ the\ overload\ that\ passes\ an\ interpolation\ type\ instead"{}})]]}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ YoYInflationCoupon(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ paymentDate,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nominal,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ startDate,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ endDate,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a0e67390d5065280adea4c197d34cf464}{fixingDays}},}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<YoYInflationIndex>\&\ \mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a245ccc1b7c2bfcb897af546dd613e09a}{index}},}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a787bb517a1a463b36d97b55bd81a1b9b}{observationLag}},}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a68ebb497c1a0e62cf4097ff804d954bc}{dayCounter}},}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a4f0ef5809aca526e2f3cb486f894b5ba}{gearing}}\ =\ 1.0,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ \mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a3c437f8c6f0e49f807f8ae196ed54ef1}{spread}}\ =\ 0.0,}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodStart\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodEnd\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}());}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a4f0ef5809aca526e2f3cb486f894b5ba}{gearing}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ gearing\_;\ \}}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ \mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a3c437f8c6f0e49f807f8ae196ed54ef1}{spread}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ spread\_;\ \}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ \mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a65df65973a957b19a0eaa31e6b164a21}{indexFixing}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ adjustedFixing()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<YoYInflationIndex>\&\ yoyIndex()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_c_p_i_adaf018681fd1d9478c984348c82c9013}{CPI::InterpolationType}}\ interpolation()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ ext::shared\_ptr<YoYInflationIndex>\ yoyIndex\_;}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_c_p_i_adaf018681fd1d9478c984348c82c9013}{CPI::InterpolationType}}\ interpolation\_;}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ gearing\_;}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ spread\_;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a979ce21c54ddd63af12d1e3d32a52e55}{checkPricerImpl}}(\textcolor{keyword}{const}\ ext::shared\_ptr<InflationCouponPricer>\&)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00095\ \ \ \ \ \};}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keyword}{const}\ ext::shared\_ptr<YoYInflationIndex>\&}
+\DoxyCodeLine{00098\ \ \ \ \ YoYInflationCoupon::yoyIndex()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ yoyIndex\_;}
+\DoxyCodeLine{00100\ \ \ \ \ \}}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{struct_quant_lib_1_1_c_p_i_adaf018681fd1d9478c984348c82c9013}{CPI::InterpolationType}}\ YoYInflationCoupon::interpolation()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ interpolation\_;}
+\DoxyCodeLine{00104\ \ \ \ \ \}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ YoYInflationCoupon::adjustedFixing()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (\mbox{\hyperlink{class_quant_lib_1_1_inflation_coupon_a1d84a54420161835317f950b484670e8}{rate}}()-\/\mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a3c437f8c6f0e49f807f8ae196ed54ef1}{spread}}())/\mbox{\hyperlink{class_quant_lib_1_1_yo_y_inflation_coupon_a4f0ef5809aca526e2f3cb486f894b5ba}{gearing}}();}
+\DoxyCodeLine{00108\ \ \ \ \ \}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keyword}{class\ }yoyInflationLeg\ \{}
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ yoyInflationLeg(\mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\ schedule,}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\ cal,}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<YoYInflationIndex>\ index,}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ observationLag,}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_c_p_i_adaf018681fd1d9478c984348c82c9013}{CPI::InterpolationType}}\ interpolation);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ [[deprecated(\textcolor{stringliteral}{"{}Use\ the\ overload\ that\ passes\ an\ interpolation\ type\ instead"{}})]]}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ yoyInflationLeg(\mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\ schedule,}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\ cal,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<YoYInflationIndex>\ index,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ observationLag);}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ yoyInflationLeg\&\ withNotionals(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notional);}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ yoyInflationLeg\&\ withNotionals(\textcolor{keyword}{const}\ std::vector<Real>\&\ notionals);}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ yoyInflationLeg\&\ withPaymentDayCounter(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&);}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ yoyInflationLeg\&\ withPaymentAdjustment(\mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}});}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ yoyInflationLeg\&\ withFixingDays(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ fixingDays);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ yoyInflationLeg\&\ withFixingDays(\textcolor{keyword}{const}\ std::vector<Natural>\&\ fixingDays);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ yoyInflationLeg\&\ withGearings(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ gearing);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ yoyInflationLeg\&\ withGearings(\textcolor{keyword}{const}\ std::vector<Real>\&\ gearings);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ yoyInflationLeg\&\ withSpreads(\mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ spread);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ yoyInflationLeg\&\ withSpreads(\textcolor{keyword}{const}\ std::vector<Spread>\&\ spreads);}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ yoyInflationLeg\&\ withCaps(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ cap);}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ yoyInflationLeg\&\ withCaps(\textcolor{keyword}{const}\ std::vector<Rate>\&\ caps);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ yoyInflationLeg\&\ withFloors(\mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ floor);}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ yoyInflationLeg\&\ withFloors(\textcolor{keyword}{const}\ std::vector<Rate>\&\ floors);}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \textcolor{keyword}{operator}\ \mbox{\hyperlink{namespace_quant_lib_a14f786c47ee979097c448d96b2defaab}{Leg}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\ schedule\_;}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ ext::shared\_ptr<YoYInflationIndex>\ index\_;}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\ observationLag\_;}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_c_p_i_adaf018681fd1d9478c984348c82c9013}{CPI::InterpolationType}}\ interpolation\_;}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ std::vector<Real>\ notionals\_;}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ paymentDayCounter\_;}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ paymentAdjustment\_\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881aaa730fc5548402fd95e95f1c57f9a535}{ModifiedFollowing}};}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\ paymentCalendar\_;}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ std::vector<Natural>\ fixingDays\_;}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ std::vector<Real>\ gearings\_;}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ std::vector<Spread>\ spreads\_;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ std::vector<Rate>\ caps\_,\ floors\_;}
+\DoxyCodeLine{00157\ \ \ \ \ \};}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \}}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00164\ }
+
+\end{DoxyCode}

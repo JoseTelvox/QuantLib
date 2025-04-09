@@ -1,0 +1,1230 @@
+\doxysection{saddlepointlossmodel.\+hpp}
+\hypertarget{saddlepointlossmodel_8hpp_source}{}\label{saddlepointlossmodel_8hpp_source}\index{ql/experimental/credit/saddlepointlossmodel.hpp@{ql/experimental/credit/saddlepointlossmodel.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#ifndef\ quantlib\_saddle\_point\_lossmodel\_hpp}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ quantlib\_saddle\_point\_lossmodel\_hpp}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{tuple_8hpp}{ql/tuple.hpp}}>}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{brent_8hpp}{ql/math/solvers1d/brent.hpp}}>}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{newton_8hpp}{ql/math/solvers1d/newton.hpp}}>}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{basket_8hpp}{ql/experimental/credit/basket.hpp}}>}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultlossmodel.hpp>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/constantlosslatentmodel.hpp>}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{comment}{/*\ The\ treatment\ of\ recovery\ wont\ work\ with\ random\ recoveries,\ they\ should}}
+\DoxyCodeLine{00079\ \textcolor{comment}{\ \ \ \ be\ passed\ to\ the\ conditional\ methods\ in\ the\ same\ way\ as\ the\ probabilities.}}
+\DoxyCodeLine{00080\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00083\ \textcolor{comment}{\ \ \ \ TO\ DO:}}
+\DoxyCodeLine{00084\ \textcolor{comment}{\ \ \ \ -\/>\ Failing\ when\ the\ tranche\ upper\ loss\ limit\ goes\ over\ the\ max\ attainable\ }}
+\DoxyCodeLine{00085\ \textcolor{comment}{\ \ \ \ \ \ \ \ loss.}}
+\DoxyCodeLine{00086\ \textcolor{comment}{}}
+\DoxyCodeLine{00087\ \textcolor{comment}{\ \ \ \ -\/\ With\ 15\ quadrature\ points\ things\ are\ OK\ but\ 25\ gives\ me\ -\/1\#IND000\ errors\ }}
+\DoxyCodeLine{00088\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ (over\ region\ around\ the\ EL\ I\ think)\ }}
+\DoxyCodeLine{00089\ \textcolor{comment}{\ \ \ \ -\/\ Silly\ bug\ when\ calling\ some\ methods\ on\ todays\ date\ (zero\ time).\ }}
+\DoxyCodeLine{00090\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ ProbDef\ =\ 0\ there}}
+\DoxyCodeLine{00091\ \textcolor{comment}{\ \ \ \ -\/\ VaR\ <-\/\ tranched?????!}}
+\DoxyCodeLine{00092\ \textcolor{comment}{\ \ \ \ -\/\ ESF\ <-\/\ tranched????!!}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ \ \ \ -\/\ VaR\ split}}
+\DoxyCodeLine{00094\ \textcolor{comment}{\ \ \ \ -\/\ ESF\ split?}}
+\DoxyCodeLine{00095\ \textcolor{comment}{}}
+\DoxyCodeLine{00096\ \textcolor{comment}{\ \ \ \ When\ introducing\ defaults;\ somewhere,\ (after\ an\ update?)\ there\ should\ be\ }}
+\DoxyCodeLine{00097\ \textcolor{comment}{\ \ \ \ a\ check\ that:\ copula\_-\/>basketSize()\ EQUALS\ remainingBasket\_.size()}}
+\DoxyCodeLine{00098\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{keyword}{class\ }SaddlePointLossModel\ :\ \textcolor{keyword}{public}\ DefaultLossModel\ \{}
+\DoxyCodeLine{00101\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ SaddlePointLossModel(}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<\mbox{\hyperlink{class_quant_lib_1_1_constant_loss_latentmodel}{ConstantLossLatentmodel<CP>}}\ >\&\ m)}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ :\ copula\_(m)\ \{\ \}}
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ Cumulants\ and\ derivatives\ auxiliary\ functions\ -\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_afff6d649f2216a712c173215d4ee0b30}{CumulantGeneratingCond}}(}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossFraction,\textcolor{comment}{//\ saddle\ pt}}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a765cd2b6c952b76f3dc1dd0f27a1e17d}{CumGen1stDerivativeCond}}(}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ \textcolor{comment}{//\ in\ fract\ loss\ units...\ humm\ not\ really}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae8003c44022e683b23c39c84f298e486}{CumGen2ndDerivativeCond}}(}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ CumGen3rdDerivativeCond(}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ CumGen4thDerivativeCond(}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\ \textcolor{keyword}{const}\ ;}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ std::tuple<Real,\ Real,\ Real,\ Real>\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ad2660951a9a0f3acd06caa56a28e00f6}{CumGen0234DerivCond}}(}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ std::tuple<Real,\ Real>\ CumGen02DerivCond(}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Unconditional\ cumulants.\ Because\ this\ class\ integrates\ the\ various}}
+\DoxyCodeLine{00165\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ statistics\ it\ provides\ in\ indirect\ mode\ they\ are\ never\ used.\ }}
+\DoxyCodeLine{00166\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ Provided\ for\ completeness/extendability\ */}}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a1901caadda588f2d4bbc5edeeed0f24c}{CumulantGenerating}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ CumGen1stDerivative(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ CumGen2ndDerivative(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ CumGen3rdDerivative(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ CumGen4thDerivative(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/\ Saddle\ point\ search\ functions\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_1_1_saddle_objective_function_a27c40b599a73204f191e7238bb9e05a7}{SaddleObjectiveFunction}}\ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ SaddlePointLossModel\&\ me\_;}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ targetValue\_;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor\_;}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs\_;}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_1_1_saddle_objective_function_a27c40b599a73204f191e7238bb9e05a7}{SaddleObjectiveFunction}}(\textcolor{keyword}{const}\ SaddlePointLossModel\&\ me,}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ target,}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ :\ me\_(me),\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ targetValue\_(target),\ }
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor\_(mktFactor),\ }
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs\_(invUncondProbs)}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \{\}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator()(\textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ me\_.\mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a765cd2b6c952b76f3dc1dd0f27a1e17d}{CumGen1stDerivativeCond}}(invUncondProbs\_,\ x,\ }
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor\_)\ -\/\ targetValue\_;}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ derivative(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ me\_.\mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae8003c44022e683b23c39c84f298e486}{CumGen2ndDerivativeCond}}(invUncondProbs\_,\ x,\ }
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor\_);}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a65cf83c7daa2c2b91bab3a4e99293259}{findSaddle}}(}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossLevel,}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor,\ }
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ 1.0e-\/3,\textcolor{comment}{//1.e-\/4}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ maxEvaluations\ =\ 50}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ )\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }SaddlePercObjFunction\ \{}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ SaddlePointLossModel\&\ me\_;}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ targetValue\_;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ date\_;}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ SaddlePercObjFunction(}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ SaddlePointLossModel\&\ me,}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ target,}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date)}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ :\ me\_(me),\ targetValue\_(1.-\/target),\ date\_(date)\ \{\}}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_1_1_saddle_perc_obj_function_a95078b4ed5181f448402e9a6628df647}{operator()}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ me\_.probOverLoss(date\_,\ x)\ -\/\ targetValue\_;}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Functionality,\ Provides\ various\ portfolio\ statistics-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a22c5406183e410f27a3e3335681bc85b}{probOverLossCond}}(\ }
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ trancheLossFract,\ }
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ probOverLossPortfCond1stOrder(}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,\ }
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00263\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae04bf88e8206b128596094b62aa134b8}{probOverLoss}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ trancheLossFract)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00265\ }
+\DoxyCodeLine{00266\ \ \ \ \ \ \ std::map<Real,\ Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a2971a952590ebd6e333834ded04117e0}{lossDistribution}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00268\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a46120bee2967860cd6d8ce0b3b83099c}{probOverLossPortfCond}}(}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,\ }
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00284\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ probOverPortfLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00287\ }
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a5873026803299621a1ff0ba881f260c7}{probDensityCond}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00297\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ probDensity(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00299\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ std::vector<Real>\ splitLossCond(}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,\ std::vector<Real>\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae57829929758f2af1f4770e34d1a557d}{expectedShortfallFullPortfolioCond}}(}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossPerc,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedShortfallTrancheCond(}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossPerc,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}},\ }
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ std::vector<Real>\ expectedShortfallSplitCond(}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossPerc,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00313\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a043e0d936e5422163114204e5d3d15b4}{splitVaRLevel}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ad951608b35188cfb419e1296fd4fa8b9}{expectedShortfall}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_aa0d607e75340d7ca18d97edcdb8a5e14}{conditionalExpectedLoss}}(}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_afa698dabdfe399fffffbc9603b7bafa7}{conditionalExpectedTrancheLoss}}(}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00337\ }
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_af0096807a2c39b6f1dfff8b22d052ab1}{resetModel}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ remainingNotionals\_\ =\ basket\_-\/>remainingNotionals();}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ remainingNotional\_\ \ =\ basket\_-\/>remainingNotional();}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ attachRatio\_\ =\ std::min(basket\_-\/>remainingAttachmentAmount()\ }
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ basket\_-\/>remainingNotional(),\ 1.);}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ detachRatio\_\ =\ std::min(basket\_-\/>remainingDetachmentAmount()\ }
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ basket\_-\/>remainingNotional(),\ 1.);}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>resetBasket(basket\_.currentLink());}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00347\ }
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<ConstantLossLatentmodel<CP>\ >\ copula\_;}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cached\ todays\ arguments\ values}}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ remainingSize\_;}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Real>\ remainingNotionals\_;}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingNotional\_;}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ remaining\ basket\ levels:}}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachRatio\_,\ detachRatio\_;}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00356\ \textcolor{comment}{\ \ \ \ \ \ \ \ //\ Just\ for\ testing\ the\ ESF\ direct\ integration,\ not\ for\ release,\ }}
+\DoxyCodeLine{00357\ \textcolor{comment}{\ \ \ \ \ \ \ \ //\ \ \ this\ is\ very\ inneficient:}}
+\DoxyCodeLine{00358\ \textcolor{comment}{\ \ \ \ \ \ \ \ class\ ESFIntegrator\ \{}}
+\DoxyCodeLine{00359\ \textcolor{comment}{\ \ \ \ \ \ \ \ public:}}
+\DoxyCodeLine{00360\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ ESFIntegrator(const\ SaddlePointLossModel\&\ me,}}
+\DoxyCodeLine{00361\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ const\ Date\&\ date,}}
+\DoxyCodeLine{00362\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Real\ lossPercentileFract//,}}
+\DoxyCodeLine{00363\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //const\ std::vector<Real>\&\ mktFactor}}
+\DoxyCodeLine{00364\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}}
+\DoxyCodeLine{00365\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ :\ me\_(me),\ date\_(date),lossPercentileFract\_(lossPercentileFract)}}
+\DoxyCodeLine{00366\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \{\}}}
+\DoxyCodeLine{00367\ \textcolor{comment}{}}
+\DoxyCodeLine{00368\ \textcolor{comment}{}}
+\DoxyCodeLine{00369\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Real\ operator()(Real\ x)\ const\ \{}}
+\DoxyCodeLine{00370\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ return\ me\_.densityTrancheLoss(date\_,\ x\ +\ lossPercentileFract\_)\ }}
+\DoxyCodeLine{00371\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (x\ +\ lossPercentileFract\_);}}
+\DoxyCodeLine{00372\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00373\ \textcolor{comment}{}}
+\DoxyCodeLine{00374\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Real\ lossPercentileFract\_;}}
+\DoxyCodeLine{00375\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Date\ date\_;}}
+\DoxyCodeLine{00376\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ //\ \ const\ std::vector<Real>\&\ mktFactor\_;}}
+\DoxyCodeLine{00377\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ const\ SaddlePointLossModel\&\ me\_;}}
+\DoxyCodeLine{00378\ \textcolor{comment}{\ \ \ \ \ \ \ \ \};}}
+\DoxyCodeLine{00379\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00380\ \ \ \ \ \};}
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00382\ }
+\DoxyCodeLine{00383\ \ \ \ \ \textcolor{comment}{//\ -\/-\/\ Inlined\ integrations-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00384\ }
+\DoxyCodeLine{00385\ \ \ \ \ \textcolor{comment}{//\ Unconditional\ Moments\ and\ derivatives.\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00386\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00387\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a1901caadda588f2d4bbc5edeeed0f24c}{SaddlePointLossModel<CP>::CumulantGenerating}}(}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00389\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(date);}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_afff6d649f2216a712c173215d4ee0b30}{CumulantGeneratingCond}}(invUncondProbs,\ s,\ v1);}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00400\ \ \ \ \ \}}
+\DoxyCodeLine{00401\ }
+\DoxyCodeLine{00402\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00403\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SaddlePointLossModel<CP>::CumGen1stDerivative(}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00405\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(date);}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00411\ }
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ CumGen1stDerivativeCond(invUncondProbs,\ s,\ v1);}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00416\ \ \ \ \ \}}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00418\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00419\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SaddlePointLossModel<CP>::CumGen2ndDerivative(}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00421\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(date);}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ CumGen2ndDerivativeCond(invUncondProbs,\ s,\ v1);}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00432\ \ \ \ \ \}}
+\DoxyCodeLine{00433\ }
+\DoxyCodeLine{00434\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00435\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SaddlePointLossModel<CP>::CumGen3rdDerivative(}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00437\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(date);}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00443\ }
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ CumGen3rdDerivativeCond(invUncondProbs,\ s,\ v1);}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00448\ \ \ \ \ \}}
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00451\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SaddlePointLossModel<CP>::CumGen4thDerivative(}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00453\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(date);}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ CumGen4thDerivativeCond(invUncondProbs,\ s,\ v1);}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00464\ \ \ \ \ \}}
+\DoxyCodeLine{00465\ }
+\DoxyCodeLine{00466\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00467\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae04bf88e8206b128596094b62aa134b8}{SaddlePointLossModel<CP>::probOverLoss}}(}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ trancheLossFract)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00469\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ avoid\ computation:}}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (trancheLossFract\ >=\ }
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ time\ dependent\ soon:}}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>detachmentAmount())\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00474\ }
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(d);}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00480\ }
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a22c5406183e410f27a3e3335681bc85b}{probOverLossCond}}(invUncondProbs,\ trancheLossFract,\ v1);}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00485\ \ \ \ \ \}}
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00487\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00488\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ SaddlePointLossModel<CP>::probOverPortfLoss(}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00490\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \ \ std::vector<Probability>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00492\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(d);}
+\DoxyCodeLine{00493\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00494\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00495\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00496\ }
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ probOverLossPortfCond(invUncondProbs,\ loss,\ v1);}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00501\ \ \ \ \ \}}
+\DoxyCodeLine{00502\ }
+\DoxyCodeLine{00503\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00504\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SaddlePointLossModel<CP>::expectedTrancheLoss(}
+\DoxyCodeLine{00505\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00506\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(d);}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00510\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00512\ }
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ conditionalExpectedTrancheLoss(invUncondProbs,\ v1);}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00517\ \ \ \ \ \}}
+\DoxyCodeLine{00518\ }
+\DoxyCodeLine{00519\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00520\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ SaddlePointLossModel<CP>::probDensity(}
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00522\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00523\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00524\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(d);}
+\DoxyCodeLine{00525\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00528\ }
+\DoxyCodeLine{00529\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00530\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00531\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ probDensityCond(invUncondProbs,\ loss,\ v1);}
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00533\ \ \ \ \ \}}
+\DoxyCodeLine{00534\ }
+\DoxyCodeLine{00535\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00536\ \ \ \ \ \textcolor{keyword}{inline}\ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a043e0d936e5422163114204e5d3d15b4}{SaddlePointLossModel<CP>::splitVaRLevel}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00537\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(date);}
+\DoxyCodeLine{00540\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{00543\ }
+\DoxyCodeLine{00544\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValueV(}
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ splitLossCond(invUncondProbs,\ s,\ v1);}
+\DoxyCodeLine{00547\ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00548\ \ \ \ \ \}}
+\DoxyCodeLine{00549\ }
+\DoxyCodeLine{00550\ }
+\DoxyCodeLine{00551\ }
+\DoxyCodeLine{00552\ }
+\DoxyCodeLine{00553\ }
+\DoxyCodeLine{00554\ }
+\DoxyCodeLine{00555\ }
+\DoxyCodeLine{00556\ \ \ \ \ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00557\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Conditional\ Moments\ and\ derivatives.\ }}
+\DoxyCodeLine{00558\ \textcolor{comment}{}}
+\DoxyCodeLine{00559\ \textcolor{comment}{\ \ \ \ \ \ \ \ Notice\ that\ in\ all\ this\ methods\ the\ date\ dependence\ is\ implicitly}}
+\DoxyCodeLine{00560\ \textcolor{comment}{\ \ \ \ \ \ \ \ present\ in\ the\ unconditional\ probabilities.\ But,\ as\ in\ other\ LMs,\ it}}
+\DoxyCodeLine{00561\ \textcolor{comment}{\ \ \ \ \ \ \ \ is\ redundant\ and\ expensive\ to\ perform\ the\ call\ to\ the\ probabilities\ in}}
+\DoxyCodeLine{00562\ \textcolor{comment}{\ \ \ \ \ \ \ \ these\ methods\ since\ they\ are\ integrands.}}
+\DoxyCodeLine{00563\ \textcolor{comment}{\ \ \ \ \ \ \ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00564\ }
+\DoxyCodeLine{00565\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00566\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_afff6d649f2216a712c173215d4ee0b30}{SaddlePointLossModel<CP>::CumulantGeneratingCond}}(}
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossFraction,}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00570\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sum\ =\ 0.;}
+\DoxyCodeLine{00573\ }
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ }
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \ \ \ \ sum\ +=\ std::log(1.\ -\/\ pBuffer\ +\ }
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pBuffer\ *\ std::exp(remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{00580\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],}
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor))\ *\ lossFraction\ /\ remainingNotional\_));}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00583\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sum;}
+\DoxyCodeLine{00584\ \ \ \ \ \}}
+\DoxyCodeLine{00585\ }
+\DoxyCodeLine{00586\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00587\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a765cd2b6c952b76f3dc1dd0f27a1e17d}{SaddlePointLossModel<CP>::CumGen1stDerivativeCond}}(}
+\DoxyCodeLine{00588\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00591\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sum\ =\ 0.;}
+\DoxyCodeLine{00594\ }
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ }
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00598\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ loss\ in\ fractional\ units}}
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossInDef\ =\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor))\ /\ remainingNotional\_;}
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ midFactor\ =\ pBuffer\ *\ std::exp(lossInDef\ *\ saddle);}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \ \ \ \ \ \ sum\ +=\ lossInDef\ *\ midFactor\ /\ (1.-\/pBuffer\ +\ midFactor);}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sum;}
+\DoxyCodeLine{00607\ \ \ \ \ \}}
+\DoxyCodeLine{00608\ }
+\DoxyCodeLine{00609\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00610\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae8003c44022e683b23c39c84f298e486}{SaddlePointLossModel<CP>::CumGen2ndDerivativeCond}}(}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00613\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00614\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00615\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sum\ =\ 0.;}
+\DoxyCodeLine{00617\ }
+\DoxyCodeLine{00618\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{00619\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ }
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00621\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ loss\ in\ fractional\ units}}
+\DoxyCodeLine{00623\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossInDef\ =\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor))\ /\ remainingNotional\_;}
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ midFactor\ =\ pBuffer\ *\ std::exp(lossInDef\ *\ saddle);}
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ denominator\ =\ 1.-\/pBuffer\ +\ midFactor;}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \ \ \ \ sum\ +=\ lossInDef\ *\ lossInDef\ *\ midFactor\ /\ denominator\ -\/\ }
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::pow(lossInDef\ *\ midFactor\ /\ denominator\ ,\ 2.);}
+\DoxyCodeLine{00630\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sum;}
+\DoxyCodeLine{00632\ \ \ \ \ \}}
+\DoxyCodeLine{00633\ }
+\DoxyCodeLine{00634\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00635\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SaddlePointLossModel<CP>::CumGen3rdDerivativeCond(}
+\DoxyCodeLine{00636\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00638\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00639\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00640\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00641\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sum\ =\ 0.;}
+\DoxyCodeLine{00642\ }
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{00644\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ }
+\DoxyCodeLine{00645\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{00647\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossInDef\ =\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{00648\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{00649\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor))\ /\ remainingNotional\_;}
+\DoxyCodeLine{00650\ }
+\DoxyCodeLine{00651\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ midFactor\ =\ pBuffer\ *\ std::exp(lossInDef\ *\ saddle);}
+\DoxyCodeLine{00652\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ denominator\ =\ 1.-\/pBuffer\ +\ midFactor;}
+\DoxyCodeLine{00653\ }
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ suma0\ =\ denominator;}
+\DoxyCodeLine{00655\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma1\ \ =\ lossInDef\ *\ midFactor;}
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma2\ \ =\ lossInDef\ *\ suma1;}
+\DoxyCodeLine{00657\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma3\ \ =\ lossInDef\ *\ suma2;}
+\DoxyCodeLine{00658\ }
+\DoxyCodeLine{00659\ \ \ \ \ \ \ \ \ \ \ \ \ sum\ +=\ (suma3\ +\ (2.*std::pow(suma1,\ 3.)/suma0\ -\/\ }
+\DoxyCodeLine{00660\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 3.*suma1*suma2)/suma0)/suma0;}
+\DoxyCodeLine{00661\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00662\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sum;}
+\DoxyCodeLine{00663\ \ \ \ \ \}}
+\DoxyCodeLine{00664\ }
+\DoxyCodeLine{00665\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00666\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SaddlePointLossModel<CP>::CumGen4thDerivativeCond(}
+\DoxyCodeLine{00667\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00668\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00669\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00670\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sum\ =\ 0.;}
+\DoxyCodeLine{00673\ }
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{00675\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ }
+\DoxyCodeLine{00676\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00677\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossInDef\ =\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor))\ /\ remainingNotional\_;}
+\DoxyCodeLine{00681\ }
+\DoxyCodeLine{00682\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ midFactor\ =\ pBuffer\ *\ std::exp(lossInDef\ *\ saddle);}
+\DoxyCodeLine{00683\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ denominator\ =\ 1.-\/pBuffer\ +\ midFactor;}
+\DoxyCodeLine{00684\ }
+\DoxyCodeLine{00685\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ suma0\ =\ denominator;}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma1\ \ =\ lossInDef\ *\ midFactor;}
+\DoxyCodeLine{00687\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma2\ \ =\ lossInDef\ *\ suma1;}
+\DoxyCodeLine{00688\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma3\ \ =\ lossInDef\ *\ suma2;}
+\DoxyCodeLine{00689\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma4\ \ =\ lossInDef\ *\ suma3;}
+\DoxyCodeLine{00690\ }
+\DoxyCodeLine{00691\ \ \ \ \ \ \ \ \ \ \ \ \ sum\ +=\ (suma4\ +\ (-\/4.*suma1*suma3\ -\/\ 3.*suma2*suma2\ +\ }
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (12.*suma1*suma1*suma2\ -\/\ }
+\DoxyCodeLine{00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 6.*std::pow(suma1,4.)/suma0)/suma0)/suma0)/suma0;}
+\DoxyCodeLine{00694\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00695\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sum;}
+\DoxyCodeLine{00696\ \ \ \ \ \}}
+\DoxyCodeLine{00697\ }
+\DoxyCodeLine{00698\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00699\ \ \ \ \ std::tuple<Real,\ Real,\ Real,\ Real>\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ad2660951a9a0f3acd06caa56a28e00f6}{SaddlePointLossModel<CP>::CumGen0234DerivCond}}(}
+\DoxyCodeLine{00700\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00702\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00703\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00704\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00705\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ deriv0\ =\ 0.,}
+\DoxyCodeLine{00706\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//deriv1\ =\ 0.,}}
+\DoxyCodeLine{00707\ \ \ \ \ \ \ \ \ \ \ \ \ \ deriv2\ =\ 0.,}
+\DoxyCodeLine{00708\ \ \ \ \ \ \ \ \ \ \ \ \ \ deriv3\ =\ 0.,}
+\DoxyCodeLine{00709\ \ \ \ \ \ \ \ \ \ \ \ \ \ deriv4\ =\ 0.;}
+\DoxyCodeLine{00710\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{00711\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ }
+\DoxyCodeLine{00712\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00713\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{00714\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossInDef\ =\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{00715\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor))\ /\ remainingNotional\_;}
+\DoxyCodeLine{00717\ }
+\DoxyCodeLine{00718\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ midFactor\ =\ pBuffer\ *\ std::exp(lossInDef\ *\ saddle);}
+\DoxyCodeLine{00719\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ denominator\ =\ 1.-\/pBuffer\ +\ midFactor;}
+\DoxyCodeLine{00720\ }
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ suma0\ =\ denominator;}
+\DoxyCodeLine{00722\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma1\ \ =\ lossInDef\ *\ midFactor;}
+\DoxyCodeLine{00723\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma2\ \ =\ lossInDef\ *\ suma1;}
+\DoxyCodeLine{00724\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma3\ \ =\ lossInDef\ *\ suma2;}
+\DoxyCodeLine{00725\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma4\ \ =\ lossInDef\ *\ suma3;}
+\DoxyCodeLine{00726\ }
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ To\ do:\ optimize\ these:}}
+\DoxyCodeLine{00728\ \ \ \ \ \ \ \ \ \ \ \ \ deriv0\ +=\ std::log(suma0);}
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//deriv1\ +=\ suma1\ /\ suma0;}}
+\DoxyCodeLine{00730\ \ \ \ \ \ \ \ \ \ \ \ \ deriv2\ +=\ suma2\ /\ suma0\ -\/\ std::pow(suma1\ /\ suma0\ ,\ 2.);}
+\DoxyCodeLine{00731\ \ \ \ \ \ \ \ \ \ \ \ \ deriv3\ +=\ (suma3\ +\ (2.*std::pow(suma1,\ 3.)/suma0\ -\/\ }
+\DoxyCodeLine{00732\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 3.*suma1*suma2)/suma0)/suma0;}
+\DoxyCodeLine{00733\ \ \ \ \ \ \ \ \ \ \ \ \ deriv4\ +=\ (suma4\ +\ (-\/4.*suma1*suma3\ -\/\ 3.*suma2*suma2\ +\ }
+\DoxyCodeLine{00734\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (12.*suma1*suma1*suma2\ -\/\ }
+\DoxyCodeLine{00735\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 6.*std::pow(suma1,4.)/suma0)/suma0)/suma0)/suma0;}
+\DoxyCodeLine{00736\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00737\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{deriv0,\ deriv2,\ deriv3,\ deriv4\};}
+\DoxyCodeLine{00738\ \ \ \ \ \}}
+\DoxyCodeLine{00739\ }
+\DoxyCodeLine{00740\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00741\ \ \ \ \ std::tuple<Real,\ Real>\ SaddlePointLossModel<CP>::CumGen02DerivCond(}
+\DoxyCodeLine{00742\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00743\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddle,\ }
+\DoxyCodeLine{00744\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00745\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00746\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00747\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ deriv0\ =\ 0.,}
+\DoxyCodeLine{00748\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//deriv1\ =\ 0.,}}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \ \ \ \ \ \ \ deriv2\ =\ 0.;}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ }
+\DoxyCodeLine{00752\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossInDef\ =\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{00756\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor))\ /\ remainingNotional\_;}
+\DoxyCodeLine{00757\ }
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ midFactor\ =\ pBuffer\ *\ std::exp(lossInDef\ *\ saddle);}
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ denominator\ =\ 1.-\/pBuffer\ +\ midFactor;}
+\DoxyCodeLine{00760\ }
+\DoxyCodeLine{00761\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ suma0\ =\ denominator;}
+\DoxyCodeLine{00762\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma1\ \ =\ lossInDef\ *\ midFactor;}
+\DoxyCodeLine{00763\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma2\ \ =\ lossInDef\ *\ suma1;}
+\DoxyCodeLine{00764\ }
+\DoxyCodeLine{00765\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ To\ do:\ optimize\ these:}}
+\DoxyCodeLine{00766\ \ \ \ \ \ \ \ \ \ \ \ \ deriv0\ +=\ std::log(suma0);}
+\DoxyCodeLine{00767\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//deriv1\ +=\ suma1\ /\ suma0;}}
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \ \ \ \ \ \ deriv2\ +=\ suma2\ /\ suma0\ -\/\ std::pow(suma1\ /\ suma0\ ,\ 2.);}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00770\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{deriv0,\ deriv2\};}
+\DoxyCodeLine{00771\ \ \ \ \ \}}
+\DoxyCodeLine{00772\ }
+\DoxyCodeLine{00773\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/\ Saddle\ point\ search\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00774\ }
+\DoxyCodeLine{00775\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00776\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a65cf83c7daa2c2b91bab3a4e99293259}{SaddlePointLossModel<CP>::findSaddle}}(}
+\DoxyCodeLine{00777\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondPs,}
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossLevel,\ \textcolor{comment}{//\ in\ total\ portfolio\ loss\ fractional\ unit\ }}
+\DoxyCodeLine{00779\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor,\ }
+\DoxyCodeLine{00780\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy,}
+\DoxyCodeLine{00781\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ maxEvaluations}
+\DoxyCodeLine{00782\ \ \ \ \ \ \ \ \ )\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00783\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)to\ do:}}
+\DoxyCodeLine{00785\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ REQUIRE\ that\ loss\ level\ is\ below\ the\ max\ loss\ attainable\ in\ }}
+\DoxyCodeLine{00786\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ the\ portfolio,\ otherwise\ theres\ no\ solution...}}
+\DoxyCodeLine{00787\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_1_1_saddle_objective_function}{SaddleObjectiveFunction}}\ f(*\textcolor{keyword}{this},\ lossLevel,\ invUncondPs,\ mktFactor);}
+\DoxyCodeLine{00788\ }
+\DoxyCodeLine{00789\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00790\ \ \ \ \ \ \ \ \ std::vector<Real>\ lgds;}
+\DoxyCodeLine{00791\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<nNames;\ iName++)}
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \ \ \ \ \ lgds.push\_back(remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{00793\ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondPs[iName],\ iName,}
+\DoxyCodeLine{00794\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor))\ );}
+\DoxyCodeLine{00795\ }
+\DoxyCodeLine{00796\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ computed\ limits:}}
+\DoxyCodeLine{00797\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ position\ of\ the\ name\ with\ the\ largest\ relative\ exposure\ loss\ (i.e.:}}
+\DoxyCodeLine{00798\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ largest:\ N\_i\ LGD\_i\ /\ N\_\{total\})}}
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iNamMax\ =\ std::distance(lgds.begin(),\ }
+\DoxyCodeLine{00800\ \ \ \ \ \ \ \ \ \ \ \ \ std::max\_element(lgds.begin(),\ lgds.end())\ );}
+\DoxyCodeLine{00801\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ gap\ to\ be\ considered\ zero\ at\ the\ negative\ side\ of\ the\ logistic\ }}
+\DoxyCodeLine{00802\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ inversion:}}
+\DoxyCodeLine{00803\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ deltaMin\ =\ 1.e-\/5;}
+\DoxyCodeLine{00804\ \ \ \ \ \ \ \ \ \textcolor{comment}{//}}
+\DoxyCodeLine{00805\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pMaxName\ =\ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{00806\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondPs[iNamMax],\ iNamMax,\ mktFactor);}
+\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ aproximates\ the\ \ saddle\ pt\ corresponding\ to\ this\ minimum;\ finds\ }}
+\DoxyCodeLine{00808\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ it\ by\ using\ only\ the\ smallest\ logistic\ term\ and\ thus\ this\ is\ }}
+\DoxyCodeLine{00809\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ smaller\ than\ the\ true\ value:}}
+\DoxyCodeLine{00810\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddleMin\ =\ 1./(lgds[iNamMax]/remainingNotional\_)\ *\ }
+\DoxyCodeLine{00811\ \ \ \ \ \ \ \ \ \ \ \ \ std::log(deltaMin*(1.-\/pMaxName)/}
+\DoxyCodeLine{00812\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (pMaxName*lgds[iNamMax]/remainingNotional\_-\/pMaxName*deltaMin));}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ and\ the\ associated\ minimum\ loss\ is\ approximately:\ (this\ is\ thence\ }}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ the\ minimum\ loss\ we\ can\ resolve/invert)}}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minLoss\ =\ }
+\DoxyCodeLine{00816\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a765cd2b6c952b76f3dc1dd0f27a1e17d}{CumGen1stDerivativeCond}}(invUncondPs,\ saddleMin,\ mktFactor);}
+\DoxyCodeLine{00817\ }
+\DoxyCodeLine{00818\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ we\ are\ below\ the\ loss\ resolution\ it\ returns\ approximating\ }}
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ by\ the\ minimum/maximum\ attainable\ point.\ Typically\ the\ functionals}}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ to\ integrate\ will\ have\ a\ low\ dependency\ on\ this\ point.}}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(lossLevel\ <\ minLoss)\ \textcolor{keywordflow}{return}\ saddleMin;}
+\DoxyCodeLine{00822\ }
+\DoxyCodeLine{00823\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddleMax\ =\ 1./(lgds[iNamMax]/remainingNotional\_)\ *\ }
+\DoxyCodeLine{00824\ \ \ \ \ \ \ \ \ \ \ \ \ std::log((lgds[iNamMax]/remainingNotional\_}
+\DoxyCodeLine{00825\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/deltaMin)*(1.-\/pMaxName)/(pMaxName*deltaMin));}
+\DoxyCodeLine{00826\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxLoss\ =\ }
+\DoxyCodeLine{00827\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a765cd2b6c952b76f3dc1dd0f27a1e17d}{CumGen1stDerivativeCond}}(invUncondPs,\ saddleMax,\ mktFactor);}
+\DoxyCodeLine{00828\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(lossLevel\ >\ maxLoss)\ \textcolor{keywordflow}{return}\ saddleMax;}
+\DoxyCodeLine{00829\ }
+\DoxyCodeLine{00830\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_brent}{Brent}}\ solverBrent;}
+\DoxyCodeLine{00831\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ guess\ =\ (saddleMin+saddleMax)/2.;}
+\DoxyCodeLine{00832\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00833\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ (lossLevel\ -\/\ }}
+\DoxyCodeLine{00834\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ CumGen1stDerivativeCond(invUncondPs,\ lossLevel,\ mktFactor))}}
+\DoxyCodeLine{00835\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /CumGen2ndDerivativeCond(invUncondPs,\ lossLevel,\ mktFactor);}}
+\DoxyCodeLine{00836\ \textcolor{comment}{\ \ \ \ \ \ \ \ if(guess\ >\ saddleMax)\ guess\ =\ (saddleMin+saddleMax)/2.;}}
+\DoxyCodeLine{00837\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00838\ \ \ \ \ \ \ \ \ solverBrent.\mbox{\hyperlink{class_quant_lib_1_1_solver1_d_a65b912b5ea70e93f3a942c3f1ed020b0}{setMaxEvaluations}}(maxEvaluations);}
+\DoxyCodeLine{00839\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ solverBrent.\mbox{\hyperlink{class_quant_lib_1_1_solver1_d_a137cd2caf0042ad6fd2c409a9ebc8226}{solve}}(f,\ accuracy,\ guess,\ saddleMin,\ saddleMax);}
+\DoxyCodeLine{00840\ \ \ \ \ \}}
+\DoxyCodeLine{00841\ }
+\DoxyCodeLine{00842\ }
+\DoxyCodeLine{00843\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/\ Statistics\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00844\ }
+\DoxyCodeLine{00845\ }
+\DoxyCodeLine{00846\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00847\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{SaddlePointLossModel<CP>::percentile}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ }
+\DoxyCodeLine{00848\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}})\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00849\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00850\ \ \ \ \ \ \ \ \ \textcolor{comment}{//this\ test\ should\ be\ in\ the\ calling\ basket...?}}
+\DoxyCodeLine{00851\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(\mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}}\ >=0.\ \&\&\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}}\ <=1.,\ }
+\DoxyCodeLine{00852\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Incorrect\ percentile\ value."{}});}
+\DoxyCodeLine{00853\ }
+\DoxyCodeLine{00854\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ still\ this\ does\ not\ tackle\ the\ situation\ where\ we\ have\ cumulated\ }}
+\DoxyCodeLine{00855\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ losses\ from\ previous\ defaults:}}
+\DoxyCodeLine{00856\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(d\ <=\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().evaluationDate())\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00857\ }
+\DoxyCodeLine{00858\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Trivial\ cases\ when\ the\ percentile\ is\ outside\ the\ prob\ range\ }}
+\DoxyCodeLine{00859\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ associated\ to\ the\ tranche\ limits:}}
+\DoxyCodeLine{00860\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}}\ <=\ 1.-\/\mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae04bf88e8206b128596094b62aa134b8}{probOverLoss}}(d,\ 0.))\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00861\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}}\ >=\ 1.-\/\mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae04bf88e8206b128596094b62aa134b8}{probOverLoss}}(d,\ 1.))\ }
+\DoxyCodeLine{00862\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ basket\_-\/>remainingTrancheNotional();}
+\DoxyCodeLine{00863\ }
+\DoxyCodeLine{00864\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_1_1_saddle_perc_obj_function}{SaddlePercObjFunction}}\ f(*\textcolor{keyword}{this},\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}},\ d);}
+\DoxyCodeLine{00865\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_brent}{Brent}}\ solver;}
+\DoxyCodeLine{00866\ \ \ \ \ \ \ \ \ solver.\mbox{\hyperlink{class_quant_lib_1_1_solver1_d_a65b912b5ea70e93f3a942c3f1ed020b0}{setMaxEvaluations}}(100);}
+\DoxyCodeLine{00867\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minVal\ =\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}};}
+\DoxyCodeLine{00868\ }
+\DoxyCodeLine{00869\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxVal\ =\ 1.-\/\mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}};\ }
+\DoxyCodeLine{00870\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ guess\ =\ 0.5;}
+\DoxyCodeLine{00871\ }
+\DoxyCodeLine{00872\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ solut\ =\ solver.\mbox{\hyperlink{class_quant_lib_1_1_solver1_d_a137cd2caf0042ad6fd2c409a9ebc8226}{solve}}(f,\ 1.e-\/4,\ guess,\ minVal,\ maxVal);}
+\DoxyCodeLine{00873\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ basket\_-\/>remainingTrancheNotional()\ *\ solut;}
+\DoxyCodeLine{00874\ \ \ \ \ \}}
+\DoxyCodeLine{00875\ }
+\DoxyCodeLine{00876\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00877\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a22c5406183e410f27a3e3335681bc85b}{SaddlePointLossModel<CP>::probOverLossCond}}(}
+\DoxyCodeLine{00878\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondPs,}
+\DoxyCodeLine{00879\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ trancheLossFract,\ }
+\DoxyCodeLine{00880\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ portfFract\ =\ attachRatio\_\ +\ trancheLossFract\ *\ }
+\DoxyCodeLine{00882\ \ \ \ \ \ \ \ \ \ \ \ \ (detachRatio\_-\/attachRatio\_);\textcolor{comment}{//\ these\ are\ remaining\ ratios}}
+\DoxyCodeLine{00883\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00884\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ for\ non-\/equity\ losses\ add\ the\ probability\ jump\ at\ zero\ tranche\ }}
+\DoxyCodeLine{00885\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ losses\ (since\ this\ method\ returns\ prob\ of\ losing\ more\ or\ }}
+\DoxyCodeLine{00886\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ equal\ to)}}
+\DoxyCodeLine{00888\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{00889\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a46120bee2967860cd6d8ce0b3b83099c}{probOverLossPortfCond}}(invUncondPs,}
+\DoxyCodeLine{00890\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//below;\ should\ substract\ realized\ loses.\ Use\ remaining\ amounts??}}
+\DoxyCodeLine{00891\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portfFract\ *\ basket\_-\/>basketNotional(),}
+\DoxyCodeLine{00892\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor);}
+\DoxyCodeLine{00893\ \ \ \ \ \}}
+\DoxyCodeLine{00894\ }
+\DoxyCodeLine{00895\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00896\ \ \ \ \ std::map<Real,\ Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a2971a952590ebd6e333834ded04117e0}{SaddlePointLossModel<CP>::lossDistribution}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00897\ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>\ distrib;}
+\DoxyCodeLine{00898\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{constexpr}\ \textcolor{keywordtype}{double}\ numPts\ =\ 500.;}
+\DoxyCodeLine{00899\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossFraction=1./numPts;\ lossFraction<0.45;\ }
+\DoxyCodeLine{00900\ \ \ \ \ \ \ \ \ \ \ \ \ lossFraction+=\ 1./numPts)}
+\DoxyCodeLine{00901\ \ \ \ \ \ \ \ \ \ \ \ \ distrib.insert(std::make\_pair<Real,\ Probability>(}
+\DoxyCodeLine{00902\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lossFraction\ *\ remainingNotional\_\ ,\ }
+\DoxyCodeLine{00903\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1.-\/probOverPortfLoss(d,\ lossFraction*\ remainingNotional\_\ )));}
+\DoxyCodeLine{00904\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ distrib;}
+\DoxyCodeLine{00905\ \ \ \ \ \}}
+\DoxyCodeLine{00906\ }
+\DoxyCodeLine{00907\ \ \ \ \ \textcolor{comment}{/*\ \ NOTICE\ THIS\ IS\ ON\ THE\ TOTAL\ PORTFOLIO\ -\/-\/-\/-\/\ UNTRANCHED..............}}
+\DoxyCodeLine{00908\ \textcolor{comment}{\ \ \ \ \ \ \ \ Probability\ of\ having\ losses\ in\ the\ portfolio\ due\ to\ default\ }}
+\DoxyCodeLine{00909\ \textcolor{comment}{\ \ \ \ \ \ \ \ events\ equal\ or\ larger\ than\ a\ given\ absolute\ loss\ value\ on\ a\ }}
+\DoxyCodeLine{00910\ \textcolor{comment}{\ \ \ \ \ \ \ \ given\ date\ conditional\ to\ the\ latent\ model\ factor.}}
+\DoxyCodeLine{00911\ \textcolor{comment}{\ \ \ \ \ \ \ \ The\ integral\ expression\ on\ the\ expansion\ is\ the\ first\ order\ }}
+\DoxyCodeLine{00912\ \textcolor{comment}{\ \ \ \ \ \ \ \ integration\ as\ presented\ in\ several\ references,\ see\ for\ instance;\ }}
+\DoxyCodeLine{00913\ \textcolor{comment}{\ \ \ \ \ \ \ \ equation\ 8\ in\ R.Martin,\ K.Thompson,\ and\ C.\ Browne\ 's\ }}
+\DoxyCodeLine{00914\ \textcolor{comment}{\ \ \ \ \ \ \ \ 'Taking\ to\ the\ Saddle',\ Risk\ Magazine,\ June\ 2001,\ page\ 91}}
+\DoxyCodeLine{00915\ \textcolor{comment}{}}
+\DoxyCodeLine{00916\ \textcolor{comment}{\ \ \ \ \ \ \ \ The\ loss\ is\ passed\ in\ absolute\ value.}}
+\DoxyCodeLine{00917\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00918\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{00919\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a46120bee2967860cd6d8ce0b3b83099c}{SaddlePointLossModel<CP>::probOverLossPortfCond}}(}
+\DoxyCodeLine{00920\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{00921\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,\ }
+\DoxyCodeLine{00922\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00923\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00924\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ This\ is\ taking\ in\ the\ unconditional\ probabilites\ non\ inverted.\ See\ if}}
+\DoxyCodeLine{00925\ \textcolor{comment}{\ \ \ \ \ \ \ \ the\ callers\ can\ be\ written\ taking\ the\ inversion\ already;\ if\ they\ are\ }}
+\DoxyCodeLine{00926\ \textcolor{comment}{\ \ \ \ \ \ \ \ performing\ it\ thats\ a\ perf\ hit.\ At\ least\ this\ can\ be\ seen\ to\ be\ true}}
+\DoxyCodeLine{00927\ \textcolor{comment}{\ \ \ \ \ \ \ \ for\ the\ recovery\ call\ (but\ rand\ rr\ are\ not\ intended\ to\ be\ used\ yet)}}
+\DoxyCodeLine{00928\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00929\ \ \ \ \ \ \ \ \textcolor{comment}{//\ return\ probOverLossPortfCond1stOrder(d,\ loss,\ mktFactor);}}
+\DoxyCodeLine{00930\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (loss\ <=\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \textcolor{keywordflow}{return}\ 1.;}
+\DoxyCodeLine{00931\ }
+\DoxyCodeLine{00932\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ relativeLoss\ =\ loss\ /\ remainingNotional\_;}
+\DoxyCodeLine{00933\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (relativeLoss\ >=\ 1.-\/\mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00934\ }
+\DoxyCodeLine{00935\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{00936\ }
+\DoxyCodeLine{00937\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ averageRecovery\_\ =\ 0.;}
+\DoxyCodeLine{00938\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)}
+\DoxyCodeLine{00939\ \ \ \ \ \ \ \ \ \ \ \ \ averageRecovery\_\ +=\ copula\_-\/>conditionalRecoveryInvP(}
+\DoxyCodeLine{00940\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{00941\ \ \ \ \ \ \ \ \ averageRecovery\_\ =\ averageRecovery\_\ /\ nNames;}
+\DoxyCodeLine{00942\ }
+\DoxyCodeLine{00943\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxAttLossFract\ =\ 1.-\/averageRecovery\_;}
+\DoxyCodeLine{00944\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(relativeLoss\ >\ maxAttLossFract)\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00945\ }
+\DoxyCodeLine{00946\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddlePt\ =\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a65cf83c7daa2c2b91bab3a4e99293259}{findSaddle}}(invUncondProbs,}
+\DoxyCodeLine{00947\ \ \ \ \ \ \ \ \ \ \ \ \ relativeLoss,\ mktFactor);}
+\DoxyCodeLine{00948\ }
+\DoxyCodeLine{00949\ \ \ \ \ \ \ \ \ std::tuple<Real,\ Real,\ Real,\ Real>\ cumulants\ =\ }
+\DoxyCodeLine{00950\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ad2660951a9a0f3acd06caa56a28e00f6}{CumGen0234DerivCond}}(invUncondProbs,\ }
+\DoxyCodeLine{00951\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ saddlePt,\ mktFactor);}
+\DoxyCodeLine{00952\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ baseVal\ =\ std::get<0>(cumulants);}
+\DoxyCodeLine{00953\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ secondVal\ =\ std::get<1>(cumulants);}
+\DoxyCodeLine{00954\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ K3Saddle\ =\ std::get<2>(cumulants);}
+\DoxyCodeLine{00955\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ K4Saddle\ =\ std::get<3>(cumulants);}
+\DoxyCodeLine{00956\ }
+\DoxyCodeLine{00957\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddleTo2\ =\ saddlePt\ *\ saddlePt;}
+\DoxyCodeLine{00958\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddleTo3\ =\ saddleTo2\ *\ saddlePt;}
+\DoxyCodeLine{00959\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddleTo4\ =\ saddleTo3\ *\ saddlePt;}
+\DoxyCodeLine{00960\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddleTo6\ =\ saddleTo4\ *\ saddleTo2;}
+\DoxyCodeLine{00961\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ K3SaddleTo2\ =\ K3Saddle*K3Saddle;}
+\DoxyCodeLine{00962\ }
+\DoxyCodeLine{00963\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(saddlePt\ >\ 0.)\ \{\ \textcolor{comment}{//\ <-\/>\ (loss\ >\ condEL)}}
+\DoxyCodeLine{00964\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ exponent\ =\ baseVal\ -\/\ relativeLoss\ *\ saddlePt\ +\ }
+\DoxyCodeLine{00965\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .5\ *\ saddleTo2\ *\ secondVal;}
+\DoxyCodeLine{00966\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ std::abs(exponent)\ >\ 700.)\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00967\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{00968\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::exp(exponent)}
+\DoxyCodeLine{00969\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ \mbox{\hyperlink{class_quant_lib_1_1_cumulative_normal_distribution}{CumulativeNormalDistribution}}()(-\/std::abs(saddlePt)*}
+\DoxyCodeLine{00970\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::sqrt(\textcolor{comment}{/*saddleTo2\ **/}secondVal))}
+\DoxyCodeLine{00971\ }
+\DoxyCodeLine{00972\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ high\ order\ corrections:}}
+\DoxyCodeLine{00973\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (1.\ -\/\ saddleTo3*K3Saddle/6.\ +\ saddleTo4*K4Saddle/24.\ +\ }
+\DoxyCodeLine{00974\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ saddleTo6*K3SaddleTo2/72.)\ }
+\DoxyCodeLine{00975\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00976\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //\ FIX\ ME:\ this\ term\ introduces\ at\ times\ numerical\ }}
+\DoxyCodeLine{00977\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //\ \ \ instabilty\ (shows\ up\ in\ percentile\ computation)}}
+\DoxyCodeLine{00978\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ (3.*secondVal*(1.-\/secondVal*saddleTo2)*}}
+\DoxyCodeLine{00979\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (saddlePt*K4Saddle-\/4.*K3Saddle)}}
+\DoxyCodeLine{00980\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ saddlePt*K3SaddleTo2*(3.-\/saddleTo2*secondVal\ +\ }}
+\DoxyCodeLine{00981\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ saddleTo4*secondVal*secondVal))\ }}
+\DoxyCodeLine{00982\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ (72.*M\_SQRTPI*M\_SQRT\_2*std::pow(secondVal,\ 5./2.)\ )\ }}
+\DoxyCodeLine{00983\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00984\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ;}
+\DoxyCodeLine{00985\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(saddlePt==0.)\{\textcolor{comment}{//\ <-\/>\ (loss\ ==\ condEL)}}
+\DoxyCodeLine{00986\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ .5;}
+\DoxyCodeLine{00987\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\ \{\textcolor{comment}{//\ <-\/>(loss\ <\ condEL)}}
+\DoxyCodeLine{00988\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ exponent\ =\ baseVal\ -\/\ relativeLoss\ *\ saddlePt\ +\ }
+\DoxyCodeLine{00989\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .5\ *\ saddleTo2\ *\ secondVal;}
+\DoxyCodeLine{00990\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ std::abs(exponent)\ >\ 700.)\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00991\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{00992\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1.-\/}
+\DoxyCodeLine{00993\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::exp(exponent)}
+\DoxyCodeLine{00994\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ \mbox{\hyperlink{class_quant_lib_1_1_cumulative_normal_distribution}{CumulativeNormalDistribution}}()(-\/std::abs(saddlePt)}
+\DoxyCodeLine{00995\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ std::sqrt(\textcolor{comment}{/*saddleTo2\ **/}secondVal))\textcolor{comment}{//\ static\ call?}}
+\DoxyCodeLine{00996\ }
+\DoxyCodeLine{00997\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ high\ order\ corrections:}}
+\DoxyCodeLine{00998\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (1.\ -\/\ saddleTo3*K3Saddle/6.\ +\ saddleTo4*K4Saddle/24.\ +\ }
+\DoxyCodeLine{00999\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ saddleTo6*K3SaddleTo2/72.)\ }
+\DoxyCodeLine{01000\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{01001\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ (3.*secondVal*(1.-\/secondVal*saddleTo2)*}}
+\DoxyCodeLine{01002\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (saddlePt*K4Saddle-\/4.*K3Saddle)}}
+\DoxyCodeLine{01003\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ saddlePt*K3SaddleTo2*(3.-\/saddleTo2*secondVal\ +}}
+\DoxyCodeLine{01004\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ saddleTo4*secondVal*secondVal))\ }}
+\DoxyCodeLine{01005\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ (72.*M\_SQRTPI*M\_SQRT\_2*std::pow(secondVal,\ 5./2.)\ )\ }}
+\DoxyCodeLine{01006\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{01007\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ;}
+\DoxyCodeLine{01008\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01009\ \ \ \ \ \}}
+\DoxyCodeLine{01010\ }
+\DoxyCodeLine{01011\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01012\ \ \ \ \ \textcolor{comment}{//\ cheaper;\ less\ terms\ retained;\ yet\ the\ cost\ lies\ in\ the\ saddle\ point\ calc}}
+\DoxyCodeLine{01013\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ SaddlePointLossModel<CP>::probOverLossPortfCond1stOrder(}
+\DoxyCodeLine{01014\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondPs,}
+\DoxyCodeLine{01015\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,\ }
+\DoxyCodeLine{01016\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01017\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01018\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (loss\ <=\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \textcolor{keywordflow}{return}\ 1.;}
+\DoxyCodeLine{01019\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{01020\ }
+\DoxyCodeLine{01021\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ relativeLoss\ =\ loss\ /\ remainingNotional\_;}
+\DoxyCodeLine{01022\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(relativeLoss\ >=\ 1.-\/\mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{01023\ }
+\DoxyCodeLine{01024\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ only\ true\ for\ constant\ recovery\ models......?}}
+\DoxyCodeLine{01025\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ averageRecovery\_\ =\ 0.;}
+\DoxyCodeLine{01026\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)}
+\DoxyCodeLine{01027\ \ \ \ \ \ \ \ \ \ \ \ \ averageRecovery\_\ +=\ }
+\DoxyCodeLine{01028\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalRecoveryInvP(invUncondPs[iName],\ iName,\ }
+\DoxyCodeLine{01029\ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor);\ \ }
+\DoxyCodeLine{01030\ \ \ \ \ \ \ \ \ averageRecovery\_\ =\ averageRecovery\_\ /\ nNames;}
+\DoxyCodeLine{01031\ }
+\DoxyCodeLine{01032\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxAttLossFract\ =\ 1.-\/averageRecovery\_;}
+\DoxyCodeLine{01033\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(relativeLoss\ >\ maxAttLossFract)\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{01034\ }
+\DoxyCodeLine{01035\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddlePt\ =\ findSaddle(invUncondPs,}
+\DoxyCodeLine{01036\ \ \ \ \ \ \ \ \ \ \ \ \ relativeLoss,\ mktFactor);}
+\DoxyCodeLine{01037\ }
+\DoxyCodeLine{01038\ \ \ \ \ \ \ \ \ std::tuple<Real,\ Real>\ cumulants\ =\ }
+\DoxyCodeLine{01039\ \ \ \ \ \ \ \ \ \ \ \ \ CumGen02DerivCond(invUncondPs,}
+\DoxyCodeLine{01040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ saddlePt,\ mktFactor);}
+\DoxyCodeLine{01041\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ baseVal\ =\ std::get<0>(cumulants);}
+\DoxyCodeLine{01042\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ secondVal\ =\ std::get<1>(cumulants);}
+\DoxyCodeLine{01043\ }
+\DoxyCodeLine{01044\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddleTo2\ =\ saddlePt\ *\ saddlePt;}
+\DoxyCodeLine{01045\ }
+\DoxyCodeLine{01046\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(saddlePt\ >\ 0.)\ \{\ \textcolor{comment}{//\ <-\/>\ (loss\ >\ condEL)}}
+\DoxyCodeLine{01047\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ exponent\ =\ baseVal\ -\/\ relativeLoss\ *\ saddlePt\ +\ }
+\DoxyCodeLine{01048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .5\ *\ saddleTo2\ *\ secondVal;}
+\DoxyCodeLine{01049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ std::abs(exponent)\ >\ 700.)\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{01050\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{01051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ dangerous\ exponential;\ fix\ me}}
+\DoxyCodeLine{01052\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::exp(exponent)}
+\DoxyCodeLine{01053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ std::exp(baseVal\ -\/\ relativeLoss\ *\ saddlePt\ }}
+\DoxyCodeLine{01054\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ .5\ *\ saddleTo2\ *\ secondVal)*/}}
+\DoxyCodeLine{01055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ \mbox{\hyperlink{class_quant_lib_1_1_cumulative_normal_distribution}{CumulativeNormalDistribution}}()(-\/std::abs(saddlePt)*}
+\DoxyCodeLine{01056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::sqrt(\textcolor{comment}{/*saddleTo2\ **/}secondVal));}
+\DoxyCodeLine{01057\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(saddlePt==0.)\{\textcolor{comment}{//\ <-\/>\ (loss\ ==\ condEL)}}
+\DoxyCodeLine{01058\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ .5;}
+\DoxyCodeLine{01059\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\ \{\textcolor{comment}{//\ <-\/>(loss\ <\ condEL)}}
+\DoxyCodeLine{01060\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ exponent\ =\ baseVal\ -\/\ relativeLoss\ *\ saddlePt\ +\ }
+\DoxyCodeLine{01061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .5\ *\ saddleTo2\ *\ secondVal;}
+\DoxyCodeLine{01062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\ std::abs(exponent)\ >\ 700.)\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{01063\ }
+\DoxyCodeLine{01064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{01065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1.-\/}
+\DoxyCodeLine{01066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ std::exp(baseVal\ -\/\ relativeLoss\ *\ saddlePt\ }}
+\DoxyCodeLine{01067\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ .5\ *\ saddleTo2\ *\ secondVal)*/}}
+\DoxyCodeLine{01068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::exp(exponent)}
+\DoxyCodeLine{01069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ \mbox{\hyperlink{class_quant_lib_1_1_cumulative_normal_distribution}{CumulativeNormalDistribution}}()(-\/std::abs(saddlePt)*}
+\DoxyCodeLine{01070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::sqrt(\textcolor{comment}{/*saddleTo2\ **/}secondVal));}
+\DoxyCodeLine{01071\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01072\ \ \ \ \ \}}
+\DoxyCodeLine{01073\ }
+\DoxyCodeLine{01074\ }
+\DoxyCodeLine{01081\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01082\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a5873026803299621a1ff0ba881f260c7}{SaddlePointLossModel<CP>::probDensityCond}}(}
+\DoxyCodeLine{01083\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondPs,}
+\DoxyCodeLine{01084\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,}
+\DoxyCodeLine{01085\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01086\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01087\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (loss\ <=\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{01088\ }
+\DoxyCodeLine{01089\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ relativeLoss\ =\ loss\ /\ remainingNotional\_;}
+\DoxyCodeLine{01090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddlePt\ =\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a65cf83c7daa2c2b91bab3a4e99293259}{findSaddle}}(invUncondPs,}
+\DoxyCodeLine{01091\ \ \ \ \ \ \ \ \ \ \ \ \ relativeLoss,\ mktFactor);}
+\DoxyCodeLine{01092\ }
+\DoxyCodeLine{01093\ \ \ \ \ \ \ \ \ std::tuple<Real,\ Real,\ Real,\ Real>\ cumulants\ =\ }
+\DoxyCodeLine{01094\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ad2660951a9a0f3acd06caa56a28e00f6}{CumGen0234DerivCond}}(invUncondPs,}
+\DoxyCodeLine{01095\ \ \ \ \ \ \ \ \ \ \ \ \ saddlePt,\ mktFactor);}
+\DoxyCodeLine{01097\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ K0Saddle\ =\ std::get<0>(cumulants);}
+\DoxyCodeLine{01098\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ K2Saddle\ =\ std::get<1>(cumulants);}
+\DoxyCodeLine{01099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ K3Saddle\ =\ std::get<2>(cumulants);}
+\DoxyCodeLine{01100\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ K4Saddle\ =\ std::get<3>(cumulants);}
+\DoxyCodeLine{01101\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ see,\ for\ instance\ R.Martin\ "{}he\ saddle\ point\ method\ and\ portfolio\ }}
+\DoxyCodeLine{01102\ \textcolor{comment}{\ \ \ \ \ \ \ \ optionalities."{}\ in\ Risk\ December\ 2006\ p.93\ */}}
+\DoxyCodeLine{01103\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\(\backslash\)todo\ the\ exponentials\ below\ are\ dangerous\ and\ agressive,\ tame\ them.}}
+\DoxyCodeLine{01104\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{01105\ \ \ \ \ \ \ \ \ \ \ \ \ (}
+\DoxyCodeLine{01106\ \ \ \ \ \ \ \ \ \ \ \ \ 1.}
+\DoxyCodeLine{01107\ \ \ \ \ \ \ \ \ \ \ \ \ +\ K4Saddle}
+\DoxyCodeLine{01108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /(8.*std::pow(K2Saddle,\ 2.))}
+\DoxyCodeLine{01109\ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ 5.*std::pow(K3Saddle,2.)}
+\DoxyCodeLine{01110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /(24.*std::pow(K2Saddle,\ 3.))}
+\DoxyCodeLine{01111\ \ \ \ \ \ \ \ \ \ \ \ \ )\ *\ std::exp(K0Saddle\ -\/\ saddlePt\ *\ relativeLoss)}
+\DoxyCodeLine{01112\ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ (std::sqrt(2.\ *\ M\_PI\ *\ K2Saddle));}
+\DoxyCodeLine{01113\ \ \ \ \ \}}
+\DoxyCodeLine{01114\ }
+\DoxyCodeLine{01115\ \ \ \ \ \textcolor{comment}{/*\ \ \ \ NOTICE\ THIS\ IS\ ON\ THE\ TOTAL\ PORTFOLIO\ -\/-\/-\/-\/\ UNTRANCHED..}}
+\DoxyCodeLine{01116\ \textcolor{comment}{\ \ \ \ \ \ \ \ Sensitivities\ of\ the\ individual\ names\ to\ a\ given\ portfolio\ loss\ value\ }}
+\DoxyCodeLine{01117\ \textcolor{comment}{\ \ \ \ \ \ \ \ due\ to\ defaults.\ It\ returns\ ratios\ to\ the\ total\ structure\ notional,\ }}
+\DoxyCodeLine{01118\ \textcolor{comment}{\ \ \ \ \ \ \ \ which\ aggregated\ add\ up\ to\ the\ requested\ loss\ value.}}
+\DoxyCodeLine{01119\ \textcolor{comment}{}}
+\DoxyCodeLine{01120\ \textcolor{comment}{\ \ \ \ see\ equation\ 8\ in\ 'VAR:\ who\ contributes\ and\ how\ much?'\ by\ R.Martin,\ }}
+\DoxyCodeLine{01121\ \textcolor{comment}{\ \ \ \ K.Thompson,\ and\ C.\ Browne\ in\ Risk\ Magazine,\ August\ 2001}}
+\DoxyCodeLine{01122\ \textcolor{comment}{}}
+\DoxyCodeLine{01123\ \textcolor{comment}{\ \ \ \ The\ passed\ loss\ is\ the\ loss\ amount\ level\ at\ which\ we\ want\ to}}
+\DoxyCodeLine{01124\ \textcolor{comment}{\ \ \ \ request\ the\ sensitivity.\ \ Equivalent\ to\ a\ percentile.}}
+\DoxyCodeLine{01125\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{01126\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01127\ \ \ \ \ std::vector<Real>\ SaddlePointLossModel<CP>::splitLossCond(}
+\DoxyCodeLine{01128\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{01129\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,\ }
+\DoxyCodeLine{01130\ \ \ \ \ \ \ \ \ std::vector<Real>\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01131\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01132\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{01133\ \ \ \ \ \ \ \ \ std::vector<Real>\ condContrib(nNames,\ 0.);}
+\DoxyCodeLine{01134\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (loss\ <=\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \textcolor{keywordflow}{return}\ condContrib;}
+\DoxyCodeLine{01135\ }
+\DoxyCodeLine{01136\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddlePt\ =\ findSaddle(invUncondProbs,\ loss\ /\ remainingNotional\_,\ }
+\DoxyCodeLine{01137\ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor);}
+\DoxyCodeLine{01138\ }
+\DoxyCodeLine{01139\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<nNames;\ iName++)\ \{}
+\DoxyCodeLine{01140\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ }
+\DoxyCodeLine{01141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{01142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{01143\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossInDef\ =\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{01144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{01145\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor));}
+\DoxyCodeLine{01146\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ midFactor\ =\ pBuffer\ *\ }
+\DoxyCodeLine{01147\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::exp(lossInDef\ *\ saddlePt/\ remainingNotional\_);}
+\DoxyCodeLine{01148\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ denominator\ =\ 1.-\/pBuffer\ +\ midFactor;}
+\DoxyCodeLine{01149\ }
+\DoxyCodeLine{01150\ \ \ \ \ \ \ \ \ \ \ \ \ condContrib[iName]\ =\ lossInDef\ *\ midFactor\ /\ denominator;\ }
+\DoxyCodeLine{01151\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01152\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ condContrib;}
+\DoxyCodeLine{01153\ \ \ \ \ \}}
+\DoxyCodeLine{01154\ }
+\DoxyCodeLine{01155\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01156\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_aa0d607e75340d7ca18d97edcdb8a5e14}{SaddlePointLossModel<CP>::conditionalExpectedLoss}}(}
+\DoxyCodeLine{01157\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{01158\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01159\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01160\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{01161\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ eloss\ =\ 0.;}
+\DoxyCodeLine{01163\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{01164\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{01165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{01166\ \ \ \ \ \ \ \ \ \ \ \ \ eloss\ +=\ pBuffer\ *\ remainingNotionals\_[iName]\ *}
+\DoxyCodeLine{01167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{01168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor));}
+\DoxyCodeLine{01169\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01170\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ eloss;}
+\DoxyCodeLine{01171\ \ \ \ \ \}}
+\DoxyCodeLine{01172\ }
+\DoxyCodeLine{01173\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01174\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_afa698dabdfe399fffffbc9603b7bafa7}{SaddlePointLossModel<CP>::conditionalExpectedTrancheLoss}}(}
+\DoxyCodeLine{01175\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{01176\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01177\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01178\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{01179\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ eloss\ =\ 0.;}
+\DoxyCodeLine{01181\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{01182\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{01183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{01184\ \ \ \ \ \ \ \ \ \ \ \ \ eloss\ +=\ }
+\DoxyCodeLine{01185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pBuffer\ *\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{01186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],\ }
+\DoxyCodeLine{01187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor));}
+\DoxyCodeLine{01188\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::min(}
+\DoxyCodeLine{01190\ \ \ \ \ \ \ \ \ \ \ \ \ std::max(eloss\ -\/\ attachRatio\_\ *\ remainingNotional\_,\ 0.),\ }
+\DoxyCodeLine{01191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (detachRatio\_\ -\/\ attachRatio\_)\ *\ remainingNotional\_);}
+\DoxyCodeLine{01192\ \ \ \ \ \}}
+\DoxyCodeLine{01193\ }
+\DoxyCodeLine{01194\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01195\ \ \ \ \ std::vector<Real>\ SaddlePointLossModel<CP>::expectedShortfallSplitCond(}
+\DoxyCodeLine{01196\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{01197\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossPerc,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01198\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01199\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{01200\ \ \ \ \ \ \ \ \ std::vector<Real>\ lgds;}
+\DoxyCodeLine{01201\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<nNames;\ iName++)}
+\DoxyCodeLine{01202\ \ \ \ \ \ \ \ \ \ \ \ \ lgds.push\_back(remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{01203\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],}
+\DoxyCodeLine{01204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor)));\ }
+\DoxyCodeLine{01205\ \ \ \ \ \ \ \ \ std::vector<Real>\ vola(nNames,\ 0.),\ mu(nNames,\ 0.);}
+\DoxyCodeLine{01206\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ volaTot\ =\ 0.,\ muTot\ =\ 0.;}
+\DoxyCodeLine{01207\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{01208\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{01209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{01210\ \ \ \ \ \ \ \ \ \ \ \ \ mu[iName]\ =\ lgds[iName]\ *\ pBuffer\ /\ remainingNotionals\_[iName];}
+\DoxyCodeLine{01211\ \ \ \ \ \ \ \ \ \ \ \ \ muTot\ +=\ lgds[iName]\ *\ pBuffer;}
+\DoxyCodeLine{01212\ \ \ \ \ \ \ \ \ \ \ \ \ vola[iName]\ =\ lgds[iName]\ *\ lgds[iName]\ *\ pBuffer\ *\ (1.-\/pBuffer)\ }
+\DoxyCodeLine{01213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ remainingNotionals\_[iName];}
+\DoxyCodeLine{01214\ \ \ \ \ \ \ \ \ \ \ \ \ volaTot\ +=\ lgds[iName]\ *\ lgds[iName]\ *\ pBuffer\ *\ (1.-\/pBuffer)\ ;}
+\DoxyCodeLine{01215\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)}
+\DoxyCodeLine{01217\ \ \ \ \ \ \ \ \ \ \ \ \ vola[iName]\ =\ vola[iName]\ /\ volaTot;}
+\DoxyCodeLine{01218\ }
+\DoxyCodeLine{01219\ \ \ \ \ \ \ \ \ std::vector<Real>\ esfPartition(nNames,\ 0.);}
+\DoxyCodeLine{01220\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{01221\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ uEdisp\ =\ (lossPerc-\/muTot)/std::sqrt(volaTot);}
+\DoxyCodeLine{01222\ \ \ \ \ \ \ \ \ \ \ \ \ esfPartition[iName]\ =\ mu[iName]}
+\DoxyCodeLine{01223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ CumulativeNormalDistribution()(uEdisp)\ \textcolor{comment}{//\ static\ call?}}
+\DoxyCodeLine{01224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ vola[iName]\ *\ NormalDistribution()(uEdisp);}
+\DoxyCodeLine{01225\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01226\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ esfPartition;}
+\DoxyCodeLine{01227\ \ \ \ \ \}}
+\DoxyCodeLine{01228\ }
+\DoxyCodeLine{01229\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01230\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ SaddlePointLossModel<CP>::expectedShortfallTrancheCond(}
+\DoxyCodeLine{01231\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{01232\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossPerc,\ \textcolor{comment}{//\ value\ }}
+\DoxyCodeLine{01233\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ percentile,}
+\DoxyCodeLine{01234\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01235\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01236\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ TO\ DO:\ this\ is\ too\ crude,\ a\ general\ expression\ valid\ for\ all\ }}
+\DoxyCodeLine{01237\ \textcolor{comment}{\ \ \ \ \ \ \ \ situations\ is\ possible\ (with\ no\ extra\ cost\ as\ long\ as\ the\ loss\ limits\ }}
+\DoxyCodeLine{01238\ \textcolor{comment}{\ \ \ \ \ \ \ \ are\ checked).}}
+\DoxyCodeLine{01239\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{01240\ \ \ \ \ \ \ \ \ \textcolor{comment}{//tranche\ correction\ term:}}
+\DoxyCodeLine{01241\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ correctionTerm\ =\ 0.;}
+\DoxyCodeLine{01242\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ probLOver\ =\ probOverLossPortfCond(invUncondProbs,}
+\DoxyCodeLine{01243\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>detachmentAmount(),\ mktFactor);}
+\DoxyCodeLine{01244\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(basket\_-\/>attachmentAmount()\ >\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \{}
+\DoxyCodeLine{01245\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(lossPerc\ <\ basket\_-\/>attachmentAmount())\ \{}
+\DoxyCodeLine{01246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ correctionTerm\ =\ (\ (basket\_-\/>detachmentAmount()\ }
+\DoxyCodeLine{01247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ 2.*basket\_-\/>attachmentAmount())*}
+\DoxyCodeLine{01248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ probOverLossPortfCond(invUncondProbs,\ lossPerc,\ }
+\DoxyCodeLine{01249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor)}
+\DoxyCodeLine{01250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ basket\_-\/>attachmentAmount()\ *\ probLOver\ )/(1.-\/percentile);}
+\DoxyCodeLine{01251\ \ \ \ \ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{01252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ correctionTerm\ =\ (\ (percentile-\/1)*basket\_-\/>attachmentAmount()}
+\DoxyCodeLine{01253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ basket\_-\/>detachmentAmount()\ *\ probLOver}
+\DoxyCodeLine{01254\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )/(1.-\/percentile);}
+\DoxyCodeLine{01255\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01256\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01257\ }
+\DoxyCodeLine{01258\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ expectedShortfallFullPortfolioCond(invUncondProbs,\ }
+\DoxyCodeLine{01259\ \ \ \ \ \ \ \ \ \ \ \ \ std::max(lossPerc,\ basket\_-\/>attachmentAmount()),\ mktFactor)}
+\DoxyCodeLine{01260\ \ \ \ \ \ \ \ \ \ \ \ \ +\ expectedShortfallFullPortfolioCond(invUncondProbs,\ }
+\DoxyCodeLine{01261\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>detachmentAmount(),\ mktFactor)}
+\DoxyCodeLine{01262\ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ correctionTerm;}
+\DoxyCodeLine{01263\ \ \ \ \ \}}
+\DoxyCodeLine{01264\ }
+\DoxyCodeLine{01265\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01266\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae57829929758f2af1f4770e34d1a557d}{SaddlePointLossModel<CP>::expectedShortfallFullPortfolioCond}}(}
+\DoxyCodeLine{01267\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ invUncondProbs,}
+\DoxyCodeLine{01268\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossPerc,\ \textcolor{comment}{//\ value\ }}
+\DoxyCodeLine{01269\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactor)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01270\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01271\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ This\ version\ is\ based\ on:\ Martin\ 2006\ paper\ and\ on\ the\ expression\ }}
+\DoxyCodeLine{01272\ \textcolor{comment}{\ \ \ \ \ \ \ \ in\ 'SaddlePoint\ approximation\ of\ expected\ shortfall\ for\ transformed\ }}
+\DoxyCodeLine{01273\ \textcolor{comment}{\ \ \ \ \ \ \ \ means'\ S.A.\ Broda\ and\ M.S.Paolella\ ,\ Amsterdam\ School\ of\ Economics\ }}
+\DoxyCodeLine{01274\ \textcolor{comment}{\ \ \ \ \ \ \ \ discussion\ paper,\ available\ online.}}
+\DoxyCodeLine{01275\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{01276\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossPercRatio\ =\ lossPerc\ \ /remainingNotional\_;}
+\DoxyCodeLine{01277\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ elCond\ =\ 0.;}
+\DoxyCodeLine{01278\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nNames\ =\ remainingNotionals\_.size();}
+\DoxyCodeLine{01279\ }
+\DoxyCodeLine{01281\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ nNames;\ iName++)\ \{}
+\DoxyCodeLine{01282\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ pBuffer\ =\ copula\_-\/>conditionalDefaultProbabilityInvP(}
+\DoxyCodeLine{01283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[iName],\ iName,\ mktFactor);}
+\DoxyCodeLine{01284\ \ \ \ \ \ \ \ \ \ \ \ \ elCond\ +=\ pBuffer\ *\ remainingNotionals\_[iName]\ *\ }
+\DoxyCodeLine{01285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/copula\_-\/>conditionalRecoveryInvP(invUncondProbs[iName],}
+\DoxyCodeLine{01286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iName,\ mktFactor));}
+\DoxyCodeLine{01287\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01288\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ saddlePt\ =\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a65cf83c7daa2c2b91bab3a4e99293259}{findSaddle}}(invUncondProbs,\ lossPercRatio,\ mktFactor);}
+\DoxyCodeLine{01289\ }
+\DoxyCodeLine{01290\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Martin\ 2006:}}
+\DoxyCodeLine{01291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{01292\ \ \ \ \ \ \ \ \ \ \ \ \ elCond\ *\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a46120bee2967860cd6d8ce0b3b83099c}{probOverLossPortfCond}}(invUncondProbs,\ lossPerc,\ mktFactor)}
+\DoxyCodeLine{01293\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ +\ (lossPerc\ -\/\ elCond)\ *\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a5873026803299621a1ff0ba881f260c7}{probDensityCond}}(invUncondProbs,\ lossPerc,}
+\DoxyCodeLine{01294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mktFactor)\ /saddlePt;}
+\DoxyCodeLine{01295\ }
+\DoxyCodeLine{01296\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ calling\ the\ EL\ tranche}}
+\DoxyCodeLine{01297\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ return\ elCond\ -\/\ expectedEquityLossCond(d,\ lossPercRatio,\ mktFactor);}}
+\DoxyCodeLine{01298\ }
+\DoxyCodeLine{01299\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{01300\ \textcolor{comment}{\ \ \ \ \ \ \ \ //\ Broda\ and\ Paolella:}}
+\DoxyCodeLine{01301\ \textcolor{comment}{\ \ \ \ \ \ \ \ Real\ elCondRatio\ =\ elCond\ /\ remainingNotional\_;}}
+\DoxyCodeLine{01302\ \textcolor{comment}{}}
+\DoxyCodeLine{01303\ \textcolor{comment}{\ \ \ \ \ \ \ \ std::tuple<Real,\ Real,\ Real,\ Real>\ cumulants\ =\ }}
+\DoxyCodeLine{01304\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ CumGen0234DerivCond(uncondProbs,\ }}
+\DoxyCodeLine{01305\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ saddlePt,\ mktFactor);}}
+\DoxyCodeLine{01306\ \textcolor{comment}{\ \ \ \ \ \ \ \ Real\ K0Saddle\ =\ std::get<0>(cumulants);///USE\ THEM\ DIRECTLY}}
+\DoxyCodeLine{01307\ \textcolor{comment}{\ \ \ \ \ \ \ \ Real\ K2Saddle\ =\ std::get<1>(cumulants);}}
+\DoxyCodeLine{01308\ \textcolor{comment}{}}
+\DoxyCodeLine{01309\ \textcolor{comment}{\ \ \ \ \ \ \ \ Real\ wq\ =\ std::sqrt(2.\ *\ saddlePt\ *\ lossPercRatio\ -\/\ 2.\ *\ K0Saddle);}}
+\DoxyCodeLine{01310\ \textcolor{comment}{\ \ \ \ \ \ \ \ //std::sqrt(-\/2.\ *\ saddlePt\ *\ lossPerc\ +\ 2.\ *\ K0Saddle);????}}
+\DoxyCodeLine{01311\ \textcolor{comment}{\ \ \ \ \ \ \ \ Real\ factor\ =\ 1.;}}
+\DoxyCodeLine{01312\ \textcolor{comment}{\ \ \ \ \ \ \ \ if(saddlePt<0.)\ \{}}
+\DoxyCodeLine{01313\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ wq\ =\ -\/wq;}}
+\DoxyCodeLine{01314\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ factor\ =\ -\/1.;}}
+\DoxyCodeLine{01315\ \textcolor{comment}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{01316\ \textcolor{comment}{}}
+\DoxyCodeLine{01317\ \textcolor{comment}{\ \ \ \ \ \ \ \ Real\ numNames\ =\ static\_cast<Real>(nNames);}}
+\DoxyCodeLine{01318\ \textcolor{comment}{}}
+\DoxyCodeLine{01319\ \textcolor{comment}{\ \ \ \ \ \ \ \ Real\ term1\ =\ CumulativeNormalDistribution()(wq)//\ *\ std::sqrt(numNames)}}
+\DoxyCodeLine{01320\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ *\ elCond\ ;}}
+\DoxyCodeLine{01321\ \textcolor{comment}{\ \ \ \ \ \ \ \ Real\ term2\ =\ .5\ *\ M\_2\_SQRTPI\ *\ M\_SQRT1\_2\ *\ (1./std::sqrt(numNames))}}
+\DoxyCodeLine{01322\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ *\ exp(-\/wq*wq\ *\ numNames/2.)*(elCond/wq\ -\/\ }}
+\DoxyCodeLine{01323\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lossPerc/(saddlePt\ *\ std::sqrt(K2Saddle)));}}
+\DoxyCodeLine{01324\ \textcolor{comment}{\ \ \ \ \ \ \ \ return\ term1\ +\ term2;}}
+\DoxyCodeLine{01325\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{01326\ \ \ \ \ \}}
+\DoxyCodeLine{01327\ }
+\DoxyCodeLine{01328\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ CP>}
+\DoxyCodeLine{01329\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ad951608b35188cfb419e1296fd4fa8b9}{SaddlePointLossModel<CP>::expectedShortfall}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&d,\ }
+\DoxyCodeLine{01330\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ percProb)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{01331\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{01332\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ assuming\ I\ have\ the\ tranched\ one.}}
+\DoxyCodeLine{01333\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossPerc\ =\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_a64178e1c5af0a8887ed3cd6d4948caa3}{percentile}}(d,\ percProb);}
+\DoxyCodeLine{01334\ }
+\DoxyCodeLine{01335\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ check\ the\ trivial\ case\ when\ the\ loss\ is\ over\ the\ detachment\ limit\ }}
+\DoxyCodeLine{01336\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ to\ avoid\ computation:}}
+\DoxyCodeLine{01337\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ trancheAmount\ =\ basket\_-\/>trancheNotional()\ *\ }
+\DoxyCodeLine{01338\ \ \ \ \ \ \ \ \ \ \ \ \ (detachRatio\_-\/attachRatio\_);}
+\DoxyCodeLine{01339\ \ \ \ \ \ \ \ \ \textcolor{comment}{//assumed\ the\ amount\ includes\ the\ realized\ loses}}
+\DoxyCodeLine{01340\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(lossPerc\ >=\ trancheAmount)\ \textcolor{keywordflow}{return}\ trancheAmount;}
+\DoxyCodeLine{01341\ \ \ \ \ \ \ \ \ \textcolor{comment}{//SHOULD\ CHECK\ NOW\ THE\ OPPOSITE\ LIMIT\ ("{}zero"{}\ losses)....}}
+\DoxyCodeLine{01342\ \ \ \ \ \ \ \ \ std::vector<Real>\ invUncondProbs\ =\ }
+\DoxyCodeLine{01343\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(d);}
+\DoxyCodeLine{01344\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<invUncondProbs.size();\ i++)}
+\DoxyCodeLine{01345\ \ \ \ \ \ \ \ \ \ \ \ \ invUncondProbs[i]\ =\ }
+\DoxyCodeLine{01346\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invUncondProbs[i],\ i);}
+\DoxyCodeLine{01347\ }
+\DoxyCodeLine{01348\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Integrate\ with\ the\ tranche\ or\ the\ portfolio\ according\ to\ the\ limits.}}
+\DoxyCodeLine{01349\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{01350\ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{01351\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_saddle_point_loss_model_ae57829929758f2af1f4770e34d1a557d}{expectedShortfallFullPortfolioCond}}(invUncondProbs,\ lossPerc,\ v1);}
+\DoxyCodeLine{01352\ \ \ \ \ \ \ \ \ \ \ \ \ \})\ /\ (1.-\/percProb);}
+\DoxyCodeLine{01353\ }
+\DoxyCodeLine{01354\ \ \ \ \ \textcolor{comment}{/*\ test:?}}
+\DoxyCodeLine{01355\ \textcolor{comment}{\ \ \ \ \ \ \ \ return\ std::inner\_product(integrESFPartition.begin(),\ }}
+\DoxyCodeLine{01356\ \textcolor{comment}{\ \ \ \ \ \ \ \ integrESFPartition.end(),\ remainingNotionals\_.begin(),\ 0.);}}
+\DoxyCodeLine{01357\ \textcolor{comment}{\ \ \ \ */}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{01358\ }
+\DoxyCodeLine{01359\ \ \ \ \ \}}
+\DoxyCodeLine{01360\ }
+\DoxyCodeLine{01361\ }
+\DoxyCodeLine{01362\ }
+\DoxyCodeLine{01363\ \}}
+\DoxyCodeLine{01364\ }
+\DoxyCodeLine{01365\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

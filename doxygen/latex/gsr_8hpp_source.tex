@@ -1,0 +1,202 @@
+\doxysection{gsr.\+hpp}
+\hypertarget{gsr_8hpp_source}{}\label{gsr_8hpp_source}\index{ql/models/shortrate/onefactormodels/gsr.hpp@{ql/models/shortrate/onefactormodels/gsr.hpp}}
+\mbox{\hyperlink{gsr_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2013,\ 2015\ Peter\ Caspers}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_gsr\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_gsr\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{gaussian1dmodel_8hpp}{ql/models/shortrate/onefactormodels/gaussian1dmodel.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{gsrprocess_8hpp}{ql/processes/gsrprocess.hpp}}>}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{keyword}{class\ }Gsr\ :\ \textcolor{keyword}{public}\ Gaussian1dModel,\ \textcolor{keyword}{public}\ CalibratedModel\ \{}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{comment}{//\ constant\ mean\ reversion}}
+\DoxyCodeLine{00038\ \ \ \ \ Gsr(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ termStructure,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ std::vector<Date>\ volstepdates,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ volatilities,}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ reversion,}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ T\ =\ 60.0);}
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{comment}{//\ piecewise\ mean\ reversion\ (with\ same\ step\ dates\ as\ volatilities)}}
+\DoxyCodeLine{00044\ \ \ \ \ Gsr(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ termStructure,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ std::vector<Date>\ volstepdates,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ volatilities,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ reversions,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ T\ =\ 60.0);}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{comment}{//\ constant\ mean\ reversion\ with\ floating\ model\ data}}
+\DoxyCodeLine{00050\ \ \ \ \ Gsr(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ termStructure,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ std::vector<Date>\ volstepdates,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\ volatilities,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ reversion,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ T\ =\ 60.0);}
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{comment}{//\ piecewise\ mean\ reversion\ with\ floating\ model\ data}}
+\DoxyCodeLine{00056\ \ \ \ \ Gsr(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ termStructure,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ std::vector<Date>\ volstepdates,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\ volatilities,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\ reversions,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ T\ =\ 60.0);}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ numeraireTime()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keywordtype}{void}\ numeraireTime(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ T);}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&reversion()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ reversion\_.params();\ \}}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&volatility()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ sigma\_.params();\ \}}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{comment}{//\ calibration\ constraints}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{comment}{//\ fixed\ reversions,\ only\ volatilities\ are\ free}}
+\DoxyCodeLine{00071\ \ \ \ \ std::vector<bool>\ FixedReversions()\ \{}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ std::vector<bool>\ res(reversions\_.size(),\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ std::vector<bool>\ vol(volatilities\_.size(),\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ res.insert(res.end(),\ vol.begin(),\ vol.end());}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{00076\ \ \ \ \ \}}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{comment}{//\ fixed\ volatilities,\ only\ reversions\ are\ free}}
+\DoxyCodeLine{00079\ \ \ \ \ std::vector<bool>\ FixedVolatilities()\ \{}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ std::vector<bool>\ res(reversions\_.size(),\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ std::vector<bool>\ vol(volatilities\_.size(),\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ res.insert(res.end(),\ vol.begin(),\ vol.end());}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{00084\ \ \ \ \ \}}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \ std::vector<bool>\ MoveVolatility(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i)\ \{}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(i\ <\ volatilities\_.size(),}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}volatility\ with\ index\ "{}}\ <<\ i\ <<\ \textcolor{stringliteral}{"{}\ does\ not\ exist\ (0..."{}}}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ volatilities\_.size()\ -\/\ 1\ <<\ \textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ std::vector<bool>\ res(reversions\_.size()\ +\ volatilities\_.size(),\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ res[reversions\_.size()\ +\ i]\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{00093\ \ \ \ \ \}}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ std::vector<bool>\ MoveReversion(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i)\ \{}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(i\ <\ reversions\_.size(),}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}reversion\ with\ index\ "{}}\ <<\ i\ <<\ \textcolor{stringliteral}{"{}\ does\ not\ exist\ (0..."{}}}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ reversions\_.size()\ -\/\ 1\ <<\ \textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ std::vector<bool>\ res(reversions\_.size()\ +\ volatilities\_.size(),\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ res[i]\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{00102\ \ \ \ \ \}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{comment}{//\ With\ fixed\ reversion\ calibrate\ the\ volatilities\ one\ by\ one}}
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{comment}{//\ to\ the\ given\ helpers.\ It\ is\ assumed\ that\ that\ volatility\ step}}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{comment}{//\ dates\ are\ suitable\ for\ this,\ i.e.\ they\ should\ be\ identical\ to}}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{comment}{//\ the\ fixing\ dates\ of\ the\ helpers\ (except\ for\ the\ last\ one\ where}}
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{comment}{//\ we\ do\ not\ need\ a\ step).\ Also\ note\ that\ the\ endcritera\ reflect}}
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{comment}{//\ only\ the\ status\ of\ the\ last\ calibration\ when\ using\ this\ method.}}
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keywordtype}{void}\ calibrateVolatilitiesIterative(}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<ext::shared\_ptr<BlackCalibrationHelper>\ >\ \&helpers,}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{OptimizationMethod}}\ \&method,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\ \&\mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_a797a6b080b7a66d620758ff6fe34df39}{endCriteria}},}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \&constraint\ =\ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}(),}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ \&weights\ =\ std::vector<Real>())\ \{}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ helpers.size();\ i++)\ \{}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<CalibrationHelper>\ >\ h(1,\ helpers[i]);}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_af2776521b1584d547ec2440833508677}{calibrate}}(h,\ method,\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_a797a6b080b7a66d620758ff6fe34df39}{endCriteria}},\ constraint,\ weights,}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ MoveVolatility(i));}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00121\ \ \ \ \ \}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{comment}{//\ With\ fixed\ volatility\ calibrate\ the\ reversions\ one\ by\ one}}
+\DoxyCodeLine{00124\ \ \ \ \ \textcolor{comment}{//\ to\ the\ given\ helpers.\ In\ this\ case\ the\ step\ dates\ must\ be\ chosen}}
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{comment}{//\ according\ to\ the\ maturities\ of\ the\ calibration\ instruments.}}
+\DoxyCodeLine{00126\ \ \ \ \ \textcolor{keywordtype}{void}\ calibrateReversionsIterative(}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<ext::shared\_ptr<BlackCalibrationHelper>\ >\ \&helpers,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{OptimizationMethod}}\ \&method,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\ \&\mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_a797a6b080b7a66d620758ff6fe34df39}{endCriteria}},}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \&constraint\ =\ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}(),}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ \&weights\ =\ std::vector<Real>())\ \{}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ helpers.size();\ i++)\ \{}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<CalibrationHelper>\ >\ h(1,\ helpers[i]);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_af2776521b1584d547ec2440833508677}{calibrate}}(h,\ method,\ \mbox{\hyperlink{class_quant_lib_1_1_calibrated_model_a797a6b080b7a66d620758ff6fe34df39}{endCriteria}},\ constraint,\ weights,}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ MoveReversion(i));}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00137\ \ \ \ \ \}}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00140\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ numeraireImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ y,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ yts)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ zerobondImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ T,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ y,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\&\ yts)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keywordtype}{void}\ generateArguments()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ ext::static\_pointer\_cast<GsrProcess>(stateProcess\_)-\/>flushCache();}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00147\ \ \ \ \ \}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_gsr_aeab33a390e5811f180d68296aa38668e}{update}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_gsr_a6727fcb92ae273e667aaed986e9cd082}{performCalculations}}()\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_gaussian1d_model_ac299fb9c82685759700edcadc84b9f4c}{Gaussian1dModel::performCalculations}}();}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ updateTimes();}
+\DoxyCodeLine{00154\ \ \ \ \ \}}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{keywordtype}{void}\ updateTimes()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{keywordtype}{void}\ updateVolatility();}
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keywordtype}{void}\ updateReversion();}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \textcolor{keywordtype}{void}\ initialize(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}});}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_parameter}{Parameter}}\ \&reversion\_,\ \&sigma\_;}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \ \ std::vector<Handle<Quote>\ >\ volatilities\_;}
+\DoxyCodeLine{00166\ \ \ \ \ std::vector<Handle<Quote>\ >\ reversions\_;}
+\DoxyCodeLine{00167\ \ \ \ \ std::vector<Date>\ volstepdates\_;\ \textcolor{comment}{//\ this\ is\ shared\ between\ vols,}}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ adjusters\ and\ reverisons\ in}}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ case\ of\ piecewise\ reversions}}
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Time>\ volsteptimes\_;}
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ volsteptimesArray\_;\ \textcolor{comment}{//\ FIXME\ this\ is\ redundant\ (just\ a\ copy\ of}}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ volsteptimes\_)}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \textcolor{keyword}{struct\ }VolatilityObserver\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}\ \{}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ VolatilityObserver(\mbox{\hyperlink{class_quant_lib_1_1_gsr}{Gsr}}\ *p)\ :\ p\_(p)\ \{\}}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update()\textcolor{keyword}{\ override\ }\{\ p\_-\/>updateVolatility();\ \}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ Gsr\ *p\_;}
+\DoxyCodeLine{00178\ \ \ \ \ \};}
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keyword}{struct\ }ReversionObserver\ :\ \textcolor{keyword}{public}\ Observer\ \{}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ ReversionObserver(Gsr\ *p)\ :\ p\_(p)\ \{\}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update()\textcolor{keyword}{\ override\ }\{\ p\_-\/>updateReversion();\ \}}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ Gsr\ *p\_;}
+\DoxyCodeLine{00183\ \ \ \ \ \};}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \ \ \ \ ext::shared\_ptr<VolatilityObserver>\ volatilityObserver\_;}
+\DoxyCodeLine{00186\ \ \ \ \ ext::shared\_ptr<ReversionObserver>\ reversionObserver\_;}
+\DoxyCodeLine{00187\ \};}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ Gsr::numeraireTime()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00190\ \ \ \ \ \textcolor{keywordflow}{return}\ ext::dynamic\_pointer\_cast<GsrProcess>(stateProcess\_)}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ -\/>getForwardMeasureTime();}
+\DoxyCodeLine{00192\ \}}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ Gsr::numeraireTime(\textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ T)\ \{}
+\DoxyCodeLine{00195\ \ \ \ \ ext::dynamic\_pointer\_cast<GsrProcess>(stateProcess\_)}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ -\/>setForwardMeasureTime(T);}
+\DoxyCodeLine{00197\ \}}
+\DoxyCodeLine{00198\ \}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

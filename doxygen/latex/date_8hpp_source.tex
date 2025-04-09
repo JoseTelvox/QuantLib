@@ -1,0 +1,377 @@
+\doxysection{date.\+hpp}
+\hypertarget{date_8hpp_source}{}\label{date_8hpp_source}\index{ql/time/date.hpp@{ql/time/date.hpp}}
+\mbox{\hyperlink{date_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2000,\ 2001,\ 2002,\ 2003\ RiskMap\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2003,\ 2004,\ 2005,\ 2006\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2004,\ 2005,\ 2006\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ Copyright\ (C)\ 2006\ Katiuscia\ Manzoni}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ Copyright\ (C)\ 2006\ Toyin\ Akin}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ Copyright\ (C)\ 2015\ Klaus\ Spanderen}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ Copyright\ (C)\ 2020\ Leonardo\ Arcari}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ Copyright\ (C)\ 2020\ Kline\ s.r.l.}}
+\DoxyCodeLine{00012\ \textcolor{comment}{}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00021\ \textcolor{comment}{}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#ifndef\ quantlib\_date\_hpp}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#define\ quantlib\_date\_hpp}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{period_8hpp}{ql/time/period.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{weekday_8hpp}{ql/time/weekday.hpp}}>}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{null_8hpp}{ql/utilities/null.hpp}}>}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#ifdef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <boost/date\_time/posix\_time/ptime.hpp>}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <boost/date\_time/posix\_time/posix\_time\_duration.hpp>}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ \mbox{\hyperlink{namespace_quant_lib_a7354a4ac9189352870cbb0cb998e0bd4}{Day}};}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keyword}{enum}\ \mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ \{\ January\ \ \ =\ 1,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ February\ \ =\ 2,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ March\ \ \ \ \ =\ 3,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ April\ \ \ \ \ =\ 4,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ May\ \ \ \ \ \ \ =\ 5,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ June\ \ \ \ \ \ =\ 6,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ July\ \ \ \ \ \ =\ 7,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ August\ \ \ \ =\ 8,}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ September\ =\ 9,}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ October\ \ \ =\ 10,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ November\ \ =\ 11,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ December\ \ =\ 12,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Jan\ =\ 1,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Feb\ =\ 2,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Mar\ =\ 3,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Apr\ =\ 4,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Jun\ =\ 6,}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Jul\ =\ 7,}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Aug\ =\ 8,}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Sep\ =\ 9,}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Oct\ =\ 10,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Nov\ =\ 11,}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Dec\ =\ 12}
+\DoxyCodeLine{00080\ \ \ \ \ \};}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00083\ \ \ \ \ std::ostream\&\ operator<<(std::ostream\&,\ \mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}});}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ \mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}};}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \textcolor{preprocessor}{\#ifdef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keyword}{typedef}\ boost::posix\_time::hours::hour\_type\ Hour;}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keyword}{typedef}\ boost::posix\_time::minutes::min\_type\ Minute;}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{keyword}{typedef}\ boost::posix\_time::minutes::sec\_type\ Second;}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{keyword}{typedef}\ boost::posix\_time::time\_duration::fractional\_seconds\_type}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ Millisecond;}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{typedef}\ boost::posix\_time::time\_duration::fractional\_seconds\_type}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ Microsecond;}
+\DoxyCodeLine{00111\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \{}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::int\_fast32\_t\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{serial\_type}};}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}();}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}(\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ serialNumber);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}(\mbox{\hyperlink{namespace_quant_lib_a7354a4ac9189352870cbb0cb998e0bd4}{Day}}\ d,\ \mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ m,\ \mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}}\ y);}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\#ifdef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}(\textcolor{keyword}{const}\ boost::posix\_time::ptime\&\ localTime);}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}(\mbox{\hyperlink{namespace_quant_lib_a7354a4ac9189352870cbb0cb998e0bd4}{Day}}\ d,\ \mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ m,\ \mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}}\ y,}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \ \ \ Hour\ hours,\ Minute\ minutes,\ Second\ seconds,}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ Millisecond\ millisec\ =\ 0,\ Microsecond\ microsec\ =\ 0);}
+\DoxyCodeLine{00145\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a04474aebb0bea95bba2f1dcbdd8a27a6}{Weekday}}\ weekday()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a7354a4ac9189352870cbb0cb998e0bd4}{Day}}\ dayOfMonth()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a7354a4ac9189352870cbb0cb998e0bd4}{Day}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a015382225a0dcdc9476170fdd75cf2bf}{dayOfYear}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ month()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}}\ year()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ serialNumber()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \textcolor{preprocessor}{\#ifdef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ Hour\ hours()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ Minute\ minutes()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ Second\ seconds()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ Millisecond\ milliseconds()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ Microsecond\ microseconds()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ fractionOfDay()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ fractionOfSecond()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ boost::posix\_time::ptime\&\ dateTime()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_date_ac02f4dd69c10af7d7dcb1a38a79965c5}{operator+=}}(\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ days);}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_date_ac02f4dd69c10af7d7dcb1a38a79965c5}{operator+=}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&);}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_date_ac4c78bcec781349ca3bf6270731c384f}{operator-\/=}}(\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ days);}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_date_ac4c78bcec781349ca3bf6270731c384f}{operator-\/=}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&);}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_date_ac4133b8fc2bf0a3b66149b9ec7ef9288}{operator++}}();}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ac4133b8fc2bf0a3b66149b9ec7ef9288}{operator++}}(\textcolor{keywordtype}{int}\ );}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_date_a10075e5b5ea11c6f4b6e2034ede6ba9e}{operator-\/-\/}}();}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a10075e5b5ea11c6f4b6e2034ede6ba9e}{operator-\/-\/}}(\textcolor{keywordtype}{int}\ );}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a0f1cdebd554cd8728d396499f0f0585b}{operator+}}(\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ days)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a0f1cdebd554cd8728d396499f0f0585b}{operator+}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ae49bdabcb6460b1f4a7a7a2fd8e9d8a9}{operator-\/}}(\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ days)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ae49bdabcb6460b1f4a7a7a2fd8e9d8a9}{operator-\/}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_acdc9ad017a50abc0f14b8c4c77b3abe6}{todaysDate}}();}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ab3e730da90778d2163d34719915efaed}{minDate}}();}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ad04a122553934667f47284aede26bde2}{maxDate}}();}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ae51d29d45deb8e9f5fa2d538ea92068c}{isLeap}}(\mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}}\ y);}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a6364156ee4ee36b71ce2a61657b14e5d}{startOfMonth}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d);}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a8509a966813ef17cc30c08b922ef7011}{isStartOfMonth}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d);}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a452304c9aded5ef07d82fc43dcc81309}{endOfMonth}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d);}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a748ed14c936b2b91dfd440fdb9e309e3}{isEndOfMonth}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d);}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a30e332994cecd9a8891cc975eaf763ef}{nextWeekday}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d,}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a04474aebb0bea95bba2f1dcbdd8a27a6}{Weekday}}\ w);}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ac71c17c630fb79d73d3030bfbffd3975}{nthWeekday}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a04474aebb0bea95bba2f1dcbdd8a27a6}{Weekday}}\ w,}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ m,}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}}\ y);}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \textcolor{preprocessor}{\#ifdef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ localDateTime();}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ universalDateTime();}
+\DoxyCodeLine{00242\ }
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ boost::posix\_time::time\_duration::tick\_type\ ticksPerSecond();}
+\DoxyCodeLine{00245\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ minimumSerialNumber();}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ maximumSerialNumber();}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ checkSerialNumber(\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ serialNumber);}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \textcolor{preprocessor}{\#ifdef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ boost::posix\_time::ptime\ dateTime\_;}
+\DoxyCodeLine{00256\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ serialNumber\_;}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ advance(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ units,\ \mbox{\hyperlink{namespace_quant_lib_a6cdac5e2dae1e972076cc8e3302e4ad3}{TimeUnit}});}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ monthLength(\mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ m,\ \textcolor{keywordtype}{bool}\ leapYear);}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ monthOffset(\mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ m,\ \textcolor{keywordtype}{bool}\ leapYear);}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ yearOffset(\mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}}\ y);}
+\DoxyCodeLine{00262\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00263\ \ \ \ \ \};}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00268\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ operator-\/(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00272\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ daysBetween(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{keywordtype}{bool}\ operator==(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00277\ \ \ \ \ \textcolor{keywordtype}{bool}\ operator!=(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00279\ \ \ \ \ \textcolor{keywordtype}{bool}\ operator<(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00281\ \ \ \ \ \textcolor{keywordtype}{bool}\ operator<=(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00283\ \ \ \ \ \textcolor{keywordtype}{bool}\ operator>(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00285\ \ \ \ \ \textcolor{keywordtype}{bool}\ operator>=(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00308\ \ \ \ \ std::size\_t\ hash\_value(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d);}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00311\ \ \ \ \ std::ostream\&\ operator<<(std::ostream\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&);}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \ \ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}}\ \{}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }short\_date\_holder\ \{}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ short\_date\_holder(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ d)\ :\ d(d)\ \{\}}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ d;}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ std::ostream\&\ operator<<(std::ostream\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1short__date__holder}{short\_date\_holder}}\&);}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }long\_date\_holder\ \{}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ long\_date\_holder(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ :\ d(d)\ \{\}}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ d;}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ std::ostream\&\ operator<<(std::ostream\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1long__date__holder}{long\_date\_holder}}\&);}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }iso\_date\_holder\ \{}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ iso\_date\_holder(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ :\ d(d)\ \{\}}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ d;}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ std::ostream\&\ operator<<(std::ostream\&,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1iso__date__holder}{iso\_date\_holder}}\&);}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }formatted\_date\_holder\ \{}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \ \ \ \ formatted\_date\_holder(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ std::string\ f)\ :\ d(d),\ f(std::move(f))\ \{\}}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ d;}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ f;}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ std::ostream\&\ operator<<(std::ostream\&,}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1formatted__date__holder}{formatted\_date\_holder}}\&);}
+\DoxyCodeLine{00340\ }
+\DoxyCodeLine{00341\ \textcolor{preprocessor}{\#ifdef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }iso\_datetime\_holder\ \{}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ iso\_datetime\_holder(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ :\ d(d)\ \{\}}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ d;}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ std::ostream\&\ operator<<(std::ostream\&,\ \textcolor{keyword}{const}\ iso\_datetime\_holder\&);}
+\DoxyCodeLine{00347\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00348\ \ \ \ \ \}}
+\DoxyCodeLine{00349\ }
+\DoxyCodeLine{00350\ \ \ \ \ \textcolor{keyword}{namespace\ }io\ \{}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00353\ }
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ detail::short\_date\_holder\ \mbox{\hyperlink{group__manips_gab9e306f9ec0855319cbb452f6a7b3627}{short\_date}}(\textcolor{keyword}{const}\ Date\&);}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00357\ }
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ detail::long\_date\_holder\ \mbox{\hyperlink{group__manips_gad2cba1797c1cf63c02d899696b343ee8}{long\_date}}(\textcolor{keyword}{const}\ Date\&);}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00361\ }
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ detail::iso\_date\_holder\ \mbox{\hyperlink{group__manips_ga0921b3ae46195feff93b2a4388e05d63}{iso\_date}}(\textcolor{keyword}{const}\ Date\&);}
+\DoxyCodeLine{00363\ }
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ detail::formatted\_date\_holder\ \mbox{\hyperlink{group__manips_ga8fa78f7a218d5b62e45e1a2d3ae369a4}{formatted\_date}}(\textcolor{keyword}{const}\ Date\&,}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\&\ fmt);}
+\DoxyCodeLine{00368\ }
+\DoxyCodeLine{00369\ \textcolor{preprocessor}{\#ifdef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ detail::iso\_datetime\_holder\ iso\_datetime(\textcolor{keyword}{const}\ Date\&);}
+\DoxyCodeLine{00373\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00375\ \ \ \ \ \}}
+\DoxyCodeLine{00376\ }
+\DoxyCodeLine{00377\ }
+\DoxyCodeLine{00378\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00379\ }
+\DoxyCodeLine{00380\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a6364156ee4ee36b71ce2a61657b14e5d}{Date::startOfMonth}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d)\ \{}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ m\ =\ d.month();}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}}\ y\ =\ d.year();}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}(1,\ m,\ y);}
+\DoxyCodeLine{00384\ \ \ \ \ \}}
+\DoxyCodeLine{00385\ }
+\DoxyCodeLine{00386\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a8509a966813ef17cc30c08b922ef7011}{Date::isStartOfMonth}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d)\ \{}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (d.dayOfMonth()\ ==\ 1);}
+\DoxyCodeLine{00388\ \ \ \ \ \}}
+\DoxyCodeLine{00389\ }
+\DoxyCodeLine{00390\ \textcolor{preprocessor}{\#ifndef\ QL\_HIGH\_RESOLUTION\_DATE}}
+\DoxyCodeLine{00391\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a04474aebb0bea95bba2f1dcbdd8a27a6}{Weekday}}\ Date::weekday()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ w\ =\ serialNumber\_\ \%\ 7;}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespace_quant_lib_a04474aebb0bea95bba2f1dcbdd8a27a6}{Weekday}}(w\ ==\ 0\ ?\ 7\ :\ w);}
+\DoxyCodeLine{00394\ \ \ \ \ \}}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00396\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a7354a4ac9189352870cbb0cb998e0bd4}{Day}}\ Date::dayOfMonth()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a015382225a0dcdc9476170fdd75cf2bf}{dayOfYear}}()\ -\/\ monthOffset(month(),\mbox{\hyperlink{class_quant_lib_1_1_date_ae51d29d45deb8e9f5fa2d538ea92068c}{isLeap}}(year()));}
+\DoxyCodeLine{00398\ \ \ \ \ \}}
+\DoxyCodeLine{00399\ }
+\DoxyCodeLine{00400\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a7354a4ac9189352870cbb0cb998e0bd4}{Day}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a015382225a0dcdc9476170fdd75cf2bf}{Date::dayOfYear}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ serialNumber\_\ -\/\ yearOffset(year());}
+\DoxyCodeLine{00402\ \ \ \ \ \}}
+\DoxyCodeLine{00403\ }
+\DoxyCodeLine{00404\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ Date::serialNumber()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ serialNumber\_;}
+\DoxyCodeLine{00406\ \ \ \ \ \}}
+\DoxyCodeLine{00407\ }
+\DoxyCodeLine{00408\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a0f1cdebd554cd8728d396499f0f0585b}{Date::operator+}}(\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ days)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}(serialNumber\_+days);}
+\DoxyCodeLine{00410\ \ \ \ \ \}}
+\DoxyCodeLine{00411\ }
+\DoxyCodeLine{00412\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ae49bdabcb6460b1f4a7a7a2fd8e9d8a9}{Date::operator-\/}}(\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ days)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}(serialNumber\_-\/days);}
+\DoxyCodeLine{00414\ \ \ \ \ \}}
+\DoxyCodeLine{00415\ }
+\DoxyCodeLine{00416\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a0f1cdebd554cd8728d396499f0f0585b}{Date::operator+}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ p)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ advance(*\textcolor{keyword}{this},p.length(),p.units());}
+\DoxyCodeLine{00418\ \ \ \ \ \}}
+\DoxyCodeLine{00419\ }
+\DoxyCodeLine{00420\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ae49bdabcb6460b1f4a7a7a2fd8e9d8a9}{Date::operator-\/}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ p)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ advance(*\textcolor{keyword}{this},-\/p.length(),p.units());}
+\DoxyCodeLine{00422\ \ \ \ \ \}}
+\DoxyCodeLine{00423\ }
+\DoxyCodeLine{00424\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a452304c9aded5ef07d82fc43dcc81309}{Date::endOfMonth}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d)\ \{}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_afc504c75e7ee54a75e255256d99781e4}{Month}}\ m\ =\ d.month();}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a5dcda5470aff130981ac30f25d4244e7}{Year}}\ y\ =\ d.year();}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \{monthLength(m,\ \mbox{\hyperlink{class_quant_lib_1_1_date_ae51d29d45deb8e9f5fa2d538ea92068c}{isLeap}}(y)),\ m,\ y\};}
+\DoxyCodeLine{00428\ \ \ \ \ \}}
+\DoxyCodeLine{00429\ }
+\DoxyCodeLine{00430\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a748ed14c936b2b91dfd440fdb9e309e3}{Date::isEndOfMonth}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d)\ \{}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (d.dayOfMonth()\ ==\ monthLength(d.month(),\ \mbox{\hyperlink{class_quant_lib_1_1_date_ae51d29d45deb8e9f5fa2d538ea92068c}{isLeap}}(d.year())));}
+\DoxyCodeLine{00432\ \ \ \ \ \}}
+\DoxyCodeLine{00433\ }
+\DoxyCodeLine{00434\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_ae49bdabcb6460b1f4a7a7a2fd8e9d8a9}{operator-\/}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d1,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d2)\ \{}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ d1.serialNumber()-\/d2.serialNumber();}
+\DoxyCodeLine{00436\ \ \ \ \ \}}
+\DoxyCodeLine{00437\ }
+\DoxyCodeLine{00438\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a29f7670d202257ce1117b1806711ba2a}{daysBetween}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d1,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date_a2aebff9676fa9c647cc2cefe9f50fc0e}{Date}}\&\ d2)\ \{}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}(d2-\/d1);}
+\DoxyCodeLine{00440\ \ \ \ \ \}}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00442\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ operator==(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d1,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d2)\ \{}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (d1.serialNumber()\ ==\ d2.serialNumber());}
+\DoxyCodeLine{00444\ \ \ \ \ \}}
+\DoxyCodeLine{00445\ }
+\DoxyCodeLine{00446\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ operator!=(\textcolor{keyword}{const}\ Date\&\ d1,\ \textcolor{keyword}{const}\ Date\&\ d2)\ \{}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (d1.serialNumber()\ !=\ d2.serialNumber());}
+\DoxyCodeLine{00448\ \ \ \ \ \}}
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ operator<(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d1,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d2)\ \{}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (d1.serialNumber()\ <\ d2.serialNumber());}
+\DoxyCodeLine{00452\ \ \ \ \ \}}
+\DoxyCodeLine{00453\ }
+\DoxyCodeLine{00454\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ operator<=(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d1,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d2)\ \{}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (d1.serialNumber()\ <=\ d2.serialNumber());}
+\DoxyCodeLine{00456\ \ \ \ \ \}}
+\DoxyCodeLine{00457\ }
+\DoxyCodeLine{00458\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ operator>(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d1,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d2)\ \{}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (d1.serialNumber()\ >\ d2.serialNumber());}
+\DoxyCodeLine{00460\ \ \ \ \ \}}
+\DoxyCodeLine{00461\ }
+\DoxyCodeLine{00462\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{bool}\ operator>=(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d1,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d2)\ \{}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (d1.serialNumber()\ >=\ d2.serialNumber());}
+\DoxyCodeLine{00464\ \ \ \ \ \}}
+\DoxyCodeLine{00465\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00466\ \}}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \textcolor{keyword}{namespace\ }std\ \{}
+\DoxyCodeLine{00469\ \ \ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00470\ \ \ \ \ \textcolor{keyword}{struct\ }hash<\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}::Date>\ \{}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ std::size\_t\ operator()(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{QuantLib::Date}}\&\ d)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ QuantLib::hash\_value(d);}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00474\ \ \ \ \ \};}
+\DoxyCodeLine{00475\ \}}
+\DoxyCodeLine{00476\ }
+\DoxyCodeLine{00477\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

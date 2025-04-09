@@ -1,0 +1,88 @@
+\doxysection{Quant\+Lib\+::Hybrid\+Simulated\+Annealing\texorpdfstring{$<$}{<} Sampler, Probability, Temperature, Reannealing \texorpdfstring{$>$}{>} Class Template Reference}
+\hypertarget{class_quant_lib_1_1_hybrid_simulated_annealing}{}\label{class_quant_lib_1_1_hybrid_simulated_annealing}\index{QuantLib::HybridSimulatedAnnealing$<$ Sampler, Probability, Temperature, Reannealing $>$@{QuantLib::HybridSimulatedAnnealing$<$ Sampler, Probability, Temperature, Reannealing $>$}}
+
+
+{\ttfamily \#include $<$hybridsimulatedannealing.\+hpp$>$}
+
+Inheritance diagram for Quant\+Lib\+::Hybrid\+Simulated\+Annealing\texorpdfstring{$<$}{<} Sampler, Probability, Temperature, Reannealing \texorpdfstring{$>$}{>}\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_quant_lib_1_1_hybrid_simulated_annealing}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_quant_lib_1_1_hybrid_simulated_annealing_ae0d81c69dd4ac1003ed348409496064e}\label{class_quant_lib_1_1_hybrid_simulated_annealing_ae0d81c69dd4ac1003ed348409496064e} 
+enum {\bfseries Local\+Optimize\+Scheme} \{ {\bfseries No\+Local\+Optimize}
+, {\bfseries Every\+New\+Point}
+, {\bfseries Every\+Best\+Point}
+ \}
+\item 
+\Hypertarget{class_quant_lib_1_1_hybrid_simulated_annealing_a20b57c9b72eb62f45764352d3b224196}\label{class_quant_lib_1_1_hybrid_simulated_annealing_a20b57c9b72eb62f45764352d3b224196} 
+enum {\bfseries Reset\+Scheme} \{ {\bfseries No\+Reset\+Scheme}
+, {\bfseries Reset\+To\+Best\+Point}
+, {\bfseries Reset\+To\+Origin}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_quant_lib_1_1_hybrid_simulated_annealing_a13c57cb7a8e0c5848e10b912ba723ebd}\label{class_quant_lib_1_1_hybrid_simulated_annealing_a13c57cb7a8e0c5848e10b912ba723ebd} 
+{\bfseries Hybrid\+Simulated\+Annealing} (const Sampler \&sampler, const \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}} \&probability, Temperature temperature, const Reannealing \&reannealing=\mbox{\hyperlink{struct_quant_lib_1_1_reannealing_trivial}{Reannealing\+Trivial}}(), \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}} start\+Temperature=200.\+0, \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}} end\+Temperature=0.\+01, \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}} re\+Anneal\+Steps=50, Reset\+Scheme reset\+Scheme=Reset\+To\+Best\+Point, \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}} reset\+Steps=150, ext\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{Optimization\+Method}} $>$ local\+Optimizer=ext\+::make\+\_\+shared$<$ \mbox{\hyperlink{class_quant_lib_1_1_levenberg_marquardt}{Levenberg\+Marquardt}} $>$(), Local\+Optimize\+Scheme optimize\+Scheme=Every\+Best\+Point)
+\item 
+End\+Criteria\+::\+Type \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing_a96c109b6479ed921f29f57b399c7518c}{minimize}} (\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}} \&P, const \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{End\+Criteria}} \&end\+Criteria) override
+\begin{DoxyCompactList}\small\item\em minimize the optimization problem P \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$class Sampler, class \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}, class Temperature, class Reannealing = Reannealing\+Trivial$>$\newline
+class Quant\+Lib\+::\+Hybrid\+Simulated\+Annealing$<$ Sampler, Probability, Temperature, Reannealing $>$}
+Method is fairly straightforward\+: 1) Sampler provides a probability density (based on current value) for the parameters. Each iteration a new draw is made from it to find a new point 2) \doxylink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability} determines whether the new point, obtained from Sampler, is accepted or not 3) Temperature is a schedule T(k) for the iteration k, which affects the Sampler and \doxylink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability} 4) Reannealing is a departure from the traditional Boltzmann Annealing method\+: it rescales the iteration k independently for each dimension so as to improve convergence
+
+The hybrid in the name is because one can provide it a local optimizer for use whenever any new best point is found or at every accepted point, in which case is used is chose by the user.
+
+Class Sampler must implement the following interface\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{void}\ operator()(Array\ \&newPoint,\ \textcolor{keyword}{const}\ Array\ \&currentPoint,\ \textcolor{keyword}{const}\ Array\ \&temp)\ \textcolor{keyword}{const};}
+
+\end{DoxyCode}
+ Class \doxylink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability} must implement the following interface\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{bool}\ operator()(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ currentValue,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ newValue,\ \textcolor{keyword}{const}\ Array\ \&temp)\ \textcolor{keyword}{const};}
+
+\end{DoxyCode}
+ Class Temperature must implement the following interface\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{void}\ operator()(Array\ \&newTemp,\ \textcolor{keyword}{const}\ Array\ \&currTemp,\ \textcolor{keyword}{const}\ Array\ \&steps)\ \textcolor{keyword}{const};}
+
+\end{DoxyCode}
+ Class Reannealing must implement the following interface\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keywordtype}{void}\ operator()(Array\ \&\ steps,\ \textcolor{keyword}{const}\ Array\ \&currentPoint,}
+\DoxyCodeLine{\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ aCurrentValue,\ \textcolor{keyword}{const}\ Array\ \&\ currTemp)\ \textcolor{keyword}{const};}
+
+\end{DoxyCode}
+ 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_quant_lib_1_1_hybrid_simulated_annealing_a96c109b6479ed921f29f57b399c7518c}\index{QuantLib::HybridSimulatedAnnealing$<$ Sampler, Probability, Temperature, Reannealing $>$@{QuantLib::HybridSimulatedAnnealing$<$ Sampler, Probability, Temperature, Reannealing $>$}!minimize@{minimize}}
+\index{minimize@{minimize}!QuantLib::HybridSimulatedAnnealing$<$ Sampler, Probability, Temperature, Reannealing $>$@{QuantLib::HybridSimulatedAnnealing$<$ Sampler, Probability, Temperature, Reannealing $>$}}
+\doxysubsubsection{\texorpdfstring{minimize()}{minimize()}}
+{\footnotesize\ttfamily \label{class_quant_lib_1_1_hybrid_simulated_annealing_a96c109b6479ed921f29f57b399c7518c} 
+template$<$class Sampler, class \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}, class Temperature, class Reannealing$>$ \\
+End\+Criteria\+::\+Type \mbox{\hyperlink{class_quant_lib_1_1_hybrid_simulated_annealing}{Quant\+Lib\+::\+Hybrid\+Simulated\+Annealing}}$<$ Sampler, \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}, Temperature, Reannealing $>$\+::minimize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}} \&}]{P}{, }\item[{const \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{End\+Criteria}} \&}]{end\+Criteria}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+minimize the optimization problem P 
+
+
+
+Implements \mbox{\hyperlink{class_quant_lib_1_1_optimization_method_a28097ae73d0d2a310938f51b72a48348}{Quant\+Lib\+::\+Optimization\+Method}}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+ql/experimental/math/\mbox{\hyperlink{hybridsimulatedannealing_8hpp}{hybridsimulatedannealing.\+hpp}}\end{DoxyCompactItemize}

@@ -1,0 +1,83 @@
+\doxysection{deltavolquote.\+hpp}
+\hypertarget{deltavolquote_8hpp_source}{}\label{deltavolquote_8hpp_source}\index{ql/experimental/fx/deltavolquote.hpp@{ql/experimental/fx/deltavolquote.hpp}}
+\mbox{\hyperlink{deltavolquote_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2010\ Dimitri\ Reiswich}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_delta\_vol\_quote\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_delta\_vol\_quote\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{quote_8hpp}{ql/quote.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{handle_8hpp}{ql/handle.hpp}}>}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{class\ }DeltaVolQuote\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_quote}{Quote}},}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ Observer\ \{}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ DeltaType\ \{}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ Spot,\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Spot\ Delta,\ e.g.\ usual\ Black\ Scholes\ delta}}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \ \ \ \ Fwd,\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Forward\ Delta}}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ PaSpot,\ \ \ \ \ \ \textcolor{comment}{//\ Premium\ Adjusted\ Spot\ Delta}}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \ \ \ \ PaFwd\ \ \ \ \ \ \ \ \textcolor{comment}{//\ Premium\ Adjusted\ Forward\ Delta}}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ AtmType\ \{}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ AtmNull,\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Default,\ if\ not\ an\ atm\ quote}}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ AtmSpot,\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ K=S\_0}}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ AtmFwd,\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ K=F}}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ AtmDeltaNeutral,\ \textcolor{comment}{//\ Call\ Delta\ =\ Put\ Delta}}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ AtmVegaMax,\ \ \ \ \ \ \textcolor{comment}{//\ K\ such\ that\ Vega\ is\ Maximum}}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ AtmGammaMax,\ \ \ \ \ \textcolor{comment}{//\ K\ such\ that\ Gamma\ is\ Maximum}}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ AtmPutCall50\ \ \ \ \ \textcolor{comment}{//\ K\ such\ that\ Call\ Delta=0.50\ (only\ for\ Fwd\ Delta)}}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Standard\ constructor\ delta\ vs\ vol.}}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ DeltaVolQuote(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta,\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ vol,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,\ DeltaType\ deltaType);}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Additional\ constructor,\ if\ special\ atm\ quote\ is\ used}}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ DeltaVolQuote(\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ vol,\ DeltaType\ deltaType,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity,\ AtmType\ atmType);}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_delta_vol_quote_ad08b06c50a54098917d80a0dfdf8467d}{update}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_delta_vol_quote_a6053a723956b3e04853584ecd4a8bca6}{value}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ AtmType\ atmType()\ \ \ \textcolor{keyword}{const};}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ DeltaType\ deltaType()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_delta_vol_quote_a441d8a275646af27eb1237e0a5c1da06}{isValid}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta\_;}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ vol\_;}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ DeltaType\ deltaType\_;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity\_;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ AtmType\ atmType\_;}
+\DoxyCodeLine{00079\ \ \ \ \ \};}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

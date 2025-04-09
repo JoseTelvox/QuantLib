@@ -1,0 +1,256 @@
+\doxysection{basecorrelationlossmodel.\+hpp}
+\hypertarget{basecorrelationlossmodel_8hpp_source}{}\label{basecorrelationlossmodel_8hpp_source}\index{ql/experimental/credit/basecorrelationlossmodel.hpp@{ql/experimental/credit/basecorrelationlossmodel.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#ifndef\ quantlib\_base\_correl\_lossmodel\_hpp}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ quantlib\_base\_correl\_lossmodel\_hpp}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{quote_8hpp}{ql/quote.hpp}}>}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{simplequote_8hpp}{ql/quotes/simplequote.hpp}}>}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{basket_8hpp}{ql/experimental/credit/basket.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultlossmodel.hpp>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/basecorrelationstructure.hpp>}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{comment}{//\ move\ these\ to\ the\ CPP\ (and\ the\ template\ spezs)}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/binomiallossmodel.hpp>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/gaussianlhplossmodel.hpp>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/inhomogeneouspooldef.hpp>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{comment}{/*\ Criticism:}}
+\DoxyCodeLine{00080\ \textcolor{comment}{\ \ \ \ This\ model\ is\ not\ as\ generic\ as\ it\ could\ be.\ In\ principle\ a\ default\ loss\ }}
+\DoxyCodeLine{00081\ \textcolor{comment}{\ \ \ \ model\ dependent\ on\ a\ single\ factor\ correlation\ parameter\ is\ the\ only\ }}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ \ \ \ restriction\ on\ the\ base\ loss\ model(s)\ type.\ This\ class\ however\ is\ tied\ to\ a\ }}
+\DoxyCodeLine{00083\ \textcolor{comment}{\ \ \ \ LatentModel\ single\ factor.\ But\ there\ is\ no\ need\ for\ the\ }}
+\DoxyCodeLine{00084\ \textcolor{comment}{\ \ \ \ underlying\ model\ to\ be\ of\ a\ latent\ type.\ This\ link\ is\ due\ to\ the\ copula\ }}
+\DoxyCodeLine{00085\ \textcolor{comment}{\ \ \ \ initialization\ traits\ which\ have\ to\ be\ present\ for\ non\ trivial\ copula\ }}
+\DoxyCodeLine{00086\ \textcolor{comment}{\ \ \ \ policies\ initialization\ (e.g.\ Student-\/T\ base\ correl\ models)}}
+\DoxyCodeLine{00087\ \textcolor{comment}{}}
+\DoxyCodeLine{00088\ \textcolor{comment}{\ \ \ \ Maybe\ a\ possibility\ is\ to\ pass\ copiable\ instances\ of\ the\ model\ and\ relinking}}
+\DoxyCodeLine{00089\ \textcolor{comment}{\ \ \ \ to\ the\ correlation\ in\ two\ internal\ copies.}}
+\DoxyCodeLine{00090\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ BaseModel\_T,\ \textcolor{keyword}{class}\ Corr2DInt\_T>}
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keyword}{class\ }BaseCorrelationLossModel\ :\ \textcolor{keyword}{public}\ DefaultLossModel,\ }
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ Observer\ \{}
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ BaseModel\_T::copulaType::initTraits\ initTraits;}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ BaseCorrelationLossModel(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle}}<\mbox{\hyperlink{class_quant_lib_1_1_base_correlation_term_structure}{BaseCorrelationTermStructure<Corr2DInt\_T>}}\ >\&\ correlTS,}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ recoveries,}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ initTraits\&\ traits\ =\ initTraits())}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ :\ localCorrelationAttach\_(ext::make\_shared<SimpleQuote>(0.)),}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ localCorrelationDetach\_(ext::make\_shared<SimpleQuote>(0.)),}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ recoveries\_(std::move(recoveries)),\ correlTS\_(correlTS),\ copulaTraits\_(traits)\ \{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ registerWith(correlTS);}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ registerWith(\mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().evaluationDate());}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ react\ to\ base\ correl\ surface\ notifications\ (quotes\ or\ reference\ date)}}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_base_correlation_loss_model_a34d9297985dd6b7f9c5319f295b7d9ba}{setupModels}}();}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ tell\ basket\ to\ notify\ instruments,\ etc,\ we\ are\ invalid}}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!basket\_.empty())}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>notifyObservers();}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Update\ model\ caches\ after\ basket\ assignement.\ */}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ resetModel()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ remainingNotional\_\ =\ basket\_-\/>remainingNotional();}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ attachRatio\_\ =\ basket\_-\/>remainingAttachmentAmount()\ /\ remainingNotional\_;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ detachRatio\_\ =\ basket\_-\/>remainingDetachmentAmount()\ /\ remainingNotional\_;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ basketAttach\_\ =\ ext::make\_shared<Basket>(basket\_-\/>refDate(),\ basket\_-\/>remainingNames(),}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingNotionals(),\ basket\_-\/>pool(),}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0,\ attachRatio\_,\ basket\_-\/>claim());}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ basketDetach\_\ =\ ext::make\_shared<Basket>(basket\_-\/>refDate(),\ basket\_-\/>remainingNames(),}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingNotionals(),\ basket\_-\/>pool(),}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.0,\ detachRatio\_,\ basket\_-\/>claim());}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_base_correlation_loss_model_a34d9297985dd6b7f9c5319f295b7d9ba}{setupModels}}();}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Most\ of\ the\ statistics\ are\ not\ implemented,\ not\ impossible\ but}}
+\DoxyCodeLine{00131\ \textcolor{comment}{\ \ \ \ \ \ \ \ the\ model\ is\ intended\ for\ pricing\ rather\ than\ ptfolio\ risk\ management.}}
+\DoxyCodeLine{00132\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_base_correlation_loss_model_a34d9297985dd6b7f9c5319f295b7d9ba}{setupModels}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachRatio\_,\ detachRatio\_;}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingNotional\_;}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ trigger\ calculation.}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SimpleQuote>\ localCorrelationAttach\_,\ }
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ localCorrelationDetach\_;}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<Basket>\ basketAttach\_,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ basketDetach\_;}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ just\ cached\ for\ the\ update\ method}}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Real>\ recoveries\_;}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<BaseCorrelationTermStructure<Corr2DInt\_T>}}\ >\ correlTS\_;}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Initialization\ parameters\ for\ models\ copula}}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \textcolor{keyword}{typename}\ BaseModel\_T::copulaType::initTraits\ copulaTraits\_;}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Models\ of\ equity\ baskets.}}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<BaseModel\_T>\ scalarCorrelModelAttach\_;}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<BaseModel\_T>\ scalarCorrelModelDetach\_;}
+\DoxyCodeLine{00158\ \ \ \ \ \};}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \textcolor{comment}{//\ Remember\ ETL\ returns\ the\ EL\ on\ the\ live\ part\ of\ the\ basket.\ }}
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ LM,\ \textcolor{keyword}{class}\ I>}
+\DoxyCodeLine{00163\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ BaseCorrelationLossModel<LM,\ I>::expectedTrancheLoss(}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00165\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ correlK1\ =\ correlTS\_-\/>correlation(d,\ attachRatio\_);}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ correlK2\ =\ correlTS\_-\/>correlation(d,\ detachRatio\_);}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ reset\ correl\ and\ call\ base\ models\ which\ have\ the\ different\ baskets\ }}
+\DoxyCodeLine{00170\ \textcolor{comment}{\ \ \ \ \ \ \ \ associated.*/}}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ localCorrelationAttach\_-\/>setValue(correlK1);}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expLossK1\ =\ }
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ basketAttach\_-\/>expectedTrancheLoss(d);}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ localCorrelationDetach\_-\/>setValue(correlK2);}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expLossK2\ =\ }
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ basketDetach\_-\/>expectedTrancheLoss(d);}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ expLossK2\ -\/\ expLossK1;}
+\DoxyCodeLine{00178\ \ \ \ \ \}}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{comment}{/*\ Concrete\ specializations\ submodels\ construction.\ With\ the\ dummy\ template\ }}
+\DoxyCodeLine{00185\ \textcolor{comment}{\ \ \ \ parameter\ trick\ partial\ specializations\ leaving\ the\ interpolation\ open\ }}
+\DoxyCodeLine{00186\ \textcolor{comment}{\ \ \ \ would\ be\ possible.}}
+\DoxyCodeLine{00187\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \textcolor{preprocessor}{\ \ \ \ \#ifndef\ QL\_PATCH\_SOLARIS}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ BaseCorrelationLossModel<GaussianLHPLossModel,\ }
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ BilinearInterpolation>::setupModels()\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00194\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ on\ this\ assignment\ any\ previous\ registration\ with\ the\ attach\ and\ }}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ detach\ baskets\ should\ be\ removed}}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ scalarCorrelModelAttach\_\ =\ ext::make\_shared<GaussianLHPLossModel>(}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ Handle<Quote>(localCorrelationAttach\_),\ recoveries\_);}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ scalarCorrelModelDetach\_\ =\ ext::make\_shared<GaussianLHPLossModel>(}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ Handle<Quote>(localCorrelationDetach\_),\ recoveries\_);}
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ basketAttach\_-\/>setLossModel(scalarCorrelModelAttach\_);}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ basketDetach\_-\/>setLossModel(scalarCorrelModelDetach\_);}
+\DoxyCodeLine{00204\ \ \ \ \ \}}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_base_correlation_loss_model}{BaseCorrelationLossModel}}<GaussianBinomialLossModel,\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_bilinear_interpolation}{BilinearInterpolation}}>::setupModels()\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00209\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GaussianConstantLossLM>\ lmA\ =\ }
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<GaussianConstantLossLM>(}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}(localCorrelationAttach\_),\ recoveries\_,\ }
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::GaussianQuadrature,\ }
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ recoveries\_.size(),\ copulaTraits\_);}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GaussianConstantLossLM>\ lmD\ =\ }
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<GaussianConstantLossLM>(}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}(localCorrelationDetach\_),\ recoveries\_,\ }
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::GaussianQuadrature,\ }
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ recoveries\_.size(),\ copulaTraits\_);}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ scalarCorrelModelAttach\_\ =\ }
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<GaussianBinomialLossModel>(lmA);}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ scalarCorrelModelDetach\_\ =\ }
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<GaussianBinomialLossModel>(lmD);}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ basketAttach\_-\/>setLossModel(scalarCorrelModelAttach\_);}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ basketDetach\_-\/>setLossModel(scalarCorrelModelDetach\_);}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \ \ \ \ \}}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00231\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_base_correlation_loss_model}{BaseCorrelationLossModel}}<TBinomialLossModel,\ }
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_bilinear_interpolation}{BilinearInterpolation}}>::setupModels()\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00233\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ ext::shared\_ptr<TConstantLossLM>\ lmA\ =\ }
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<TConstantLossLM>(}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}(localCorrelationAttach\_),\ recoveries\_,\ }
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::GaussianQuadrature,\ }
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ recoveries\_.size(),\ copulaTraits\_);}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ ext::shared\_ptr<TConstantLossLM>\ lmD\ =\ }
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<TConstantLossLM>(}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}(localCorrelationDetach\_),\ recoveries\_,\ }
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::GaussianQuadrature,\ }
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ recoveries\_.size(),\ copulaTraits\_);}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ scalarCorrelModelAttach\_\ =\ }
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<TBinomialLossModel>(lmA);}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ scalarCorrelModelDetach\_\ =\ }
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<TBinomialLossModel>(lmD);}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ basketAttach\_-\/>setLossModel(scalarCorrelModelAttach\_);}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ basketDetach\_-\/>setLossModel(scalarCorrelModelDetach\_);}
+\DoxyCodeLine{00252\ \ \ \ \ \}}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \ \ \textcolor{comment}{/*\ \(\backslash\)todo\ Fix\ this\ model,\ is\ failing\ for\ equity\ tranches\ at\ least,\ the}}
+\DoxyCodeLine{00255\ \textcolor{comment}{\ \ \ \ base\ model\ works\ all\ right,\ its\ the\ link\ here.}}
+\DoxyCodeLine{00256\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00257\ \ \ \ \ \textcolor{keyword}{template}<>}
+\DoxyCodeLine{00258\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_base_correlation_loss_model}{BaseCorrelationLossModel}}<IHGaussPoolLossModel,\ }
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_bilinear_interpolation}{BilinearInterpolation}}>::setupModels()\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00260\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GaussianConstantLossLM>\ lmA\ =\ }
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<GaussianConstantLossLM>(}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}(localCorrelationAttach\_),\ recoveries\_,\ }
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::GaussianQuadrature,\ }
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ recoveries\_.size(),\ copulaTraits\_);}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GaussianConstantLossLM>\ lmD\ =\ }
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<GaussianConstantLossLM>(}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}(localCorrelationDetach\_),\ recoveries\_,\ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::GaussianQuadrature,\ }
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ recoveries\_.size(),\ copulaTraits\_);}
+\DoxyCodeLine{00271\ }
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo\ Allow\ the\ sending\ specific\ model\ params,\ as\ the\ number\ of\ }}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ buckets\ here.}}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ scalarCorrelModelAttach\_\ =\ }
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<IHGaussPoolLossModel>(lmA,\ 500);}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ scalarCorrelModelDetach\_\ =\ }
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<IHGaussPoolLossModel>(lmD,\ 500);}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ basketAttach\_-\/>setLossModel(scalarCorrelModelAttach\_);}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ basketDetach\_-\/>setLossModel(scalarCorrelModelDetach\_);}
+\DoxyCodeLine{00281\ \ \ \ \ \}}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00284\ }
+\DoxyCodeLine{00285\ }
+\DoxyCodeLine{00286\ \ \ \ \ \textcolor{comment}{//\ Vanilla\ BC\ model}}
+\DoxyCodeLine{00287\ \textcolor{preprocessor}{\ \ \ \ \#ifndef\ QL\_PATCH\_SOLARIS}}
+\DoxyCodeLine{00288\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_base_correlation_loss_model}{BaseCorrelationLossModel}}<\mbox{\hyperlink{class_quant_lib_1_1_gaussian_l_h_p_loss_model}{GaussianLHPLossModel}},\ }
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_bilinear_interpolation}{BilinearInterpolation}}>\ GaussianLHPFlatBCLM;}
+\DoxyCodeLine{00290\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \}}
+\DoxyCodeLine{00293\ }
+\DoxyCodeLine{00294\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

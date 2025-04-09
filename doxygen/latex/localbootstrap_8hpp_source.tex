@@ -1,0 +1,286 @@
+\doxysection{localbootstrap.\+hpp}
+\hypertarget{localbootstrap_8hpp_source}{}\label{localbootstrap_8hpp_source}\index{ql/termstructures/localbootstrap.hpp@{ql/termstructures/localbootstrap.hpp}}
+\mbox{\hyperlink{localbootstrap_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Simon\ Ibbotson}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_local\_bootstrap\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_local\_bootstrap\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{bootstraphelper_8hpp}{ql/termstructures/bootstraphelper.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{costfunction_8hpp}{ql/math/optimization/costfunction.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{constraint_8hpp}{ql/math/optimization/constraint.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{armijo_8hpp}{ql/math/optimization/armijo.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{levenbergmarquardt_8hpp}{ql/math/optimization/levenbergmarquardt.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{problem_8hpp}{ql/math/optimization/problem.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{dataformatters_8hpp}{ql/utilities/dataformatters.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{shared__ptr_8hpp}{ql/shared\_ptr.hpp}}>}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{comment}{//\ penalty\ function\ class\ for\ solving\ using\ a\ multi-\/dimensional\ solver}}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{class\ }PenaltyFunction\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_cost_function}{CostFunction}}\ \{}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ Curve::traits\_type\ Traits;}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ Traits::helper\ helper;}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ std::vector<\ ext::shared\_ptr<helper>\ >::const\_iterator}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ helper\_iterator;}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ PenaltyFunction(Curve*\ curve,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ initialIndex,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ helper\_iterator\ rateHelpersStart,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ helper\_iterator\ rateHelpersEnd)}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ :\ curve\_(curve),\ initialIndex\_(initialIndex),}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ localisation\_(std::distance(rateHelpersStart,\ rateHelpersEnd)),}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ rateHelpersStart\_(rateHelpersStart),\ rateHelpersEnd\_(rateHelpersEnd)\ \{\}}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_penalty_function_a25213140950838939fd7b8b91b6af5d6}{value}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \mbox{\hyperlink{class_quant_lib_1_1_penalty_function_a0376aee7f18f0769c343b495253d2d6b}{values}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ Curve*\ curve\_;}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ initialIndex\_;}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ localisation\_;}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ helper\_iterator\ rateHelpersStart\_;}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ helper\_iterator\ rateHelpersEnd\_;}
+\DoxyCodeLine{00064\ \ \ \ \ \};}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{keyword}{class\ }LocalBootstrap\ \{}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ Curve::traits\_type\ Traits;}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ Curve::interpolator\_type\ Interpolator;}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ LocalBootstrap(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ localisation\ =\ 2,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ forcePositive\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}());}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setup(Curve*\ ts);}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ calculate()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \textcolor{keywordtype}{bool}\ validCurve\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ Curve*\ ts\_;}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ localisation\_;}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ forcePositive\_;}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\_;}
+\DoxyCodeLine{00101\ \ \ \ \ \};}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{comment}{//\ template\ definitions}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00108\ \ \ \ \ LocalBootstrap<Curve>::LocalBootstrap(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ localisation,\ \textcolor{keywordtype}{bool}\ forcePositive,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy)}
+\DoxyCodeLine{00109\ \ \ \ \ :\ ts\_(nullptr),\ localisation\_(localisation),\ forcePositive\_(forcePositive),}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ accuracy\_(accuracy)\ \{\}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keywordtype}{void}\ LocalBootstrap<Curve>::setup(Curve*\ ts)\ \{}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ ts\_\ =\ ts;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n\ =\ ts\_-\/>instruments\_.size();}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ >=\ Interpolator::requiredPoints,}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}not\ enough\ instruments:\ "{}}\ <<\ n\ <<\ \textcolor{stringliteral}{"{}\ provided,\ "{}}\ <<}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Interpolator::requiredPoints\ <<\ \textcolor{stringliteral}{"{}\ required"{}});}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ >\ localisation\_,}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}not\ enough\ instruments:\ "{}}\ <<\ n\ <<\ \textcolor{stringliteral}{"{}\ provided,\ "{}}\ <<}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ localisation\_\ <<\ \textcolor{stringliteral}{"{}\ required."{}});}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<n;\ ++i)\{}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>registerWithObservables(ts\_-\/>instruments\_[i]);}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00129\ \ \ \ \ \}}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{keywordtype}{void}\ LocalBootstrap<Curve>::calculate()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ validCurve\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nInsts\ =\ ts\_-\/>instruments\_.size();}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ensure\ rate\ helpers\ are\ sorted}}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ std::sort(ts\_-\/>instruments\_.begin(),\ ts\_-\/>instruments\_.end(),}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1_bootstrap_helper_sorter}{detail::BootstrapHelperSorter}}());}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ check\ that\ there\ is\ no\ instruments\ with\ the\ same\ maturity}}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=1;\ i<nInsts;\ ++i)\ \{}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ m1\ =\ ts\_-\/>instruments\_[i-\/1]-\/>pillarDate(),}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ m2\ =\ ts\_-\/>instruments\_[i]-\/>pillarDate();}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(m1\ !=\ m2,}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}two\ instruments\ have\ the\ same\ pillar\ date\ ("{}}<<m1<<\textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ check\ that\ there\ is\ no\ instruments\ with\ invalid\ quote}}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<nInsts;\ ++i)}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(ts\_-\/>instruments\_[i]-\/>quote()-\/>isValid(),}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{group__manips_ga9645f8136bf2eabd3bca2955ce5be730}{io::ordinal}}(i+1)\ <<\ \textcolor{stringliteral}{"{}\ instrument\ (maturity:\ "{}}\ <<}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>instruments\_[i]-\/>maturityDate()\ <<\ \textcolor{stringliteral}{"{},\ pillar:\ "{}}\ <<}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>instruments\_[i]-\/>pillarDate()\ <<}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{})\ has\ an\ invalid\ quote"{}});}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ setup\ instruments}}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<nInsts;\ ++i)\ \{}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ don't\ try\ this\ at\ home!}}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ This\ call\ creates\ instruments,\ and\ removes\ "{}const"{}.}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ There\ is\ a\ significant\ interaction\ with\ observability.}}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>instruments\_[i]-\/>setTermStructure(\textcolor{keyword}{const\_cast<}Curve*\textcolor{keyword}{>}(ts\_));}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ set\ initial\ guess\ only\ if\ the\ current\ curve\ cannot\ be\ used\ as\ guess}}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (validCurve\_)}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a394b39aa396098345f86d243f207f7af}{QL\_ENSURE}}(ts\_-\/>data\_.size()\ ==\ nInsts+1,}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}dimension\ mismatch:\ expected\ "{}}\ <<\ nInsts+1\ <<}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ actual\ "{}}\ <<\ ts\_-\/>data\_.size());}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>data\_\ =\ std::vector<Rate>(nInsts+1);}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>data\_[0]\ =\ Traits::initialValue(ts\_);}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ calculate\ dates\ and\ times}}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ ts\_-\/>dates\_\ =\ std::vector<Date>(nInsts+1);}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ ts\_-\/>times\_\ =\ std::vector<Time>(nInsts+1);}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ ts\_-\/>dates\_[0]\ =\ Traits::initialDate(ts\_);}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ ts\_-\/>times\_[0]\ =\ ts\_-\/>timeFromReference(ts\_-\/>dates\_[0]);}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<nInsts;\ ++i)\ \{}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>dates\_[i+1]\ =\ ts\_-\/>instruments\_[i]-\/>pillarDate();}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>times\_[i+1]\ =\ ts\_-\/>timeFromReference(ts\_-\/>dates\_[i+1]);}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!validCurve\_)}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>data\_[i+1]\ =\ ts\_-\/>data\_[i];}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ accuracy\_\ !=\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}()\ ?\ accuracy\_\ :\ ts\_-\/>accuracy\_;}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_levenberg_marquardt}{LevenbergMarquardt}}\ solver(accuracy,}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ accuracy,}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ accuracy);}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\ endCriteria(100,\ 10,\ 0.00,\ accuracy,\ 0.00);}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_positive_constraint}{PositiveConstraint}}\ posConstraint;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}\ noConstraint;}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\&\ solverConstraint\ =\ forcePositive\_\ ?}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\&\textcolor{keyword}{>}(posConstraint)\ :}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ static\_cast<\mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\&>(noConstraint);}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ now\ start\ the\ bootstrapping.}}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iInst\ =\ localisation\_-\/1;}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dataAdjust\ =\ Curve::interpolator\_type::dataSizeAdjustment;}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}\ \{}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ initialDataPt\ =\ iInst+1-\/localisation\_+dataAdjust;}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ startArray(localisation\_+1-\/dataAdjust);}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ startArray.size()-\/1;\ ++j)}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ startArray[j]\ =\ ts\_-\/>data\_[initialDataPt+j];}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ here\ we\ are\ extending\ the\ interpolation\ a\ point\ at\ a}}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ time...\ but\ the\ local\ interpolator\ can\ make\ an}}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ approximation\ for\ the\ final\ localisation\ period.}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ e.g.\ if\ the\ localisation\ is\ 2,\ then\ the\ first\ section}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ of\ the\ curve\ will\ be\ solved\ using\ the\ first\ 2}}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ instruments...\ with\ the\ local\ interpolator\ making}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ suitable\ boundary\ conditions.}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>interpolation\_\ =}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>interpolator\_.localInterpolate(}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>times\_.begin(),}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>times\_.begin()+(iInst\ +\ 2),}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>data\_.begin(),}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ localisation\_,}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>interpolation\_,}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ nInsts+1);}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (iInst\ >=\ localisation\_)\ \{}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ startArray[localisation\_-\/dataAdjust]\ =}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Traits::guess(iInst,\ ts\_,\ \textcolor{keyword}{false},\ 0);\ \textcolor{comment}{//\ ?}}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ startArray[localisation\_-\/dataAdjust]\ =\ ts\_-\/>data\_[0];}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_penalty_function}{PenaltyFunction<Curve>}}\ currentCost(}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_,}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ initialDataPt,}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>instruments\_.begin()\ +\ ((iInst+1)\ -\/\ localisation\_),}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ts\_-\/>instruments\_.begin()\ +\ (iInst+1));}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\ toSolve(currentCost,\ solverConstraint,\ startArray);}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ EndCriteria::Type\ endType\ =\ solver.minimize(toSolve,\ endCriteria);}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ check\ the\ end\ criteria}}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(EndCriteria::succeeded(endType),}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Unable\ to\ strip\ yieldcurve\ to\ required\ accuracy:\ "{}}\ <<\ endType);}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ ++iInst;}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (\ iInst\ <\ nInsts\ );}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ validCurve\_\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00248\ \ \ \ \ \}}
+\DoxyCodeLine{00249\ }
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00252\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_penalty_function_a25213140950838939fd7b8b91b6af5d6}{PenaltyFunction<Curve>::value}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ initialIndex\_;}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ Array::const\_iterator\ guessIt\ =\ x.begin();}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (guessIt\ !=\ x.end())\ \{}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ \ Traits::updateGuess(curve\_-\/>data\_,\ *guessIt,\ i);}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ \ ++guessIt;}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ ++i;}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ curve\_-\/>interpolation\_.update();}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ penalty\ =\ 0.0;}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ helper\_iterator\ instIt\ =\ rateHelpersStart\_;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (instIt\ !=\ rateHelpersEnd\_)\ \{}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ quoteError\ =\ (*instIt)-\/>quoteError();}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ penalty\ +=\ std::fabs(quoteError);}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ ++instIt;}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ penalty;}
+\DoxyCodeLine{00271\ \ \ \ \ \}}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Curve>}
+\DoxyCodeLine{00274\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \mbox{\hyperlink{class_quant_lib_1_1_penalty_function_a0376aee7f18f0769c343b495253d2d6b}{PenaltyFunction<Curve>::values}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ Array::const\_iterator\ guessIt\ =\ x.begin();}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ initialIndex\_;}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (guessIt\ !=\ x.end())\ \{}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ Traits::updateGuess(curve\_-\/>data\_,\ *guessIt,\ i);}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ ++guessIt;}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ ++i;}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ curve\_-\/>interpolation\_.update();}
+\DoxyCodeLine{00284\ }
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ penalties(localisation\_);}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ helper\_iterator\ instIt\ =\ rateHelpersStart\_;}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ Array::iterator\ penIt\ =\ penalties.begin();}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (instIt\ !=\ rateHelpersEnd\_)\ \{}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ quoteError\ =\ (*instIt)-\/>quoteError();}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ *penIt\ =\ std::fabs(quoteError);}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ ++instIt;}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \ \ \ \ ++penIt;}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ penalties;}
+\DoxyCodeLine{00295\ \ \ \ \ \}}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \}}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

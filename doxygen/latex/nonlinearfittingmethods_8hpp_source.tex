@@ -1,0 +1,200 @@
+\doxysection{nonlinearfittingmethods.\+hpp}
+\hypertarget{nonlinearfittingmethods_8hpp_source}{}\label{nonlinearfittingmethods_8hpp_source}\index{ql/termstructures/yield/nonlinearfittingmethods.hpp@{ql/termstructures/yield/nonlinearfittingmethods.hpp}}
+\mbox{\hyperlink{nonlinearfittingmethods_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2007\ Allen\ Kuo}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2010\ Alessandro\ Roveda}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ quantlib\_nonlinear\_fitting\_methods\_hpp}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ quantlib\_nonlinear\_fitting\_methods\_hpp}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{fittedbonddiscountcurve_8hpp}{ql/termstructures/yield/fittedbonddiscountcurve.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{bspline_8hpp}{ql/math/bspline.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{shared__ptr_8hpp}{ql/shared\_ptr.hpp}}>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keyword}{class\ }ExponentialSplinesFitting}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method}{FittedBondDiscountCurve::FittingMethod}}\ \{}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ ExponentialSplinesFitting(\textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a1a70aa58b58d49e27750d684c4d3ed84}{constrainAtZero}}\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<OptimizationMethod>\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af13a932e2c10a94fbecaa422aa247448}{optimizationMethod}}\ =\ \{\},}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numCoeffs\ =\ 9,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ fixedKappa\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ ExponentialSplinesFitting(\textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a1a70aa58b58d49e27750d684c4d3ed84}{constrainAtZero}},}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}},}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}},}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numCoeffs\ =\ 9,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ fixedKappa\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ ExponentialSplinesFitting(\textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a1a70aa58b58d49e27750d684c4d3ed84}{constrainAtZero}},\ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numCoeffs,\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ fixedKappa,\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ std::unique\_ptr<FittedBondDiscountCurve::FittingMethod>\ \mbox{\hyperlink{class_quant_lib_1_1_exponential_splines_fitting_a081886f0a8c2efa30089955bd6e8cc59}{clone}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ numCoeffs\_;}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ fixedKappa\_;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discountFunction(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00082\ \ \ \ \ \};}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{keyword}{class\ }NelsonSiegelFitting}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method}{FittedBondDiscountCurve::FittingMethod}}\ \{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ NelsonSiegelFitting(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<OptimizationMethod>\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af13a932e2c10a94fbecaa422aa247448}{optimizationMethod}}\ =\ \{\},}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ NelsonSiegelFitting(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}},}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}},}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ std::unique\_ptr<FittedBondDiscountCurve::FittingMethod>\ \mbox{\hyperlink{class_quant_lib_1_1_nelson_siegel_fitting_ab08f15a92281b758c3289002106cc3df}{clone}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discountFunction(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00113\ \ \ \ \ \};}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{keyword}{class\ }SvenssonFitting}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method}{FittedBondDiscountCurve::FittingMethod}}\ \{}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ SvenssonFitting(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<OptimizationMethod>\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af13a932e2c10a94fbecaa422aa247448}{optimizationMethod}}\ =\ \{\},}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ SvenssonFitting(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}},}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}},}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ std::unique\_ptr<FittedBondDiscountCurve::FittingMethod>\ \mbox{\hyperlink{class_quant_lib_1_1_svensson_fitting_a87dc70ef231f87277c1cfe9a658e3022}{clone}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discountFunction(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00146\ \ \ \ \ \};}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00168\ \ \ \ \ \textcolor{keyword}{class\ }CubicBSplinesFitting}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method}{FittedBondDiscountCurve::FittingMethod}}\ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ CubicBSplinesFitting(\textcolor{keyword}{const}\ std::vector<Time>\&\ knotVector,}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a1a70aa58b58d49e27750d684c4d3ed84}{constrainAtZero}}\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<OptimizationMethod>\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af13a932e2c10a94fbecaa422aa247448}{optimizationMethod}}\ =\ \{\},}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ CubicBSplinesFitting(\textcolor{keyword}{const}\ std::vector<Time>\&\ knotVector,}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a1a70aa58b58d49e27750d684c4d3ed84}{constrainAtZero}},}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}},}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}},}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_cubic_b_splines_fitting_a30a99812cb6da14bc74d40c523d8bb7e}{basisFunction}}(\mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ i,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ std::unique\_ptr<FittedBondDiscountCurve::FittingMethod>\ \mbox{\hyperlink{class_quant_lib_1_1_cubic_b_splines_fitting_ace4405e8a44e01e12daf86e9d314d611}{clone}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discountFunction(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_b_spline}{BSpline}}\ splines\_;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size\_;}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ N\_;}
+\DoxyCodeLine{00196\ \ \ \ \ \};}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00209\ \ \ \ \ \textcolor{keyword}{class\ }SimplePolynomialFitting}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method}{FittedBondDiscountCurve::FittingMethod}}\ \{}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ SimplePolynomialFitting(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ degree,}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a1a70aa58b58d49e27750d684c4d3ed84}{constrainAtZero}}\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<OptimizationMethod>\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af13a932e2c10a94fbecaa422aa247448}{optimizationMethod}}\ =\ \{\},}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(),}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ SimplePolynomialFitting(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ degree,}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a1a70aa58b58d49e27750d684c4d3ed84}{constrainAtZero}},}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_afbfb66bd76f54a51d098f1b9b4a41b72}{weights}},}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_af9fc0011cee001b454cd46e9c6417e86}{l2}},}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}},}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_constraint}{Constraint}}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method_a2c8e4660b600fcd54b9d0ea84dbb9beb}{constraint}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_no_constraint}{NoConstraint}}());}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ std::unique\_ptr<FittedBondDiscountCurve::FittingMethod>\ \mbox{\hyperlink{class_quant_lib_1_1_simple_polynomial_fitting_a5029f2d4df8918d8b4d481792d2ba80d}{clone}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discountFunction(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size\_;}
+\DoxyCodeLine{00232\ \ \ \ \ \};}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{keyword}{class\ }SpreadFittingMethod}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_fitted_bond_discount_curve_1_1_fitting_method}{FittedBondDiscountCurve::FittingMethod}}\ \{}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ SpreadFittingMethod(\textcolor{keyword}{const}\ ext::shared\_ptr<FittingMethod>\&\ method,}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ discountCurve,}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ minCutoffTime\ =\ 0.0,}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxCutoffTime\ =\ \mbox{\hyperlink{group__limit_macros_ga31675a375a563ed7a1bba05c664489af}{QL\_MAX\_REAL}});}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ std::unique\_ptr<FittedBondDiscountCurve::FittingMethod>\ \mbox{\hyperlink{class_quant_lib_1_1_spread_fitting_method_a0ef58a1da2d2072879bc0583b2ab9ded}{clone}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_spread_fitting_method_a1a99eab31f146e23401298f5d2aa95aa}{init}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00249\ }
+\DoxyCodeLine{00250\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ discountFunction(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \textcolor{comment}{//\ underlying\ parametric\ method}}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ ext::shared\_ptr<FittingMethod>\ method\_;}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \textcolor{comment}{//\ adjustment\ in\ case\ underlying\ discount\ curve\ has\ different\ reference\ date}}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a05e8e288a4bdedfe5b4e16d8cec14f1c}{DiscountFactor}}\ rebase\_;}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \textcolor{comment}{//\ discount\ curve\ from\ on\ top\ of\ which\ the\ spread\ will\ be\ calculated}}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<YieldTermStructure>}}\ discountingCurve\_;}
+\DoxyCodeLine{00259\ \ \ \ \ \};}
+\DoxyCodeLine{00260\ \}}
+\DoxyCodeLine{00261\ }
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

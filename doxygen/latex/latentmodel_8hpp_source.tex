@@ -1,0 +1,563 @@
+\doxysection{latentmodel.\+hpp}
+\hypertarget{latentmodel_8hpp_source}{}\label{latentmodel_8hpp_source}\index{ql/experimental/math/latentmodel.hpp@{ql/experimental/math/latentmodel.hpp}}
+\mbox{\hyperlink{latentmodel_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Roland\ Lichters}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#ifndef\ quantlib\_latent\_model\_hpp}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ quantlib\_latent\_model\_hpp}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <ql/experimental/math/multidimquadrature.hpp>}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <ql/experimental/math/multidimintegrator.hpp>}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{trapezoidintegral_8hpp}{ql/math/integrals/trapezoidintegral.hpp}}>}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{randomsequencegenerator_8hpp}{ql/math/randomnumbers/randomsequencegenerator.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <ql/experimental/math/gaussiancopulapolicy.hpp>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <ql/experimental/math/tcopulapolicy.hpp>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{boxmullergaussianrng_8hpp}{ql/math/randomnumbers/boxmullergaussianrng.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{polarstudenttrng_8hpp}{ql/experimental/math/polarstudenttrng.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{handle_8hpp}{ql/handle.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{quote_8hpp}{ql/quote.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}}\ \{}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ havent\ figured\ out\ how\ to\ do\ this\ in-\/place}}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1multiply_v}{multiplyV}}\ \{}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ operator()(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ d,\ std::vector<Real>\ v)\ }
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::transform(v.begin(),\ v.end(),\ v.begin(),\ }
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [=](\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ -\/>\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \{\ return\ x\ *\ d;\ \});}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ v;}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00052\ \ \ \ \ \}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ \textcolor{comment}{/*\ Things\ trying\ to\ achieve\ here:}}
+\DoxyCodeLine{00057\ \textcolor{comment}{\ \ \ \ 1.-\/\ Unify\ the\ two\ branches\ of\ integrators\ in\ the\ library,\ they\ do\ not\ }}
+\DoxyCodeLine{00058\ \textcolor{comment}{\ \ \ \ \ \ hang\ from\ a\ common\ base\ class\ and\ here\ a\ common\ ptr\ for\ the\ }}
+\DoxyCodeLine{00059\ \textcolor{comment}{\ \ \ \ \ \ factory\ is\ needed.}}
+\DoxyCodeLine{00060\ \textcolor{comment}{\ \ \ \ 2.-\/\ Have\ a\ common\ signature\ for\ the\ integration\ call.}}
+\DoxyCodeLine{00061\ \textcolor{comment}{\ \ \ \ 3.-\/\ Factory\ construction\ so\ integrable\ latent\ models\ can\ choose\ the\ }}
+\DoxyCodeLine{00062\ \textcolor{comment}{\ \ \ \ \ \ integration\ algorithm\ separately.}}
+\DoxyCodeLine{00063\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_l_m_integration}{LMIntegration}}\ \{}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Interface\ with\ actual\ integrators:}}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ integral\ of\ a\ scalar\ function}}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ integrate(\textcolor{keyword}{const}\ std::function<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ (}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ arg)>\&\ f)\ \textcolor{keyword}{const}\ =\ 0;}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ integral\ of\ a\ vector\ function}}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ I\ had\ to\ use\ a\ different\ name,\ since\ the\ compiler\ does\ not}}
+\DoxyCodeLine{00072\ \textcolor{comment}{\ \ \ \ \ \ \ \ recognise\ the\ overload;\ MSVC\ sees\ the\ argument\ as\ }}
+\DoxyCodeLine{00073\ \textcolor{comment}{\ \ \ \ \ \ \ \ std::function<Signature>\ in\ both\ cases....\ \ \ }}
+\DoxyCodeLine{00074\ \textcolor{comment}{\ \ \ \ \ \ \ \ I\ could\ do\ the\ as\ with\ the\ quadratures\ and\ have\ this\ as\ a\ template\ }}
+\DoxyCodeLine{00075\ \textcolor{comment}{\ \ \ \ \ \ \ \ function\ and\ spez\ for\ the\ vector\ case\ but\ I\ prefer\ to\ understand}}
+\DoxyCodeLine{00076\ \textcolor{comment}{\ \ \ \ \ \ \ \ why\ the\ overload\ fails....}}
+\DoxyCodeLine{00077\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FIX\ ME}}
+\DoxyCodeLine{00078\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ std::vector<Real>\ integrateV(}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::function<std::vector<Real>\ \ (}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ arg)>\&\ f)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}No\ vector\ integration\ provided"{}});}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_l_m_integration}{\string~LMIntegration}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00085\ \ \ \ \ \};}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{comment}{//CRTP-\/ish\ for\ joining\ the\ integrations,\ class\ above\ to\ have\ the\ factory}}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ I\_T>}
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keyword}{class\ }IntegrationBase\ :\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ I\_T,\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_l_m_integration}{LMIntegration}}\ \{\textcolor{comment}{//\ diamond\ on\ 'integrate'}}
+\DoxyCodeLine{00091\ \ \ \ \ \ \textcolor{comment}{//\ this\ class\ template\ always\ to\ be\ fully\ specialized:}}
+\DoxyCodeLine{00092\ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ IntegrationBase()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00094\ \ \ \ \ \};}
+\DoxyCodeLine{00096\ \ \ \ \ }
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{comment}{//\ gcc\ reports\ value\ collision\ with\ heston\ engine\ (?!)\ thats\ why\ the\ name}}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keyword}{namespace\ }LatentModelIntegrationType\ \{}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ }
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ LatentModelIntegrationType\ \{}
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \#ifndef\ QL\_PATCH\_SOLARIS}}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_quadrature}{GaussianQuadrature}},}
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ Trapezoid}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ etc....}}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \}\ LatentModelIntegrationType;}
+\DoxyCodeLine{00107\ \ \ \ \ \}}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\ \ \ \ \#ifndef\ QL\_PATCH\_SOLARIS}}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{comment}{/*\ class\ template\ specializations.\ I\ havent\ use\ CRTP\ type\ cast\ directly}}
+\DoxyCodeLine{00112\ \textcolor{comment}{\ \ \ \ because\ the\ signature\ of\ the\ integrators\ is\ different,\ grid\ integration}}
+\DoxyCodeLine{00113\ \textcolor{comment}{\ \ \ \ needs\ the\ domain.\ */}}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{class\ }IntegrationBase<\mbox{\hyperlink{class_quant_lib_1_1_gaussian_quad_multidim_integrator_ab185f719525e6e43a2d39b199f207538}{GaussianQuadMultidimIntegrator}}>\ :\ }
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_quad_multidim_integrator_ab185f719525e6e43a2d39b199f207538}{GaussianQuadMultidimIntegrator}},\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_l_m_integration}{LMIntegration}}\ \{}
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ IntegrationBase(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dimension,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_quad_multidim_integrator_af2a93dbaff88d4e400da890935b3d93f}{order}})\ }
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_quad_multidim_integrator_ab185f719525e6e43a2d39b199f207538}{GaussianQuadMultidimIntegrator}}(dimension,\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_quad_multidim_integrator_af2a93dbaff88d4e400da890935b3d93f}{order}})\ \{\}}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ integrate(\textcolor{keyword}{const}\ std::function<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ arg)>\&\ f)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ GaussianQuadMultidimIntegrator::integrate<Real>(f);}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ std::vector<Real>\ integrateV(}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::function<std::vector<Real>(\textcolor{keyword}{const}\ std::vector<Real>\&\ arg)>\&\ f)\textcolor{keyword}{}}
+\DoxyCodeLine{00124\ \textcolor{keyword}{\ \ \ \ \ \ \ \ \ \ \ \ const\ override\ }\{}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ GaussianQuadMultidimIntegrator::integrate<std::vector<Real>>(f);}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \string~IntegrationBase()\ \textcolor{keyword}{override}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00128\ \ \ \ \ \};}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{class\ }IntegrationBase<MultidimIntegral>\ :\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ MultidimIntegral,\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_l_m_integration}{LMIntegration}}\ \{}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ IntegrationBase(}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<ext::shared\_ptr<Integrator>\ >\&\ integrators,\ }
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ a,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ b)\ }
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ :\ MultidimIntegral(integrators),\ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ a\_(integrators.size(),a),\ b\_(integrators.size(),b)\ \{\}}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ integrate(\textcolor{keyword}{const}\ std::function<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ arg)>\&\ f)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_multidim_integral_aebe7fdad01f1ee10730a3376abb898a5}{MultidimIntegral::operator()}}(f,\ a\_,\ b\_);}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ vector\ version\ here....}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \string~IntegrationBase()\ \textcolor{keyword}{override}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ a\_,\ b\_;}
+\DoxyCodeLine{00146\ \ \ \ \ \};}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ \textcolor{comment}{//\ Intended\ to\ replace\ OneFactorCopula}}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00277\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ copulaPolicyImpl>}
+\DoxyCodeLine{00278\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}\ }
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ :\ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ Observer\ ,\ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ Observable\ }
+\DoxyCodeLine{00280\ \ \ \ \ \{\textcolor{comment}{//observer\ if\ factors\ as\ quotes}}
+\DoxyCodeLine{00281\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a25404a7f39fe1422f6e4dd1fb9b67115}{update}}()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00284\ }
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ copulaPolicyImpl\ copulaType;}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_af159333d575c0b252de3c71371919dc2}{cumulativeY}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ val,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iVariable)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_.cumulativeY(val,\ iVariable);}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_ae64724a9ecdc4cb7dadd555b019da10b}{cumulativeZ}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ z)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_.cumulativeZ(z);}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9711849d61e8bc79608424661ac9dde2}{density}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ m)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00298\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \#if\ defined(QL\_EXTRA\_SAFETY\_CHECKS)}}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(m.size()\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_acd1daf4e28ce8ab5233065be60fd2896}{nFactors\_}},\ }
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Factor\ size\ must\ match\ that\ of\ model."{}});}
+\DoxyCodeLine{00301\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_.density(m);}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a10f1e843503876609d1cb14ac9b26c8e}{inverseCumulativeDensity}}(\mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ p,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iFactor)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_.inverseCumulativeDensity(p,\ iFactor);}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f4c7a3b52e2a50a88b3a2e67cc1109b}{inverseCumulativeY}}(\mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ p,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iVariable)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_.inverseCumulativeY(p,\ iVariable);}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a28355f257003546d33fda003452c820e}{inverseCumulativeZ}}(\mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ p)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_.inverseCumulativeZ(p);}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a77b6963ac7d92d55caade265c40af9e4}{allFactorCumulInverter}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ probs)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_.allFactorCumulInverter(probs);}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_aede4740894962881f21e1522349eb287}{latentVarValue}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ allFactors,\ }
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iVar)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00339\ \textcolor{keyword}{\ \ \ \ \ \ \ \ }\{}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::inner\_product(factorWeights\_[iVar].begin(),\ }
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ systemic\ term:}}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ factorWeights\_[iVar].end(),\ allFactors.begin(),}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ idiosyncratic\ term:}}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(allFactors[\mbox{\hyperlink{class_quant_lib_1_1_latent_model_ad410d410b17c524efa114598a0455936}{numFactors}}()+iVar]\ *\ idiosyncFctrs\_[iVar]));}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)to\ do\ write\ variants\ of\ the\ above,\ although\ is\ the\ most\ common\ case}}
+\DoxyCodeLine{00347\ }
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ copulaType\&\ copula()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_;}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \ \ \ \ \textcolor{comment}{//\ \ protected:}}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00356\ }
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00366\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Several\ (very\ different)\ usages\ make\ the\ spez\ non\ trivial}}
+\DoxyCodeLine{00367\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ The\ final\ goal\ is\ to\ obtain\ a\ sequence\ generator\ of\ the\ factor\ }}
+\DoxyCodeLine{00368\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ samples,\ several\ routes\ are\ possible\ depending\ on\ the\ algorithms:}}
+\DoxyCodeLine{00369\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{00370\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 1.-\/\ URNG\ -\/>\ Sequence\ Gen\ -\/>\ CopulaInversion\ \ }}
+\DoxyCodeLine{00371\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ e.g.:\ CopulaInversion(RandomSequenceGenerator<MersenneTwisterRNG>)}}
+\DoxyCodeLine{00372\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 2.-\/\ PseudoRSG\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/>\ CopulaInversion}}
+\DoxyCodeLine{00373\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ e.g.:\ CopulaInversion(SobolRSG)}}
+\DoxyCodeLine{00374\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 3.-\/\ URNG\ -\/>\ SpecificMapping\ -\/>\ Sequence\ Gen\ \ (bypasses\ the\ copula\ }}
+\DoxyCodeLine{00375\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ for\ performance)}}
+\DoxyCodeLine{00376\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ e.g.:\ RandomSequenceGenerator<BoxMullerGaussianRng<}}
+\DoxyCodeLine{00377\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ MersenneTwisterRNG>\ >\ }}
+\DoxyCodeLine{00378\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{00379\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Notice\ that\ the\ order\ the\ three\ algorithms\ involved\ (uniform\ gen,\ }}
+\DoxyCodeLine{00380\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ sequence\ construction,\ distribution\ mapping)\ is\ not\ always\ the\ same.}}
+\DoxyCodeLine{00381\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ (in\ fact\ there\ could\ be\ some\ other\ ways\ to\ generate\ but\ these\ are\ }}
+\DoxyCodeLine{00382\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ the\ ones\ in\ the\ library\ now.)}}
+\DoxyCodeLine{00383\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Difficulties\ arise\ when\ wanting\ to\ use\ situation\ 3.-\/\ whith\ a\ generic}}
+\DoxyCodeLine{00384\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ RNG,\ leaving\ it\ unspecified}}
+\DoxyCodeLine{00385\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ }}
+\DoxyCodeLine{00386\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Derived\ classes\ might\ specialize\ (on\ the\ copula}}
+\DoxyCodeLine{00387\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ type)\ to\ another\ type\ of\ generator\ if\ a\ more\ efficient\ algorithm\ }}
+\DoxyCodeLine{00388\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ that\ the\ distribution\ inversion\ is\ available;\ rewritig\ then\ the\ }}
+\DoxyCodeLine{00389\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ nextSequence\ method\ for\ a\ particular\ copula\ implementation.}}
+\DoxyCodeLine{00390\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Some\ combinations\ of\ generators\ might\ make\ no\ sense,\ while\ it\ }}
+\DoxyCodeLine{00391\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ could\ be\ possible\ to\ block\ template\ classes\ corresponding\ to\ those}}
+\DoxyCodeLine{00392\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ cases\ its\ not\ done\ (yet?)\ (e.g.\ a\ BoxMuller\ under\ a\ TCopula.)}}
+\DoxyCodeLine{00393\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ Dimensionality\ coherence\ (between\ the\ generator\ and\ the\ copula)\ }}
+\DoxyCodeLine{00394\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ should\ have\ been\ checked\ by\ the\ client\ code.}}
+\DoxyCodeLine{00395\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ In\ multithread\ usage\ the\ sequence\ generator\ is\ expect\ to\ be\ already}}
+\DoxyCodeLine{00396\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ in\ position.}}
+\DoxyCodeLine{00397\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ To\ sample\ the\ latent\ variable\ itself\ users\ should\ call\ }}
+\DoxyCodeLine{00398\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ LatentModel::latentVarValue\ with\ these\ samples.}}
+\DoxyCodeLine{00399\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Cant\ use\ InverseCumulativeRsg\ since\ the\ inverse\ there\ has\ to\ return\ a}}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ real\ number\ and\ here\ a\ vector\ is\ needed,\ the\ function\ inverted\ here}}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ is\ multivalued.}}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class\ }USNG,\ }
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ dummy\ template\ parameter\ to\ allow\ for\ 'full'\ specialization\ of\ }}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ inner\ class\ without\ specialization\ of\ the\ outer.}}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ =\ \textcolor{keyword}{true}>}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }FactorSampler\ \{}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1_sample}{Sample<std::vector<Real>}}\ >\ sample\_type;}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ FactorSampler(\textcolor{keyword}{const}\ copulaType\&\ copula,\ }
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\ =\ 0)\ }
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \ \ \ \ :\ sequenceGen\_(copula.numFactors(),\ seed),\ \textcolor{comment}{//\ base\ case\ construction}}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_(std::vector<Real>(copula.numFactors()),\ 1.0),}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_(copula)\ \{\ \}}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ sample\_type\&\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_1_1_factor_sampler_a19208da15b662a271de638a346236c7c}{nextSequence}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ USNG::sample\_type\ sample\ =}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sequenceGen\_.nextSequence();}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x\_.value\ =\ copula\_.allFactorCumulInverter(sample.value);}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ x\_;}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \ \ USNG\ sequenceGen\_;\textcolor{comment}{//\ copy,\ we\ might\ be\ mutithreaded}}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ sample\_type\ x\_;}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ no\ copies}}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ copulaType\&\ copula\_;}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00438\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \(\backslash\)todo\ Move\ integrator\ traits\ like\ number\ of\ quadrature\ points,\ }}
+\DoxyCodeLine{00440\ \textcolor{comment}{\ \ \ \ \ \ \ \ integration\ domain\ dimensions,\ etc\ to\ the\ copula\ through\ a\ static\ }}
+\DoxyCodeLine{00441\ \textcolor{comment}{\ \ \ \ \ \ \ \ member\ function.\ Since\ they\ depend\ on\ the\ nature\ of\ the\ probability\ }}
+\DoxyCodeLine{00442\ \textcolor{comment}{\ \ \ \ \ \ \ \ density\ distribution\ thats\ where\ they\ belong.}}
+\DoxyCodeLine{00443\ \textcolor{comment}{\ \ \ \ \ \ \ \ This\ is\ why\ theres\ one\ factory\ per\ copula\ policy\ template\ parameter\ }}
+\DoxyCodeLine{00444\ \textcolor{comment}{\ \ \ \ \ \ \ \ (even\ if\ this\ is\ not\ used...yet)}}
+\DoxyCodeLine{00445\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }IntegrationFactory\ \{}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ ext::shared\_ptr<LMIntegration>\ createLMIntegration(}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dimension,\ }
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::LatentModelIntegrationType\ type\ =\ }
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#ifndef\ QL\_PATCH\_SOLARIS}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::GaussianQuadrature)}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ LatentModelIntegrationType::Trapezoid)}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#endif}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(type)\ \{}
+\DoxyCodeLine{00458\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#ifndef\ QL\_PATCH\_SOLARIS}}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ LatentModelIntegrationType::GaussianQuadrature:}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_integration_base}{IntegrationBase<GaussianQuadMultidimIntegrator>}}\ >(}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dimension,\ 25);}
+\DoxyCodeLine{00464\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ LatentModelIntegrationType::Trapezoid:}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<Integrator>\ >\ integrals;}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<dimension;\ i++)}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ integrals.push\_back(}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<\mbox{\hyperlink{class_quant_lib_1_1_trapezoid_integral}{TrapezoidIntegral<Default>}}\ >(}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1.e-\/4,\ 20));}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ This\ integration\ domain\ is\ tailored\ for\ the\ T\ }}
+\DoxyCodeLine{00473\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ distribution;\ it\ is\ too\ wide\ for\ normals\ or\ Ts\ of\ high}}
+\DoxyCodeLine{00474\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ order.\ }}
+\DoxyCodeLine{00475\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)todo\ This\ needs\ to\ be\ solved\ by\ having\ the\ copula\ to\ }}
+\DoxyCodeLine{00476\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ provide\ the\ integration\ traits\ for\ any\ integration\ }}
+\DoxyCodeLine{00477\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ algorithm\ since\ it\ is\ the\ copula\ that\ knows\ the\ relevant}}
+\DoxyCodeLine{00478\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ domain\ for\ its\ density\ distributions.\ Also\ to\ be\ able\ to}}
+\DoxyCodeLine{00479\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ block\ integrations\ which\ will\ fail;\ like\ a\ quadrature\ \ }}
+\DoxyCodeLine{00480\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ here\ in\ some\ cases.}}
+\DoxyCodeLine{00481\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<IntegrationBase<MultidimIntegral>\ >}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (integrals,\ -\/35.,\ 35.);}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}Unknown\ latent\ model\ integration\ type."{}});}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00490\ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \ \ \ \ IntegrationFactory()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00492\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00494\ }
+\DoxyCodeLine{00495\ }
+\DoxyCodeLine{00496\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ model\ size,\ number\ of\ latent\ variables\ modelled}}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a43e8cf454283157cab9a90b5aa261409}{nVariables\_}};\}}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_ad410d410b17c524efa114598a0455936}{numFactors}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_acd1daf4e28ce8ab5233065be60fd2896}{nFactors\_}};\}}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a752c04c15550a49537c7eb0557bd6b16}{numTotalFactors}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a43e8cf454283157cab9a90b5aa261409}{nVariables\_}}\ +\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_acd1daf4e28ce8ab5233065be60fd2896}{nFactors\_}};\ \}}
+\DoxyCodeLine{00503\ }
+\DoxyCodeLine{00512\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}(}
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ factorsWeights,\ }
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ copulaType::initTraits\&\ ini\ =\ }
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ copulaType::initTraits());}
+\DoxyCodeLine{00525\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a250ac646a6be88e253dc37c2620de9dd}{LatentModel}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ factorsWeight,}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ copulaType::initTraits\&\ ini\ =\ }
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ copulaType::initTraits());}
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a762ae56003287bdd2995e5a46a8c9f57}{LatentModel}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ correlSqr,}
+\DoxyCodeLine{00540\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nVariables,}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ copulaType::initTraits\&\ ini\ =\ \textcolor{keyword}{typename}\ copulaType::initTraits());}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a4200b7490c6d6690d2ec1df95d4862ba}{LatentModel}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ singleFactorCorrel,}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nVariables,}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ copulaType::initTraits\&\ ini\ =\ }
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ copulaType::initTraits());}
+\DoxyCodeLine{00558\ }
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ factorWeights\_;}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_ad630746a257d3e970ecf83cd47878cd3}{idiosyncFctrs}}()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ idiosyncFctrs\_;\}}
+\DoxyCodeLine{00565\ }
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9d3034be325054187dfafbd5f7ef1890}{latentVariableCorrel}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iVar1,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iVar2)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ true\ for\ any\ normalized\ combination}}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ init\ =\ (iVar1\ ==\ iVar2\ ?\ }
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ idiosyncFctrs\_[iVar1]\ *\ idiosyncFctrs\_[iVar1]\ :\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.));}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::inner\_product(factorWeights\_[iVar1].begin(),\ }
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ factorWeights\_[iVar1].end(),\ factorWeights\_[iVar2].begin(),\ }
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ init);}
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00576\ }
+\DoxyCodeLine{00577\ }
+\DoxyCodeLine{00580\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a8f73847f26e632e54de23dc218e44875}{integratedExpectedValue}}(}
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::function<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)>\&\ f)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ function\ composition:\ composes\ the\ integrand\ with\ the\ density\ }}
+\DoxyCodeLine{00583\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ through\ a\ product.}}
+\DoxyCodeLine{00584\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ integration()-\/>integrate(}
+\DoxyCodeLine{00585\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ x)\{\ \textcolor{keywordflow}{return}\ copula\_.density(x)\ *\ f(x);\ \});}
+\DoxyCodeLine{00586\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a450b60907aff21aa12ef61c50206ec4b}{integratedExpectedValueV}}(}
+\DoxyCodeLine{00591\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ const\ std::function<std::vector<Real>(}}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::function<std::vector<Real>(}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ v1)>\&\ f\ )\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1multiply_v}{detail::multiplyV}}\ M;}
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ integration()-\/>integrateV(\textcolor{comment}{//see\ note\ in\ LMIntegrators\ base\ class}}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ x)\{\ \textcolor{keywordflow}{return}\ M(copula\_.density(x),\ f(x));\ \});}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00598\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Integrable\ models\ must\ provide\ their\ integrator.}}
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Arguable,\ not\ having\ the\ integration\ in\ the\ LM\ class\ saves\ that\ }}
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ memory\ but\ have\ an\ entry\ in\ the\ VT...\ }}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keyword}{const}\ ext::shared\_ptr<LMIntegration>\&\ integration()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}Integration\ non\ implemented\ in\ Latent\ model."{}});}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00606\ }
+\DoxyCodeLine{00607\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Ordering\ is:\ factorWeights\_[iVariable][iFactor]}}
+\DoxyCodeLine{00608\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<std::vector<Real>\ >\ factorWeights\_;}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ This\ is\ a\ duplicated\ value\ from\ the\ data\ above\ chosen\ for\ memory\ }}
+\DoxyCodeLine{00610\ \textcolor{comment}{\ \ \ \ \ \ \ \ reasons.}}
+\DoxyCodeLine{00611\ \textcolor{comment}{\ \ \ \ \ \ \ \ I\ have\ opted\ for\ this\ one\ value\ redundant\ memory\ rather\ than\ have\ the\ }}
+\DoxyCodeLine{00612\ \textcolor{comment}{\ \ \ \ \ \ \ \ memory\ load\ of\ the\ observable\ in\ all\ factors.\ Typically\ Latent\ models\ }}
+\DoxyCodeLine{00613\ \textcolor{comment}{\ \ \ \ \ \ \ \ are\ used\ in\ two\ very\ different\ ways:\ with\ many\ factors\ and\ not\ linked\ }}
+\DoxyCodeLine{00614\ \textcolor{comment}{\ \ \ \ \ \ \ \ to\ a\ market\ observable\ (typical\ matrix\ size\ above\ is\ of\ tens\ of\ }}
+\DoxyCodeLine{00615\ \textcolor{comment}{\ \ \ \ \ \ \ \ thousands\ entries)\ or\ with\ just\ one\ observable\ value\ and\ the\ matrix\ is\ }}
+\DoxyCodeLine{00616\ \textcolor{comment}{\ \ \ \ \ \ \ \ just\ a\ scalar.\ Otherwise,\ to\ remove\ the\ redundancy,\ the\ matrix\ }}
+\DoxyCodeLine{00617\ \textcolor{comment}{\ \ \ \ \ \ \ \ factorWeights\_\ should\ be\ one\ of\ Quotes\ Handles.}}
+\DoxyCodeLine{00618\ \textcolor{comment}{\ \ \ \ \ \ \ \ Yet\ it\ is\ not\ entirely\ true\ that\ quotes\ might\ be\ used\ only\ in\ pricing,\ }}
+\DoxyCodeLine{00619\ \textcolor{comment}{\ \ \ \ \ \ \ \ think\ sensitivity\ analysis....}}
+\DoxyCodeLine{00620\ \textcolor{comment}{\ \ \ \ \ \ \ \ \(\backslash\)todo\ Reconsider\ this,\ see\ how\ expensive\ truly\ is.}}
+\DoxyCodeLine{00621\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ Handle<Quote>\ cachedMktFactor\_;}
+\DoxyCodeLine{00623\ }
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ updated\ only\ by\ correlation\ observability\ and\ constructors.}}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)sqrt\{1-\/\(\backslash\)sum\_k\ \(\backslash\)beta\_\{i,k\}\string^2\}\ the\ addition\ being\ along\ the\ factors.\ }}
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ It\ has\ therefore\ the\ size\ of\ the\ basket.\ Cached\ for\ perfomance}}
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Real>\ idiosyncFctrs\_;}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_acd1daf4e28ce8ab5233065be60fd2896}{nFactors\_}};\textcolor{comment}{//matches\ idiosyncFctrs\_[0].size();i=0\ or\ any}}
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a43e8cf454283157cab9a90b5aa261409}{nVariables\_}};\textcolor{comment}{//\ matches\ idiosyncFctrs\_.size()\ }}
+\DoxyCodeLine{00632\ }
+\DoxyCodeLine{00633\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ copulaType\ copula\_;}
+\DoxyCodeLine{00634\ \ \ \ \ \};}
+\DoxyCodeLine{00635\ }
+\DoxyCodeLine{00636\ }
+\DoxyCodeLine{00637\ }
+\DoxyCodeLine{00638\ }
+\DoxyCodeLine{00639\ \ \ \ \ \textcolor{comment}{//\ Defines\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00640\ }
+\DoxyCodeLine{00641\ \textcolor{preprocessor}{\#ifndef\ \_\_DOXYGEN\_\_}}
+\DoxyCodeLine{00642\ }
+\DoxyCodeLine{00643\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Impl>}
+\DoxyCodeLine{00644\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel<Impl>::LatentModel}}(}
+\DoxyCodeLine{00645\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<Real>\ >\&\ factorWeights,}
+\DoxyCodeLine{00646\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ Impl::initTraits\&\ ini)}
+\DoxyCodeLine{00647\ \ \ \ \ :\ factorWeights\_(factorWeights),}
+\DoxyCodeLine{00648\ \ \ \ \ \ \ nFactors\_(factorWeights[0].size()),\ }
+\DoxyCodeLine{00649\ \ \ \ \ \ \ nVariables\_(factorWeights.size()),\ copula\_(factorWeights,\ ini)}
+\DoxyCodeLine{00650\ \ \ \ \ \{}
+\DoxyCodeLine{00651\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}.size();\ i++)\ \{}
+\DoxyCodeLine{00652\ \ \ \ \ \ \ \ \ \ \ \ \ idiosyncFctrs\_.push\_back(std::sqrt(1.-\/}
+\DoxyCodeLine{00653\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::inner\_product(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[i].begin(),\ }
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[i].end(),\ }
+\DoxyCodeLine{00655\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[i].begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.))));}
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ while\ at\ it,\ check\ sizes\ are\ coherent:}}
+\DoxyCodeLine{00657\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}}[i].size()\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_acd1daf4e28ce8ab5233065be60fd2896}{nFactors\_}},\ }
+\DoxyCodeLine{00658\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Name\ "{}}\ <<\ i\ <<\ \textcolor{stringliteral}{"{}\ provides\ a\ different\ number\ of\ factors"{}});}
+\DoxyCodeLine{00659\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00660\ \ \ \ \ \}}
+\DoxyCodeLine{00661\ }
+\DoxyCodeLine{00662\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Impl>}
+\DoxyCodeLine{00663\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel<Impl>::LatentModel}}(}
+\DoxyCodeLine{00664\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ factorWeights,}
+\DoxyCodeLine{00665\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ Impl::initTraits\&\ ini)}
+\DoxyCodeLine{00666\ \ \ \ \ :\ nFactors\_(1),}
+\DoxyCodeLine{00667\ \ \ \ \ \ \ nVariables\_(factorWeights.size())}
+\DoxyCodeLine{00668\ \ \ \ \ \{}
+\DoxyCodeLine{00669\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ factorWeight\ :\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}})}
+\DoxyCodeLine{00670\ \ \ \ \ \ \ \ \ \ \ \ \ factorWeights\_.emplace\_back(1,\ factorWeight);}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ \ \ for\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ factorWeight\ :\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a9058f44d45963e20631cf813f500ed50}{factorWeights}})}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ \ \ \ \ \ \ idiosyncFctrs\_.push\_back(std::sqrt(1.\ -\/\ factorWeight\ *\ factorWeight));}
+\DoxyCodeLine{00673\ \ \ \ \ \ \ \ \ \textcolor{comment}{//convert\ row\ to\ column\ vector....}}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ copula\_\ =\ copulaType(factorWeights\_,\ ini);}
+\DoxyCodeLine{00675\ \ \ \ \ \}}
+\DoxyCodeLine{00676\ }
+\DoxyCodeLine{00677\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Impl>}
+\DoxyCodeLine{00678\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel<Impl>::LatentModel}}(}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ correlSqr,}
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nVariables,}
+\DoxyCodeLine{00681\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ Impl::initTraits\&\ ini)}
+\DoxyCodeLine{00682\ \ \ \ \ :\ factorWeights\_(nVariables,\ std::vector<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}>(1,\ correlSqr)),}
+\DoxyCodeLine{00683\ \ \ \ \ \ \ idiosyncFctrs\_(nVariables,\ }
+\DoxyCodeLine{00684\ \ \ \ \ \ \ \ \ std::sqrt(1.-\/correlSqr*correlSqr)),}
+\DoxyCodeLine{00685\ \ \ \ \ \ \ nFactors\_(1),\ }
+\DoxyCodeLine{00686\ \ \ \ \ \ \ nVariables\_(nVariables),}
+\DoxyCodeLine{00687\ \ \ \ \ \ \ copula\_(factorWeights\_,\ ini)}
+\DoxyCodeLine{00688\ \ \ \ \ \{\ \}}
+\DoxyCodeLine{00689\ }
+\DoxyCodeLine{00690\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Impl>}
+\DoxyCodeLine{00691\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel<Impl>::LatentModel}}(}
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ singleFactorCorrel,}
+\DoxyCodeLine{00693\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nVariables,}
+\DoxyCodeLine{00694\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ Impl::initTraits\&\ ini)}
+\DoxyCodeLine{00695\ \ \ \ \ :\ factorWeights\_(nVariables,\ std::vector<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}>(1,\ }
+\DoxyCodeLine{00696\ \ \ \ \ \ \ \ \ std::sqrt(singleFactorCorrel-\/>value()))),}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ cachedMktFactor\_(singleFactorCorrel),}
+\DoxyCodeLine{00698\ \ \ \ \ \ \ idiosyncFctrs\_(nVariables,\ }
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \ \ std::sqrt(1.-\/singleFactorCorrel-\/>value())),}
+\DoxyCodeLine{00700\ \ \ \ \ \ \ nFactors\_(1),\ }
+\DoxyCodeLine{00701\ \ \ \ \ \ \ nVariables\_(nVariables),}
+\DoxyCodeLine{00702\ \ \ \ \ \ \ copula\_(factorWeights\_,\ ini)}
+\DoxyCodeLine{00703\ \ \ \ \ \{}
+\DoxyCodeLine{00704\ \ \ \ \ \ \ \ \ registerWith(cachedMktFactor\_);}
+\DoxyCodeLine{00705\ \ \ \ \ \}}
+\DoxyCodeLine{00706\ }
+\DoxyCodeLine{00707\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00708\ }
+\DoxyCodeLine{00709\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Impl>}
+\DoxyCodeLine{00710\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a25404a7f39fe1422f6e4dd1fb9b67115}{LatentModel<Impl>::update}}()\ \{}
+\DoxyCodeLine{00711\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ only\ registration\ with\ the\ single\ market\ correl\ quote.\ If\ we\ get\ }}
+\DoxyCodeLine{00712\ \textcolor{comment}{\ \ \ \ \ \ \ \ register\ with\ something\ else\ remember\ that\ the\ quote\ stores\ correlation}}
+\DoxyCodeLine{00713\ \textcolor{comment}{\ \ \ \ \ \ \ \ and\ the\ model\ need\ factor\ values;\ which\ for\ one\ factor\ models\ are\ the}}
+\DoxyCodeLine{00714\ \textcolor{comment}{\ \ \ \ \ \ \ \ square\ root\ of\ the\ correlation.}}
+\DoxyCodeLine{00715\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \ \ factorWeights\_\ =\ std::vector<std::vector<Real>\ >(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a43e8cf454283157cab9a90b5aa261409}{nVariables\_}},\ }
+\DoxyCodeLine{00717\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>(1,\ std::sqrt(cachedMktFactor\_-\/>value())));}
+\DoxyCodeLine{00718\ \ \ \ \ \ \ \ \ idiosyncFctrs\_\ =\ std::vector<Real>(\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a43e8cf454283157cab9a90b5aa261409}{nVariables\_}},\ }
+\DoxyCodeLine{00719\ \ \ \ \ \ \ \ \ \ \ \ \ std::sqrt(1.-\/cachedMktFactor\_-\/>value()));}
+\DoxyCodeLine{00720\ \ \ \ \ \ \ \ \ copula\_\ =\ copulaType(factorWeights\_,\ copula\_.getInitTraits());}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00722\ \ \ \ \ \}}
+\DoxyCodeLine{00723\ }
+\DoxyCodeLine{00724\ \textcolor{preprocessor}{\#ifndef\ \_\_DOXYGEN\_\_}}
+\DoxyCodeLine{00725\ }
+\DoxyCodeLine{00726\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/Template\ partial\ specializations\ of\ the\ random\ FactorSampler-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00727\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00728\ \textcolor{comment}{\ \ \ \ Notice\ that\ while\ the\ default\ template\ needs\ a\ sequence\ generator\ the\ }}
+\DoxyCodeLine{00729\ \textcolor{comment}{\ \ \ \ specializations\ need\ a\ number\ generator.\ This\ is\ forced\ at\ the\ time\ the\ }}
+\DoxyCodeLine{00730\ \textcolor{comment}{\ \ \ \ concrete\ policy\ class\ is\ used\ in\ the\ template\ parameter,\ if\ it\ has\ been\ }}
+\DoxyCodeLine{00731\ \textcolor{comment}{\ \ \ \ specialized\ it\ needs\ the\ sample\ type\ typedef\ to\ match\ at\ compilation.\ }}
+\DoxyCodeLine{00732\ \textcolor{comment}{\ \ \ \ }}
+\DoxyCodeLine{00733\ \textcolor{comment}{\ \ \ \ Notice\ here\ the\ outer\ class\ template\ is\ specialized\ only,\ leaving\ the\ inner}}
+\DoxyCodeLine{00734\ \textcolor{comment}{\ \ \ \ generator\ still\ a\ class\ template.\ Apparently\ old\ versions\ of\ gcc\ (3.x)\ bug\ }}
+\DoxyCodeLine{00735\ \textcolor{comment}{\ \ \ \ on\ this\ one\ not\ recognizing\ the\ specialization.}}
+\DoxyCodeLine{00736\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00741\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ TC>\ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ URNG,\ \textcolor{keywordtype}{bool}\ dummy>}
+\DoxyCodeLine{00742\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<TC>}
+\DoxyCodeLine{00743\ \ \ \ \ \ \ \ \ ::FactorSampler\ <RandomSequenceGenerator<BoxMullerGaussianRng<URNG>\ >\ ,}
+\DoxyCodeLine{00744\ \ \ \ \ \ \ \ \ \ \ \ \ dummy>\ \{}
+\DoxyCodeLine{00745\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ URNG\ urng\_type;}
+\DoxyCodeLine{00746\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00747\ \ \ \ \ \ \ \ \ \textcolor{comment}{//Size\ below\ must\ be\ ==\ to\ the\ numb\ of\ factors\ idiosy\ +\ systemi}}
+\DoxyCodeLine{00748\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1_sample}{Sample<std::vector<Real>}}\ >\ sample\_type;}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ FactorSampler(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_quant_lib_1_1_gaussian_copula_policy}{GaussianCopulaPolicy}}\&\ copula,}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\ =\ 0)\ }
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \ \ :\ boxMullRng\_(copula.numFactors(),\ }
+\DoxyCodeLine{00752\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_box_muller_gaussian_rng}{BoxMullerGaussianRng<urng\_type>}}(urng\_type(seed)))\{\ \}}
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ sample\_type\&\ nextSequence()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ boxMullRng\_.nextSequence();}
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00756\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_random_sequence_generator}{RandomSequenceGenerator<BoxMullerGaussianRng<urng\_type>}}\ >\ boxMullRng\_;}
+\DoxyCodeLine{00758\ \ \ \ \ \};}
+\DoxyCodeLine{00759\ }
+\DoxyCodeLine{00767\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ TC>\ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ URNG,\ \textcolor{keywordtype}{bool}\ dummy>\textcolor{comment}{//uniform\ number\ expected}}
+\DoxyCodeLine{00768\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<TC>}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ ::FactorSampler<RandomSequenceGenerator<PolarStudentTRng<URNG>\ >\ ,\ }
+\DoxyCodeLine{00770\ \ \ \ \ \ \ \ \ \ \ \ \ dummy>\ \{}
+\DoxyCodeLine{00771\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ URNG\ urng\_type;}
+\DoxyCodeLine{00772\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00773\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1_sample}{Sample<std::vector<Real>}}\ >\ sample\_type;}
+\DoxyCodeLine{00774\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ FactorSampler(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_t_copula_policy}{TCopulaPolicy}}\&\ copula,\ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\ =\ 0)}
+\DoxyCodeLine{00775\ \ \ \ \ \ \ \ \ :\ sequence\_(std::vector<Real>\ (copula.numFactors()),\ 1.0),}
+\DoxyCodeLine{00776\ \ \ \ \ \ \ \ \ \ \ urng\_(seed)\ \{}
+\DoxyCodeLine{00777\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ 1\ ==\ urng.dimension()\ is\ enforced\ by\ the\ sample\ type}}
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ varF\ =\ copula.varianceFactors();}
+\DoxyCodeLine{00779\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ i\ :\ varF)\ \textcolor{comment}{//\ ...use\ back\ inserter\ lambda}}
+\DoxyCodeLine{00780\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ trng\_.push\_back(\mbox{\hyperlink{class_quant_lib_1_1_polar_student_t_rng}{PolarStudentTRng<urng\_type>}}(2.\ /\ (1.\ -\/\ i\ *\ i),\ urng\_));}
+\DoxyCodeLine{00781\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00782\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ sample\_type\&\ nextSequence()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00783\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;\ i<trng\_.size();\ i++)\textcolor{comment}{//systemic\ samples\ plus\ one\ idiosyncratic}}
+\DoxyCodeLine{00785\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sequence\_.value[i]\ =\ trng\_[i].next().value;}
+\DoxyCodeLine{00786\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;\ i<sequence\_.value.size();\ i++)\textcolor{comment}{//rest\ of\ idiosyncratic\ samples}}
+\DoxyCodeLine{00787\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sequence\_.value[i]\ =\ trng\_.back().next().value;}
+\DoxyCodeLine{00788\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sequence\_;}
+\DoxyCodeLine{00789\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00790\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00791\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ sample\_type\ sequence\_;}
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \ urng\_type\ urng\_;}
+\DoxyCodeLine{00793\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<PolarStudentTRng<urng\_type>\ >\ trng\_;}
+\DoxyCodeLine{00794\ \ \ \ \ \};}
+\DoxyCodeLine{00795\ }
+\DoxyCodeLine{00796\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00797\ }
+\DoxyCodeLine{00798\ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00799\ }
+\DoxyCodeLine{00800\ }
+\DoxyCodeLine{00801\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

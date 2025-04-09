@@ -1,0 +1,389 @@
+\doxysection{binomiallossmodel.\+hpp}
+\hypertarget{binomiallossmodel_8hpp_source}{}\label{binomiallossmodel_8hpp_source}\index{ql/experimental/credit/binomiallossmodel.hpp@{ql/experimental/credit/binomiallossmodel.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#ifndef\ quantlib\_binomial\_loss\_model\_hpp}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ quantlib\_binomial\_loss\_model\_hpp}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{basket_8hpp}{ql/experimental/credit/basket.hpp}}>}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/constantlosslatentmodel.hpp>}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultlossmodel.hpp>}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{handle_8hpp}{ql/handle.hpp}}>}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <numeric>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{class\ }BinomialLossModel\ :\ \textcolor{keyword}{public}\ DefaultLossModel\ \{}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ LLM::copulaType\ copulaType;}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ BinomialLossModel(ext::shared\_ptr<LLM>\ copula)\ :\ copula\_(std::move(copula))\ \{\}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ resetModel()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ say\ there\ are\ defaults\ and\ these\ havent\ settled...\ and\ this\ is}}
+\DoxyCodeLine{00069\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ the\ engine\ to\ compute\ them....\ is\ this\ the\ wrong\ place?:*/}}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ attachAmount\_\ =\ basket\_-\/>remainingAttachmentAmount();}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\_\ =\ basket\_-\/>remainingDetachmentAmount();}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>resetBasket(basket\_.currentLink());\ \textcolor{comment}{//\ forces\ interface}}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_ac6fa14fedef4f0b6c32340a36bca79ce}{expectedDistribution}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ precal\ date\ conditional\ magnitudes:}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ notionals\ =\ basket\_-\/>remainingNotionals(date);}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Probability>\ invProbs\ =\ }
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(date);}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<invProbs.size();\ iName++)}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ invProbs[iName]\ =\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invProbs[iName],\ iName);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValueV(}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_aeab391e5f4c2e53de1577aafea959674}{lossProbability}}(date,\ notionals,\ invProbs,\ v1);}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_a34bb92302c44eabcb0742dd516e583ba}{lossPoints}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_af33cc82a36f60038148aa0d8b9dcb10e}{lossDistribution}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_abae597741e45adadae3180bd5a916302}{percentile}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_abae597741e45adadae3180bd5a916302}{percentile}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_af54e0d8ea342d41e36301ee3b028fc99}{expectedShortfall}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_abae597741e45adadae3180bd5a916302}{percentile}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Model\ internal\ workings\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_a5787b4962cdb148cda66ed016c2b6a25}{averageLoss}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ reminingNots,\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ condTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \textcolor{keyword}{const}\ std::vector<Real>\&\ lossVals,\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ bsktNots,}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Probability>\&\ uncondDefProbs,\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ expected\ as\ in\ time-\/value,\ not\ average,\ see\ literature}}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ std::vector<Real>\ expConditionalLgd(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00114\ \textcolor{keyword}{\ \ \ \ \ \ \ \ }\{}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ condLgds;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Size>\&\ evalDateLives\ =\ basket\_-\/>liveList();}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ condLgds.reserve(evalDateLives.size());}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ evalDateLive\ :\ evalDateLives)}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ condLgds.push\_back(1.\ -\/\ copula\_-\/>conditionalRecovery(d,\ evalDateLive,\ mktFactors));}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ condLgds;}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Heres\ where\ the\ burden\ of\ the\ algorithm\ setup\ lies.}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_aeab391e5f4c2e53de1577aafea959674}{lossProbability}}(\ \ \ \ \ \ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ expected\ exposures\ at\ the\ passed\ date,\ no\ wrong\ way\ means}}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ no\ dependence\ of\ the\ exposure\ with\ the\ mkt\ factor\ }}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ bsktNots,}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ uncondDefProbInv,\ }
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ \ mktFactor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<LLM>\ copula\_;}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cached\ arguments:}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ remaining\ basket\ magnitudes:}}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachAmount\_,\ detachAmount\_;}
+\DoxyCodeLine{00138\ \ \ \ \ \};}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{comment}{/*\ The\ algorithm\ to\ compute\ the\ prob.\ of\ n\ defaults\ in\ the\ basket\ is\ }}
+\DoxyCodeLine{00143\ \textcolor{comment}{\ \ \ \ \ \ \ \ recursive.\ For\ this\ reason\ theres\ no\ sense\ in\ returning\ the\ prob\ }}
+\DoxyCodeLine{00144\ \textcolor{comment}{\ \ \ \ \ \ \ \ distribution\ of\ a\ given\ number\ of\ defaults.}}
+\DoxyCodeLine{00145\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keyword}{template}<\ \textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00147\ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_aeab391e5f4c2e53de1577aafea959674}{BinomialLossModel<LLM>::lossProbability}}(}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ }
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ bsktNots,}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ uncondDefProbInv,\ }
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFactors)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00152\ \textcolor{keyword}{\ \ \ \ }\{\ \ \ \textcolor{comment}{//\ the\ model\ as\ it\ is\ does\ not\ model\ the\ exposures\ conditional\ to\ the\ }}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ mkt\ factr,\ otherwise\ this\ needs\ revision}}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ bsktSize\ =\ basket\_-\/>remainingSize();}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ conditional\ loss\ per\ unit\ notional\ of\ each\ name\ at\ time\ 'date'}}
+\DoxyCodeLine{00157\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ The\ spot\ recovery\ model\ is\ returning\ for\ all\ i's:}}
+\DoxyCodeLine{00158\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)frac\{\(\backslash\)int\_0\string^t\ \ [1-\/rr\_i(\(\backslash\)tau;\ \(\backslash\)xi)]\ P\_\{def-\/i\}(0,\ \(\backslash\)tau;\ \(\backslash\)xi)\ d\(\backslash\)tau\}}}
+\DoxyCodeLine{00159\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{P\_\{def-\/i\}(0,t;\(\backslash\)xi)\}}}
+\DoxyCodeLine{00160\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ and\ the\ constant\ recovery\ model\ is\ simply\ returning:\ }}
+\DoxyCodeLine{00161\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 1-\/RR\_i}}
+\DoxyCodeLine{00162\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ conditional\ fractional\ LGD\ expected\ as\ given\ by\ the\ recovery\ model\ }}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ for\ the\ ramaining(live)\ names\ at\ the\ current\ eval\ date.}}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ std::vector<Real>\ fractionalEL\ =\ expConditionalLgd(date,\ mktFactors);}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ std::vector<Real>\ lgdsLeft;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ std::transform(fractionalEL.begin(),\ fractionalEL.end(),\ }
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ bsktNots.begin(),\ std::back\_inserter(lgdsLeft),\ }
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ std::multiplies<>());}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ avgLgd\ =\ }
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ std::accumulate(lgdsLeft.begin(),\ lgdsLeft.end(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.))\ /}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ bsktSize;}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ std::vector<Probability>\ condDefProb(bsktSize,\ 0.);}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<bsktSize;\ j++)\textcolor{comment}{//transform}}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ condDefProb[j]\ =\ }
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>conditionalDefaultProbabilityInvP(uncondDefProbInv[j],}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ j,\ mktFactors);}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ of\ full\ portfolio:}}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ avgProb\ =\ avgLgd\ <=\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}}\ ?\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.)\ :\ \textcolor{comment}{//\ only\ if\ all\ are\ 0}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::inner\_product(condDefProb.begin(),\ }
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ condDefProb.end(),\ lgdsLeft.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.))}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ (avgLgd\ *\ bsktSize);}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ model\ parameters:}}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ m\ =\ avgProb\ *\ bsktSize;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ floorAveProb\ =\ std::min(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(bsktSize-\/1),\ std::floor(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(m)));}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ ceilAveProb\ =\ floorAveProb\ +\ 1.;}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ nu\_A}}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ varianceBinom\ =\ avgProb\ *\ (1.\ -\/\ avgProb)/bsktSize;}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ nu\_E}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ std::vector<Probability>\ oneMinusDefProb;\textcolor{comment}{//:\ 1.-\/condDefProb[j]}}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ std::transform(condDefProb.begin(),\ condDefProb.end(),\ }
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::back\_inserter(oneMinusDefProb),\ }
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [](\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ -\/>\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \{\ return\ 1.0-\/x;\ \});}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{comment}{//breaks\ condDefProb\ and\ lgdsLeft\ to\ spare\ memory}}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ std::transform(condDefProb.begin(),\ condDefProb.end(),\ }
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ oneMinusDefProb.begin(),\ condDefProb.begin(),\ }
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ std::multiplies<>());}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ std::transform(lgdsLeft.begin(),\ lgdsLeft.end(),\ }
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ lgdsLeft.begin(),\ lgdsLeft.begin(),\ std::multiplies<>());}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ variance\ =\ std::inner\_product(condDefProb.begin(),\ }
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ condDefProb.end(),\ lgdsLeft.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.));}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ variance\ =\ avgLgd\ <=\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}}\ ?\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.)\ :\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ variance\ /\ (bsktSize\ *\ bsktSize\ *\ avgLgd\ *\ avgLgd\ );}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sumAves\ =\ -\/std::pow(ceilAveProb-\/m,\ 2)\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ (std::pow(floorAveProb-\/m,\ 2)\ -\/\ std::pow(ceilAveProb,2.))\ }
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (ceilAveProb-\/m);}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ alpha\ =\ (variance\ *\ bsktSize\ +\ sumAves)\ }
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ /\ (varianceBinom\ *\ bsktSize\ +\ sumAves);}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Full\ distribution:\ }}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ....DO\ SOMETHING\ CHEAPER\ at\ least\ go\ up\ to\ the\ loss\ tranche\ limit.}}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ std::vector<Probability>\ lossProbDensity(bsktSize+1,\ 0.);\ }
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(avgProb\ >=\ 1.-\/\mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \{}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ lossProbDensity[bsktSize]\ =\ 1.;}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(avgProb\ <=\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ \{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ lossProbDensity[0]\ =\ 1.;}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ FIX\ ME:\ With\ high\ default\ probabilities\ one\ only\ gets\ tiny\ values}}
+\DoxyCodeLine{00221\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ at\ the\ end\ and\ the\ sum\ of\ probabilities\ in\ the\ }}
+\DoxyCodeLine{00222\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ conditional\ distribution\ does\ not\ add\ up\ to\ one.\ It\ might\ be\ due\ to\ }}
+\DoxyCodeLine{00223\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ the\ fact\ that\ recursion\ should\ be\ done\ in\ the\ other\ direction\ as\ }}
+\DoxyCodeLine{00224\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ pointed\ out\ in\ the\ book.\ This\ is\ numerical.}}
+\DoxyCodeLine{00225\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ probsRatio\ =\ avgProb/(1.-\/avgProb);}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ lossProbDensity[0]\ =\ std::pow(1.-\/avgProb,\ }
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\textcolor{keyword}{>}(bsktSize));}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=1;\ i<bsktSize+1;\ i++)\ \textcolor{comment}{//\ recursive\ to\ avoid\ factorial}}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lossProbDensity[i]\ =\ lossProbDensity[i-\/1]\ *\ probsRatio\ }
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (bsktSize-\/i+1.)/i;}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ redistribute\ probability:}}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<bsktSize+1;\ i++)}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lossProbDensity[i]\ *=\ alpha;}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ adjust\ average}}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ epsilon\ =\ (1.-\/alpha)*(ceilAveProb-\/m);}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ epsilonPlus\ =\ 1.-\/alpha-\/epsilon;}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ lossProbDensity[\textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\textcolor{keyword}{>}(floorAveProb)]\ +=\ epsilon;}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ lossProbDensity[\textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\textcolor{keyword}{>}(ceilAveProb)]\ \ +=\ epsilonPlus;}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ lossProbDensity;}
+\DoxyCodeLine{00242\ \ \ \ \ \}}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \ \ \textcolor{comment}{//-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{keyword}{template}<\ \textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00247\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_a5787b4962cdb148cda66ed016c2b6a25}{BinomialLossModel<LLM>::averageLoss}}(}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ }
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ reminingNots,}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mktFctrs)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00251\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ bsktSize\ =\ basket\_-\/>remainingSize();}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ conditional\ loss\ per\ unit\ notional\ of\ each\ name\ at\ time\ 'date'}}
+\DoxyCodeLine{00254\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ The\ spot\ recovery\ model\ is\ returning\ for\ all\ i's:}}
+\DoxyCodeLine{00255\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)frac\{\(\backslash\)int\_0\string^t\ \ [1-\/rr\_i(\(\backslash\)tau;\ \(\backslash\)xi)]\ P\_\{def-\/i\}(0,\ \(\backslash\)tau;\ \(\backslash\)xi)\ d\(\backslash\)tau\}}}
+\DoxyCodeLine{00256\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{P\_\{def-\/i\}(0,t;\(\backslash\)xi)\}}}
+\DoxyCodeLine{00257\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ and\ the\ constant\ recovery\ model\ is\ simply\ returning:\ }}
+\DoxyCodeLine{00258\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ 1-\/RR\_i}}
+\DoxyCodeLine{00259\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ std::vector<Real>\ fractionalEL\ =\ expConditionalLgd(d,\ mktFctrs);}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notBskt\ =\ std::accumulate(reminingNots.begin(),\ }
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reminingNots.end(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.));}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ std::vector<Real>\ lgdsLeft;}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ std::transform(fractionalEL.begin(),\ fractionalEL.end(),\ }
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ reminingNots.begin(),\ std::back\_inserter(lgdsLeft),}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::multiplies<>());}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::accumulate(lgdsLeft.begin(),\ lgdsLeft.end(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.))\ }
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ /\ (bsktSize*notBskt);}
+\DoxyCodeLine{00269\ \ \ \ \ \}}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00271\ \ \ \ \ \textcolor{keyword}{template}<\ \textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00272\ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_a34bb92302c44eabcb0742dd516e583ba}{BinomialLossModel<LLM>::lossPoints}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00273\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ std::vector<Real>\ notionals\ =\ basket\_-\/>remainingNotionals(d);}
+\DoxyCodeLine{00275\ }
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ aveLossFrct\ =\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_a5787b4962cdb148cda66ed016c2b6a25}{averageLoss}}(d,\ notionals,\ v1);}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ std::vector<Real>\ data;}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dataSize\ =\ basket\_-\/>remainingSize()\ +\ 1;}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ data.reserve(dataSize);}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ use\ std::algorithm}}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ outsNot\ =\ basket\_-\/>remainingNotional(d);}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<dataSize;\ i++)}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ data.push\_back(i\ *\ aveLossFrct\ *\ outsNot);}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ data;}
+\DoxyCodeLine{00289\ \ \ \ \ \}}
+\DoxyCodeLine{00290\ }
+\DoxyCodeLine{00291\ \ \ \ \ \textcolor{keyword}{template}<\ \textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00292\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ BinomialLossModel<LLM>::condTrancheLoss(}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ }
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ lossVals,\ }
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ bsktNots,}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ uncondDefProbsInv,}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ mkf)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ std::vector<Real>\ condLProb\ =\ }
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \ \ \ \ lossProbability(d,\ bsktNots,\ uncondDefProbsInv,\ mkf);}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)to\ do:\ move\ to\ a\ do-\/while\ over\ attach\ to\ detach}}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma\ =\ 0.;}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<lossVals.size();\ i++)\ \{\ }
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ \ \ suma\ +=\ condLProb[i]\ *\ }
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::min(std::max(lossVals[i]}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ attachAmount\_,\ 0.),\ detachAmount\_\ -\/\ attachAmount\_);}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ suma;}
+\DoxyCodeLine{00309\ \ \ \ \ \}}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \ \ \ \ \textcolor{keyword}{template}<\ \textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00312\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ BinomialLossModel<LLM>::expectedTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ std::vector<Real>\ lossVals\ \ =\ lossPoints(d);}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ std::vector<Real>\ notionals\ =\ basket\_-\/>remainingNotionals(d);}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ std::vector<Probability>\ invProbs\ =\ }
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(d);}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<invProbs.size();\ iName++)}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ \ invProbs[iName]\ =\ }
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copula\_-\/>inverseCumulativeY(invProbs[iName],\ iName);}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ copula\_-\/>integratedExpectedValue(}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \ \ \ \ [\&](\textcolor{keyword}{const}\ std::vector<Real>\&\ v1)\ \{}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ condTrancheLoss(d,\ lossVals,\ notionals,\ invProbs,\ v1);}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ \});}
+\DoxyCodeLine{00325\ \ \ \ \ \}}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00328\ \ \ \ \ \textcolor{keyword}{template}<\ \textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00329\ \ \ \ \ std::map<Real,\ Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_af33cc82a36f60038148aa0d8b9dcb10e}{BinomialLossModel<LLM>::lossDistribution}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00330\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>\ distrib;}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ std::vector<Real>\ lossPts\ =\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_a34bb92302c44eabcb0742dd516e583ba}{lossPoints}}(d);}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ std::vector<Real>\ values\ \ =\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_ac6fa14fedef4f0b6c32340a36bca79ce}{expectedDistribution}}(d);}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sum\ =\ 0.;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<lossPts.size();\ i++)\ \{}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ distrib.insert(std::make\_pair(lossPts[i],\ }
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//capped,\ some\ situations\ giving\ a\ very\ small\ probability\ over\ 1}}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::min(sum+values[i],1.)}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ));}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ sum+=\ values[i];}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ distrib;}
+\DoxyCodeLine{00343\ \ \ \ \ \}}
+\DoxyCodeLine{00344\ }
+\DoxyCodeLine{00345\ \ \ \ \ \textcolor{keyword}{template}<\ \textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00346\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_abae597741e45adadae3180bd5a916302}{BinomialLossModel<LLM>::percentile}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ perc)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>\ dist\ =\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_af33cc82a36f60038148aa0d8b9dcb10e}{lossDistribution}}(d);}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo:\ Use\ some\ of\ the\ library\ interpolators\ instead}}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(\textcolor{comment}{//\ included\ in\ test\ below-\/>\ (dist.begin()-\/>second\ >=1.)\ ||}}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \ \ \ \ (dist.begin()-\/>second\ >=\ perc))\textcolor{keywordflow}{return}\ dist.begin()-\/>first;}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ deterministic\ case\ (e.g.\ date\ requested\ is\ todays\ date)}}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(dist.size()\ ==\ 1)\ \textcolor{keywordflow}{return}\ dist.begin()-\/>first;}
+\DoxyCodeLine{00354\ }
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(perc\ ==\ 1.)\ \textcolor{keywordflow}{return}\ dist.rbegin()-\/>first;}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(perc\ ==\ 0.)\ \textcolor{keywordflow}{return}\ dist.begin()-\/>first;}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ itdist\ =\ dist.begin();}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (itdist-\/>second\ <=\ perc)\ ++itdist;}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valPlus\ =\ itdist-\/>second;}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ xPlus\ \ \ =\ itdist-\/>first;}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ -\/-\/itdist;\ \textcolor{comment}{//we're\ never\ 1st\ or\ last,\ because\ of\ tests\ above}}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valMin\ \ =\ itdist-\/>second;}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ xMin\ \ \ \ =\ itdist-\/>first;}
+\DoxyCodeLine{00364\ }
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ portfLoss\ =\ xPlus-\/(xPlus-\/xMin)*(valPlus-\/perc)/(valPlus-\/valMin);}
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ }
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \ \ \ std::min(std::max(portfLoss\ -\/\ attachAmount\_,\ 0.),\ }
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\_\ -\/\ attachAmount\_);}
+\DoxyCodeLine{00370\ \ \ \ \ \}}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \textcolor{keyword}{template}<\ \textcolor{keyword}{class}\ LLM>}
+\DoxyCodeLine{00373\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_af54e0d8ea342d41e36301ee3b028fc99}{BinomialLossModel<LLM>::expectedShortfall}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&d,\ }
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ perctl)\textcolor{keyword}{\ const\ }}
+\DoxyCodeLine{00375\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \textcolor{comment}{//taken\ from\ recursive\ since\ we\ have\ the\ distribution\ in\ both\ cases.}}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(d\ ==\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().evaluationDate())\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>\ distrib\ =\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model_af33cc82a36f60038148aa0d8b9dcb10e}{lossDistribution}}(d);}
+\DoxyCodeLine{00379\ }
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>::iterator\ }
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ itNxt,\ itDist\ =\ distrib.begin();}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;\ itDist\ !=\ distrib.end();\ ++itDist)}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(itDist-\/>second\ >=\ perctl)\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \ \ \ \ itNxt\ =\ itDist;}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \ \ \ \ -\/-\/itDist;}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo:\ I\ could\ linearly\ triangulate\ the\ exact\ point\ and\ get\ }}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ extra\ precission\ on\ the\ first(broken)\ period.}}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(itNxt\ !=\ distrib.end())\ \{\ }
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossNxt\ =\ std::min(std::max(itNxt-\/>first\ -\/\ attachAmount\_,\ }
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.),\ detachAmount\_\ -\/\ attachAmount\_);}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossHere\ =\ std::min(std::max(itDist-\/>first\ -\/\ attachAmount\_,}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.),\ detachAmount\_\ -\/\ attachAmount\_);}
+\DoxyCodeLine{00394\ }
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ val\ =\ \ lossNxt\ -\/\ (itNxt-\/>second\ -\/\ perctl)\ *\ }
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (lossNxt\ -\/\ lossHere)\ /\ (itNxt-\/>second\ -\/\ itDist-\/>second);\ }
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma\ =\ (itNxt-\/>second\ -\/\ perctl)\ *\ (lossNxt\ +\ val)\ *\ .5;}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++itDist;\ ++itNxt;}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}\{}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lossNxt\ =\ std::min(std::max(itNxt-\/>first\ -\/\ attachAmount\_,\ }
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.),\ detachAmount\_\ -\/\ attachAmount\_);}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lossHere\ =\ std::min(std::max(itDist-\/>first\ -\/\ attachAmount\_,\ }
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0.),\ detachAmount\_\ -\/\ attachAmount\_);}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ suma\ +=\ .5\ *\ (lossHere\ +\ lossNxt)\ }
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (itNxt-\/>second\ -\/\ itDist-\/>second);}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++itDist;\ ++itNxt;}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\textcolor{keywordflow}{while}(itNxt\ !=\ distrib.end());}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ suma\ /\ (1.-\/perctl);}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}Binomial\ model\ fails\ to\ calculate\ ESF."{}});}
+\DoxyCodeLine{00411\ \ \ \ \ \}}
+\DoxyCodeLine{00412\ }
+\DoxyCodeLine{00413\ \ \ \ \ \textcolor{comment}{//\ The\ standard\ use:}}
+\DoxyCodeLine{00414\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model}{BinomialLossModel<GaussianConstantLossLM>}}\ GaussianBinomialLossModel;}
+\DoxyCodeLine{00415\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_binomial_loss_model}{BinomialLossModel<TConstantLossLM>}}\ TBinomialLossModel;}
+\DoxyCodeLine{00416\ }
+\DoxyCodeLine{00417\ \}}
+\DoxyCodeLine{00418\ }
+\DoxyCodeLine{00419\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

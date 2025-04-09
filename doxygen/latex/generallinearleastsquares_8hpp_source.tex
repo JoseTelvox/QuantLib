@@ -1,0 +1,145 @@
+\doxysection{generallinearleastsquares.\+hpp}
+\hypertarget{generallinearleastsquares_8hpp_source}{}\label{generallinearleastsquares_8hpp_source}\index{ql/math/generallinearleastsquares.hpp@{ql/math/generallinearleastsquares.hpp}}
+\mbox{\hyperlink{generallinearleastsquares_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2009\ Dirk\ Eddelbuettel}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2006,\ 2009,\ 2010\ Klaus\ Spanderen}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2010\ Kakhkhor\ Abdijalilov}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ Copyright\ (C)\ 2010\ Slava\ Mazur}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00011\ \textcolor{comment}{}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00017\ \textcolor{comment}{}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00021\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#ifndef\ quantlib\_general\_linear\_least\_squares\_hpp}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ quantlib\_general\_linear\_least\_squares\_hpp}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{qldefines_8hpp}{ql/qldefines.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{svd_8hpp}{ql/math/matrixutilities/svd.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{array_8hpp}{ql/math/array.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{class\ }GeneralLinearLeastSquares\ \{}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ xContainer,\ \textcolor{keyword}{class}\ yContainer,\ \textcolor{keyword}{class}\ vContainer>}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ GeneralLinearLeastSquares(\textcolor{keyword}{const}\ xContainer\ \&\ x,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ yContainer\ \&\ y,\ \textcolor{keyword}{const}\ vContainer\ \&\ v);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ xIterator,\ \textcolor{keyword}{class}\ yIterator,\ \textcolor{keyword}{class}\ vIterator>}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ GeneralLinearLeastSquares(xIterator\ xBegin,\ xIterator\ xEnd,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yIterator\ yBegin,\ yIterator\ yEnd,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vIterator\ vBegin,\ vIterator\ vEnd);}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ coefficients()\textcolor{keyword}{\ \ \ const\ }\{\ \textcolor{keywordflow}{return}\ a\_;\ \}}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ residuals()\textcolor{keyword}{\ \ \ \ \ \ const\ }\{\ \textcolor{keywordflow}{return}\ residuals\_;\ \}}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_general_linear_least_squares_a744e9581e1aa88fef1e2fe6d986cb6f1}{standardErrors}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ standardErrors\_;\ \}}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_general_linear_least_squares_acba7ed543c91e17de631f24f1a14f4b0}{error}}()\textcolor{keyword}{\ \ \ \ \ \ \ \ \ \ const\ }\{\ \textcolor{keywordflow}{return}\ err\_;\}}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ residuals\_.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ \}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dim()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ a\_.\mbox{\hyperlink{class_quant_lib_1_1_array_a68ffa4a150e1d8d8bc3b5a212ffc1d35}{size}}();\ \}}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ Array\ a\_,\ err\_,\ residuals\_,\ standardErrors\_;}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ xIterator,\ \textcolor{keyword}{class}\ yIterator,\ \textcolor{keyword}{class}\ vIterator>}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ calculate(}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ xIterator\ xBegin,\ xIterator\ xEnd,}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ yIterator\ yBegin,\ yIterator\ yEnd,}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ vIterator\ vBegin);}
+\DoxyCodeLine{00076\ \ \ \ \ \};}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ xContainer,\ \textcolor{keyword}{class}\ yContainer,\ \textcolor{keyword}{class}\ vContainer>\ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00079\ \ \ \ \ GeneralLinearLeastSquares::GeneralLinearLeastSquares(\textcolor{keyword}{const}\ xContainer\ \&\ x,}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ yContainer\ \&\ y,}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ vContainer\ \&\ v)}
+\DoxyCodeLine{00082\ \ \ \ \ :\ a\_(v.size(),\ 0.0),}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ err\_(v.size(),\ 0.0),}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ residuals\_(y.size()),}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ standardErrors\_(v.size())\ \{}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ calculate(x.begin(),\ x.end(),\ y.begin(),\ y.end(),\ v.begin());}
+\DoxyCodeLine{00087\ \ \ \ \ \}}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ xIterator,\ \textcolor{keyword}{class}\ yIterator,\ \textcolor{keyword}{class}\ vIterator>\ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00090\ \ \ \ \ GeneralLinearLeastSquares::GeneralLinearLeastSquares(}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ xIterator\ xBegin,\ xIterator\ xEnd,}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yIterator\ yBegin,\ yIterator\ yEnd,}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vIterator\ vBegin,\ vIterator\ vEnd)}
+\DoxyCodeLine{00094\ \ \ \ \ :\ a\_(std::distance(vBegin,\ vEnd),\ 0.0),}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ err\_(a\_.size(),\ 0.0),}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ residuals\_(std::distance(yBegin,\ yEnd)),}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ standardErrors\_(a\_.size())\ \{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ calculate(xBegin,\ xEnd,\ yBegin,\ yEnd,\ vBegin);}
+\DoxyCodeLine{00099\ \ \ \ \ \}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ xIterator,\ \textcolor{keyword}{class}\ yIterator,\ \textcolor{keyword}{class}\ vIterator>}
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordtype}{void}\ GeneralLinearLeastSquares::calculate(xIterator\ xBegin,\ xIterator\ xEnd,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yIterator\ yBegin,\ yIterator\ yEnd,}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vIterator\ vBegin)\ \{}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n\ =\ residuals\_.size();}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ m\ =\ err\_.size();}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(\ n\ ==\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}(std::distance(yBegin,\ yEnd)),}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}sample\ set\ need\ to\ be\ of\ the\ same\ size"{}});}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ >=\ m,\ \textcolor{stringliteral}{"{}sample\ set\ is\ too\ small"{}});}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i;}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ Matrix\ A(n,\ m);}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<m;\ ++i)}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ std::transform(xBegin,\ xEnd,\ A.column\_begin(i),\ *vBegin++);}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ SVD\ svd(A);}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\&\ V\ =\ svd.V();}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\&\ U\ =\ svd.U();}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Array\&\ w\ =\ svd.singularValues();}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ threshold\ =\ n\ *\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}}\ *\ svd.singularValues()[0];}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<m;\ ++i)\ \{}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (w[i]\ >\ threshold)\ \{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ u\ =\ std::inner\_product(U.column\_begin(i),}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ U.column\_end(i),}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ yBegin,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.0))/w[i];}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<m;\ ++j)\ \{}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ a\_[j]\ \ +=u*V[j][i];}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ err\_[j]+=V[j][i]*V[j][i]/(w[i]*w[i]);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ err\_\ \ \ \ \ \ =\ Sqrt(err\_);}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ Array\ tmp\ =\ A*a\_;}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ std::transform(tmp.begin(),\ tmp.end(),\ yBegin,\ residuals\_.begin(),\ std::minus<>());}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ chiSq}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \ \ =\ std::inner\_product(residuals\_.begin(),\ residuals\_.end(),\ residuals\_.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.0));}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ multiplier\ =\ std::sqrt(chiSq/(n-\/2));}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ std::transform(err\_.begin(),\ err\_.end(),\ standardErrors\_.begin(),}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [=](\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ -\/>\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \{\ return\ x\ *\ multiplier;\ \});}
+\DoxyCodeLine{00147\ \ \ \ \ \}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \}}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

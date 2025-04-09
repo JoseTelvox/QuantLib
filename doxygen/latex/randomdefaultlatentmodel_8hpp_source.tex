@@ -1,0 +1,931 @@
+\doxysection{randomdefaultlatentmodel.\+hpp}
+\hypertarget{randomdefaultlatentmodel_8hpp_source}{}\label{randomdefaultlatentmodel_8hpp_source}\index{ql/experimental/credit/randomdefaultlatentmodel.hpp@{ql/experimental/credit/randomdefaultlatentmodel.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Roland\ Lichters}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2009,\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#ifndef\ quantlib\_randomdefault\_latent\_model\_hpp}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ quantlib\_randomdefault\_latent\_model\_hpp}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{basket_8hpp}{ql/experimental/credit/basket.hpp}}>}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/constantlosslatentmodel.hpp>}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultlossmodel.hpp>}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <ql/experimental/math/gaussiancopulapolicy.hpp>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{latentmodel_8hpp}{ql/experimental/math/latentmodel.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <ql/experimental/math/tcopulapolicy.hpp>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{beta_8hpp}{ql/math/beta.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{mt19937uniformrng_8hpp}{ql/math/randomnumbers/mt19937uniformrng.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{sobolrsg_8hpp}{ql/math/randomnumbers/sobolrsg.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{brent_8hpp}{ql/math/solvers1d/brent.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{histogram_8hpp}{ql/math/statistics/histogram.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{riskstatistics_8hpp}{ql/math/statistics/riskstatistics.hpp}}>}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{tuple_8hpp}{ql/tuple.hpp}}>}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{comment}{/*\ Intended\ to\ replace}}
+\DoxyCodeLine{00040\ \textcolor{comment}{\ \ \ \ ql\(\backslash\)experimental\(\backslash\)credit\(\backslash\)randomdefaultmodel.Xpp}}
+\DoxyCodeLine{00041\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{comment}{//\ replaces\ class\ Loss}}
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ simEventOwner>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1sim_event}{simEvent}};}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{comment}{/*\ CRTP\ used\ for\ performance\ to\ avoid\ virtual\ table\ resolution\ in\ the\ Monte}}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ \ \ \ Carlo.\ Not\ only\ in\ sample\ generation\ but\ access;\ quite\ an\ amount\ of\ time\ can}}
+\DoxyCodeLine{00083\ \textcolor{comment}{\ \ \ \ go\ into\ statistics\ computation,\ for\ a\ portfolio\ of\ tens\ of\ thousands}}
+\DoxyCodeLine{00084\ \textcolor{comment}{\ \ \ \ positions\ that\ part\ of\ the\ problem\ will\ be\ starting\ to\ overtake\ the}}
+\DoxyCodeLine{00085\ \textcolor{comment}{\ \ \ \ simulation\ costs.}}
+\DoxyCodeLine{00086\ \textcolor{comment}{}}
+\DoxyCodeLine{00087\ \textcolor{comment}{\ \ \ \ \(\backslash\)todo:\ someone\ with\ sound\ experience\ on\ cache\ misses\ look\ into\ this,\ the}}
+\DoxyCodeLine{00088\ \textcolor{comment}{\ \ \ \ statistics\ will\ be\ getting\ memory\ in\ and\ out\ of\ the\ cpu\ heavily\ and\ it}}
+\DoxyCodeLine{00089\ \textcolor{comment}{\ \ \ \ might\ be\ possible\ to\ get\ performance\ out\ of\ that.}}
+\DoxyCodeLine{00090\ \textcolor{comment}{\ \ \ \ \(\backslash\)todo:\ parallelize\ the\ statistics\ computation,\ things\ like\ Var/ESF\ splits}}
+\DoxyCodeLine{00091\ \textcolor{comment}{\ \ \ \ are\ very\ expensive.}}
+\DoxyCodeLine{00092\ \textcolor{comment}{\ \ \ \ \(\backslash\)todo:\ consider\ another\ design,\ taking\ the\ statistics\ outside\ the\ models.}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }derivedRandomLM,\ \textcolor{keyword}{class\ }copulaPolicy,}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }USNG\ =\ \mbox{\hyperlink{class_quant_lib_1_1_sobol_rsg}{SobolRsg}}>}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keyword}{class\ }RandomLM\ :\ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ LazyObject,}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ \textcolor{keyword}{virtual}\ DefaultLossModel\ \{}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Takes\ the\ parents\ type,\ all\ children\ have\ the\ same\ type,\ the}}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ random\ generation\ is\ performed\ in\ this\ class\ only.}}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model}{LatentModel<copulaPolicy>::template}}\ FactorSampler<USNG>}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ copulaRNG\_type;}
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ RandomLM(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numFactors,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numLMVars,\ copulaPolicy\ copula,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nSims,\ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed)}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ :\ seed\_(seed),\ numFactors\_(numFactors),\ numLMVars\_(numLMVars),\ nSims\_(nSims),}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ copula\_(std::move(copula))\ \{\}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_afdaffcaed2e17a3e4732f681731adf63}{update}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ simsBuffer\_.clear();}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ tell\ basket\ to\ notify\ instruments,\ etc,\ we\ are\ invalid}}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!basket\_.empty())}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>notifyObservers();}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_adee2bf49be5c4c78736be293321a856d}{LazyObject::update}}();}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a0ac9a7bf809a54db301b8f66f9fb3768}{performCalculations}}()\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }derivedRandomLM<copulaPolicy,\ USNG>*\ \textcolor{keyword}{>}(}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{this})-\/>initDates();\textcolor{comment}{//in\ update?}}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ copulasRng\_\ =\ ext::make\_shared<copulaRNG\_type>(copula\_,\ seed\_);}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ performSimulations();}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ performSimulations()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Next\ sequence\ should\ determine\ the\ event\ and\ push\ it\ into\ buffer}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ nSims\_;\ i\ !=\ 0U;\ i-\/-\/)\ \{}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ sample\ =}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ copulasRng\_-\/>nextSequence().value;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }derivedRandomLM<copulaPolicy,\ USNG>*\ \textcolor{keyword}{>}(}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{this})-\/>nextSample(sample);}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ alternatively\ make\ call\ an\ explicit\ local\ method...}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Method\ to\ access\ simulation\ results\ and\ avoiding\ a\ copy\ of}}
+\DoxyCodeLine{00135\ \textcolor{comment}{\ \ \ \ \ \ \ \ each\ thread\ results\ buffer.\ PerformCalculations\ should\ have\ been\ called.}}
+\DoxyCodeLine{00136\ \textcolor{comment}{\ \ \ \ \ \ \ \ Here\ in\ the\ monothread\ version\ this\ method\ is\ redundant/trivial\ but}}
+\DoxyCodeLine{00137\ \textcolor{comment}{\ \ \ \ \ \ \ \ serves\ to\ detach\ the\ statistics\ access\ to\ the\ way\ the\ simulations\ are}}
+\DoxyCodeLine{00138\ \textcolor{comment}{\ \ \ \ \ \ \ \ stored.}}
+\DoxyCodeLine{00139\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<derivedRandomLM<copulaPolicy,\ USNG>\ >\ >\&}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ getSim(\textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim)\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ simsBuffer\_[iSim];\ \}}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Allows\ statistics\ to\ be\ written\ generically\ for\ fixed\ and\ random}}
+\DoxyCodeLine{00144\ \textcolor{comment}{\ \ \ \ \ \ \ \ recovery\ rates.\ */}}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ getEventRecovery(}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ simEvent<derivedRandomLM<copulaPolicy,\ USNG>\ >\&\ evt)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00147\ \textcolor{keyword}{\ \ \ \ \ \ \ \ }\{}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \textcolor{keyword}{static\_cast<}\textcolor{keyword}{const\ }derivedRandomLM<copulaPolicy,\ USNG>*\ \textcolor{keyword}{>}(}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{this})-\/>getEventRecovery(evt);}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ These\ are\ virtual\ and\ allow\ for\ children-\/specific\ optimization\ and}}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ variance\ reduction.\ The\ virtual\ table\ is\ ok,\ they\ are\ not\ part}}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ of\ the\ simulation.}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a4573522256974f56442feed91246249c}{probAtLeastNEvents}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ std::vector<Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a61f890c966b50d23efc6b7c231b7c1e2}{probsBeingNthEvent}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a65e1bf84cbd60eae162d99126abb1834}{defaultCorrelation}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ jName)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedTrancheLoss(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ std::pair<Real,\ Real>\ expectedTrancheLossInterval(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ confidencePerc)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a07ceb3783bff4c2b911f853d39d66074}{lossDistribution}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_histogram}{Histogram}}\ computeHistogram(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a4d3026de4233c47b892cabda67feacea}{expectedShortfall}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ percent)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ std::tuple<Real,\ Real,\ Real>\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_aa3b6a096daf1a894f4b06c5d6ae68934}{percentileAndInterval}}(}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a46f349953322fb99f243d90734cf2bbd}{splitVaRLevel}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ std::vector<std::vector<Real>\ >\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a682e69146ccd628df74a73ed296e32be}{splitVaRAndError}}(}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ confInterval)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \string~RandomLM()\ \textcolor{keyword}{override}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00204\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\_;}
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numFactors\_;}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numLMVars\_;}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nSims\_;}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<std::vector<\mbox{\hyperlink{struct_quant_lib_1_1sim_event}{simEvent}}<derivedRandomLM<copulaPolicy,}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ USNG\ >\ >\ >\ >\ simsBuffer\_;}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ copulaPolicy\ copula\_;}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ ext::shared\_ptr<copulaRNG\_type>\ copulasRng\_;}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Maximum\ time\ inversion\ horizon}}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxHorizon\_\ =\ 4050;\ \textcolor{comment}{//\ over\ 11\ years}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Inversion\ probability\ limits\ are\ computed\ by\ children\ in\ initdates()}}
+\DoxyCodeLine{00221\ \ \ \ \ \};}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \ \ \textcolor{comment}{/*\ -\/-\/-\/-\/\ Statistics\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ \ */}}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00227\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a4573522256974f56442feed91246249c}{RandomLM<D,\ C,\ URNG>::probAtLeastNEvents}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00229\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(d>today,\ \textcolor{stringliteral}{"{}Date\ for\ statistic\ must\ be\ in\ the\ future."{}});}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ casted\ to\ natural\ to\ avoid\ warning,\ we\ have\ just\ checked\ the\ sign}}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ val\ =\ d.serialNumber()\ -\/\ today.serialNumber();}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(n==0)\ \textcolor{keywordflow}{return}\ 1.;}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ counts\ =\ 0.;}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim=0;\ iSim\ <\ nSims\_;\ iSim++)\ \{}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ simCount\ =\ 0;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<D<C,\ URNG>\ >\ >\&\ events\ =}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ getSim(iSim);}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iEvt=0;\ iEvt\ <\ events.size();\ iEvt++)}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ duck\ type\ on\ the\ members:}}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(val\ >\ events[iEvt].dayFromRef)\ simCount++;}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(simCount\ >=\ n)\ counts++;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ counts/nSims\_;}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo\ Provide\ confidence\ interval}}
+\DoxyCodeLine{00251\ \ \ \ \ \}}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00253\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00254\ \ \ \ \ std::vector<Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a61f890c966b50d23efc6b7c231b7c1e2}{RandomLM<D,\ C,\ URNG>::probsBeingNthEvent}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n,}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00256\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ basketSize\ =\ basket\_-\/>size();}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n>0\ \&\&\ n<=basketSize,\ \textcolor{stringliteral}{"{}Impossible\ number\ of\ defaults."{}});}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(d>today,\ \textcolor{stringliteral}{"{}Date\ for\ statistic\ must\ be\ in\ the\ future."{}});}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ casted\ to\ natural\ to\ avoid\ warning,\ we\ have\ just\ checked\ the\ sign}}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ val\ =\ d.serialNumber()\ -\/\ today.serialNumber();}
+\DoxyCodeLine{00266\ }
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ std::vector<Probability>\ hitsByDate(basketSize,\ 0.);}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim=0;\ iSim\ <\ nSims\_;\ iSim++)\ \{}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<D<C,\ URNG>\ >\ >\&\ events\ =\ getSim(iSim);}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ std::map<unsigned\ short,\ unsigned\ short>\ namesDefaulting;}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iEvt=0;\ iEvt\ <\ events.size();\ iEvt++)\ \{}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ event\ is\ within\ time\ horizon...}}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(val\ >\ events[iEvt].dayFromRef)}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//...count\ it.\ notice\ insertion\ sorts\ by\ date.}}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ namesDefaulting.insert(std::make\_pair<\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{short},}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{short}>(events[iEvt].dayFromRef,}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ events[iEvt].nameIdx));}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(namesDefaulting.size()\ >=\ n)\ \{}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ itdefs\ =\ namesDefaulting.begin();}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ locate\ nth\ default\ in\ time:}}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::advance(itdefs,\ n-\/1);}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ statistic:}}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hitsByDate[itdefs-\/>second]++;}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ std::transform(hitsByDate.begin(),\ hitsByDate.end(),}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ hitsByDate.begin(),}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [\textcolor{keyword}{this}](\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\{\ return\ x/nSims\_;\ \});}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ hitsByDate;}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo\ Provide\ confidence\ interval}}
+\DoxyCodeLine{00293\ \ \ \ \ \}}
+\DoxyCodeLine{00294\ }
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00297\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a65e1bf84cbd60eae162d99126abb1834}{RandomLM<D,\ C,\ URNG>::defaultCorrelation}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ jName)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00299\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ a\ control\ variate\ with\ the\ probabilities\ is\ possible}}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(d>today,\ \textcolor{stringliteral}{"{}Date\ for\ statistic\ must\ be\ in\ the\ future."{}});}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ casted\ to\ natural\ to\ avoid\ warning,\ we\ have\ just\ checked\ the\ sign}}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ val\ =\ d.serialNumber()\ -\/\ today.serialNumber();}
+\DoxyCodeLine{00307\ }
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedDefiDefj\ =\ 0.;\textcolor{comment}{//\ E[1\_i\ 1\_j]}}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ rest\ of\ magnitudes\ have\ known\ values\ (probabilities)\ but\ that}}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ would\ distort\ the\ simulation\ results.}}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedDefi\ =\ 0.;}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedDefj\ =\ 0.;}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim=0;\ iSim\ <\ nSims\_;\ iSim++)\ \{}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<D<C,\ URNG>\ >\ >\&\ events\ =\ getSim(iSim);}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ imatch\ =\ 0.,\ jmatch\ =\ 0.;}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iEvt=0;\ iEvt\ <\ events.size();\ iEvt++)\ \{}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((val\ >\ events[iEvt].dayFromRef)\ \&\&}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (events[iEvt].nameIdx\ ==\ iName))\ imatch\ =\ 1.;}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((val\ >\ events[iEvt].dayFromRef)\ \&\&}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (events[iEvt].nameIdx\ ==\ jName))\ jmatch\ =\ 1.;}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \ \ \ \ expectedDefiDefj\ +=\ imatch\ *\ jmatch;}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ \ \ expectedDefi\ +=\ imatch;}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ expectedDefj\ +=\ jmatch;}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ expectedDefiDefj\ =\ expectedDefiDefj\ /\ (nSims\_-\/1);\textcolor{comment}{//\ unbiased}}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ expectedDefi\ =\ expectedDefi\ /\ nSims\_;}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ expectedDefj\ =\ expectedDefj\ /\ nSims\_;}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (expectedDefiDefj\ -\/\ expectedDefi*expectedDefj)\ /}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \ \ std::sqrt((expectedDefi*expectedDefj*(1.-\/expectedDefi)}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *(1.-\/expectedDefj)));}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo\ Provide\ confidence\ interval}}
+\DoxyCodeLine{00334\ \ \ \ \ \}}
+\DoxyCodeLine{00335\ }
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00338\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ RandomLM<D,\ C,\ URNG>::expectedTrancheLoss(}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ expectedTrancheLossInterval(d,\ 0.95).first;}
+\DoxyCodeLine{00341\ \ \ \ \ \}}
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00345\ \ \ \ \ std::pair<Real,\ Real>\ RandomLM<D,\ C,\ URNG>::expectedTrancheLossInterval(}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Date\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ confidencePerc)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00347\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ Date\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ val\ =\ d.serialNumber()\ -\/\ today.serialNumber();}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachAmount\ =\ basket\_-\/>attachmentAmount();}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detachAmount\ =\ basket\_-\/>detachmentAmount();}
+\DoxyCodeLine{00354\ }
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Real\ trancheLoss=\ 0.;}}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ GeneralStatistics\ lossStats;}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim=0;\ iSim\ <\ nSims\_;\ iSim++)\ \{}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<D<C,\ URNG>\ >\ >\&\ events\ =\ getSim(iSim);}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ portfSimLoss=0.;}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iEvt=0;\ iEvt\ <\ events.size();\ iEvt++)\ \{}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ event\ is\ within\ time\ horizon...}}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(val\ >\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\textcolor{keyword}{>}(}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ events[iEvt].dayFromRef))\ \{}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName\ =\ events[iEvt].nameIdx;}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ...and\ is\ contained\ in\ the\ basket.}}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portfSimLoss\ +=}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>exposure(basket\_-\/>names()[iName],}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Date(events[iEvt].dayFromRef\ +}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ today.serialNumber()))\ *}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/getEventRecovery(events[iEvt]));}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \ \ \ \ lossStats.add(\textcolor{comment}{//\ d\ \ ates?\ current\ losses?\ realized\ defaults,\ not\ yet}}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::min(std::max(portfSimLoss\ -\/\ attachAmount,\ 0.),}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\ -\/\ attachAmount)\ );}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::make\_pair(lossStats.mean(),\ lossStats.errorEstimate()\ *}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \ \ \ \ InverseCumulativeNormal::standard\_value(0.5*(1.+confidencePerc)));}
+\DoxyCodeLine{00380\ \ \ \ \ \}}
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00382\ }
+\DoxyCodeLine{00383\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00384\ \ \ \ \ std::map<Real,\ Probability>\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a07ceb3783bff4c2b911f853d39d66074}{RandomLM<D,\ C,\ URNG>::lossDistribution}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00385\ }
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_histogram}{Histogram}}\ hist\ =\ computeHistogram(d);}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ std::map<Real,\ Probability>\ distrib;}
+\DoxyCodeLine{00388\ }
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ prob\ of\ losses\ less\ or\ equal\ to}}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ suma\ =\ hist.frequency(0);}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ distrib.insert(std::make\_pair(0.,\ suma));}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=1;\ i<hist.bins();\ i++)\ \{}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ \ \ suma\ +=\ hist.frequency(i);}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \ distrib.insert(std::make\_pair(\ hist.breaks()[i-\/1],\ suma\ ));}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ distrib;}
+\DoxyCodeLine{00397\ \ \ \ \ \}}
+\DoxyCodeLine{00398\ }
+\DoxyCodeLine{00399\ }
+\DoxyCodeLine{00400\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00401\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_histogram}{Histogram}}\ RandomLM<D,\ C,\ URNG>::computeHistogram(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ std::vector<Real>\ data;}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ std::set<Real>\ keys;\textcolor{comment}{//\ attainable\ loss\ values}}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ keys.insert(0.);}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ val\ =\ d.serialNumber()\ -\/\ today.serialNumber();}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ redundant\ test?\ should\ have\ been\ tested\ by\ the\ basket\ caller?}}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(d\ >=\ today,}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Requested\ percentile\ date\ must\ lie\ after\ computation\ date."{}});}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00411\ }
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachAmount\ =\ basket\_-\/>attachmentAmount();}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detachAmount\ =\ basket\_-\/>detachmentAmount();}
+\DoxyCodeLine{00414\ }
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim=0;\ iSim\ <\ nSims\_;\ iSim++)\ \{}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<D<C,\ URNG>\ >\ >\&\ events\ =\ getSim(iSim);}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ portfSimLoss=0.;}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iEvt=0;\ iEvt\ <\ events.size();\ iEvt++)\ \{}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(val\ >\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\textcolor{keyword}{>}(}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ events[iEvt].dayFromRef))\ \{}
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName\ =\ events[iEvt].nameIdx;}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ test\ needed\ (here\ and\ the\ others)\ to\ reuse\ simulations:}}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ if(basket\_-\/>pool()-\/>has(copula\_-\/>pool()-\/>names()[iName]))}}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portfSimLoss\ +=}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>exposure(basket\_-\/>names()[iName],}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(events[iEvt].dayFromRef\ +}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ today.serialNumber()))\ *}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/getEventRecovery(events[iEvt]));}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \ \ data.push\_back(std::min(std::max(portfSimLoss\ -\/\ attachAmount,\ 0.),}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\ -\/\ attachAmount));}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \ \ \ keys.insert(data.back());}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ avoid\ using\ as\ many\ points\ as\ in\ the\ simulation.}}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nPts\ =\ std::min<Size>(data.size(),\ 150);\textcolor{comment}{//\ fix}}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \mbox{\hyperlink{class_quant_lib_1_1_histogram}{Histogram}}(data.begin(),\ data.end(),\ nPts);}
+\DoxyCodeLine{00439\ \ \ \ \ \}}
+\DoxyCodeLine{00440\ }
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00442\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00443\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a4d3026de4233c47b892cabda67feacea}{RandomLM<D,\ C,\ URNG>::expectedShortfall}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ percent)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00445\ }
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(d\ >=\ today,}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Requested\ percentile\ date\ must\ lie\ after\ computation\ date."{}});}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00450\ }
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachAmount\ =\ basket\_-\/>attachmentAmount();}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detachAmount\ =\ basket\_-\/>detachmentAmount();}
+\DoxyCodeLine{00453\ }
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ val\ =\ d.serialNumber()\ -\/\ today.serialNumber();}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(val\ <=\ 0)\ \textcolor{keywordflow}{return}\ 0.;\textcolor{comment}{//\ plus\ basket\ realized\ losses}}
+\DoxyCodeLine{00456\ }
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ \textcolor{comment}{//GenericRiskStatistics<GeneralStatistics>\ statsX;}}
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \ \ std::vector<Real>\ losses;}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim=0;\ iSim\ <\ nSims\_;\ iSim++)\ \{}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<D<C,\ URNG>\ >\ >\&\ events\ =\ getSim(iSim);}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ portfSimLoss=0.;}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iEvt=0;\ iEvt\ <\ events.size();\ iEvt++)\ \{}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(val\ >\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\textcolor{keyword}{>}(}
+\DoxyCodeLine{00464\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ events[iEvt].dayFromRef))\ \{}
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName\ =\ events[iEvt].nameIdx;}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ ...and\ is\ contained\ in\ the\ basket.}}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//if(basket\_-\/>pool()-\/>has(copula\_-\/>pool()-\/>names()[iName]))}}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portfSimLoss\ +=}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>exposure(basket\_-\/>names()[iName],}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(events[iEvt].dayFromRef\ +}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ today.serialNumber()))\ *}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/getEventRecovery(events[iEvt]));}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ \ \ \ \ portfSimLoss\ =\ std::min(std::max(portfSimLoss\ -\/\ attachAmount,\ 0.),}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\ -\/\ attachAmount);}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \ \ \ \ \ \ losses.push\_back(portfSimLoss);}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ std::sort(losses.begin(),\ losses.end());}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ posit\ =\ std::ceil(percent\ *\ nSims\_);}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ \ \ posit\ =\ posit\ >=\ 0.\ ?\ posit\ :\ 0.;}
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ position\ =\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\textcolor{keyword}{>}(posit);}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ perctlInf\ =\ losses[position];\textcolor{comment}{//q\_\{\(\backslash\)alpha\}}}
+\DoxyCodeLine{00485\ }
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ prob\ of\ values\ strictly\ larger\ than\ the\ quantile\ value.}}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ probOverQ\ =}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\textcolor{keyword}{>}(std::distance(losses.begin()\ +\ position,}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ losses.end()))\ /\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\textcolor{keyword}{>}(nSims\_);}
+\DoxyCodeLine{00490\ }
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (\ perctlInf\ *\ (1.-\/percent-\/probOverQ)\ +\textcolor{comment}{//<-\/correction\ term}}
+\DoxyCodeLine{00492\ \ \ \ \ \ \ \ \ \ \ \ \ std::accumulate(losses.begin()\ +\ position,\ losses.end(),\ }
+\DoxyCodeLine{00493\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.))/nSims\_}
+\DoxyCodeLine{00494\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )/(1.-\/percent);}
+\DoxyCodeLine{00495\ }
+\DoxyCodeLine{00496\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Alternative\ ESF\ definition;\ find\ the\ first\ loss\ larger\ than\ the}}
+\DoxyCodeLine{00497\ \textcolor{comment}{\ \ \ \ \ \ \ \ one\ of\ the\ percentile.\ Notice\ the\ choice\ here,\ the\ expected\ shortfall}}
+\DoxyCodeLine{00498\ \textcolor{comment}{\ \ \ \ \ \ \ \ is\ understood\ in\ the\ sense\ that\ we\ are\ looking\ for\ the\ average\ given}}
+\DoxyCodeLine{00499\ \textcolor{comment}{\ \ \ \ \ \ \ \ than\ losses\ are\ above\ a\ certain\ value\ rather\ than\ above\ a\ certain}}
+\DoxyCodeLine{00500\ \textcolor{comment}{\ \ \ \ \ \ \ \ probability:}}
+\DoxyCodeLine{00501\ \textcolor{comment}{\ \ \ \ \ \ \ \ (Unlikely\ to\ be\ the\ algorithm\ of\ choice)*/}}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00503\ \textcolor{comment}{\ \ \ \ \ \ \ \ std::vector<Real>::iterator\ itPastPerc\ =}}
+\DoxyCodeLine{00504\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ std::find\_if(losses.begin()\ +\ position,\ losses.end(),}}
+\DoxyCodeLine{00505\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [=](Real\ x)\{\ return\ x\ >=\ perctlInf;\ \});}}
+\DoxyCodeLine{00506\ \textcolor{comment}{\ \ \ \ \ \ \ \ //\ notice\ if\ the\ sample\ is\ flat\ at\ the\ end\ this\ might\ be\ zero}}
+\DoxyCodeLine{00507\ \textcolor{comment}{\ \ \ \ \ \ \ \ Size\ pointsOverVal\ =\ nSims\_\ -\/\ std::distance(itPastPerc,\ losses.end());}}
+\DoxyCodeLine{00508\ \textcolor{comment}{\ \ \ \ \ \ \ \ return\ pointsOverVal\ ==\ 0\ ?\ 0.\ :}}
+\DoxyCodeLine{00509\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ std::accumulate(itPastPerc,\ losses.end(),\ 0.)\ /\ pointsOverVal;}}
+\DoxyCodeLine{00510\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00511\ }
+\DoxyCodeLine{00512\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ For\ the\ definition\ of\ ESF\ see\ for\ instance:\ 'Quantitative\ Risk}}
+\DoxyCodeLine{00513\ \textcolor{comment}{\ \ \ \ \ \ \ \ Management'\ by\ A.J.\ McNeil,\ R.Frey\ and\ P.Embrechts,\ princeton\ series\ in}}
+\DoxyCodeLine{00514\ \textcolor{comment}{\ \ \ \ \ \ \ \ finance,\ 2005;\ equations\ on\ page\ 39\ sect\ 2.12:}}
+\DoxyCodeLine{00515\ \textcolor{comment}{\ \ \ \ \ \ \ \ \$q\_\{\(\backslash\)alpha\}(F)\ =\ inf\{x\ \(\backslash\)in\ R\ :\ F(x)\ \(\backslash\)le\ \(\backslash\)alpha\}\$}}
+\DoxyCodeLine{00516\ \textcolor{comment}{\ \ \ \ \ \ \ \ and\ equation\ 2.25\ on\ p.\ 45:}}
+\DoxyCodeLine{00517\ \textcolor{comment}{\ \ \ \ \ \ \ \ \$ESF\_\{\(\backslash\)alpha\}\ =\ \(\backslash\)frac\{1\}\{1-\/\(\backslash\)alpha\}\ [E(L;\ L\ \(\backslash\)ge\ q\_\{\(\backslash\)alpha\}\ )\ +}}
+\DoxyCodeLine{00518\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ q\_\{\(\backslash\)alpha\}\ (1-\/\(\backslash\)alpha-\/P(L\ \(\backslash\)ge\ q\_\{\(\backslash\)alpha\}))\ ]\$}}
+\DoxyCodeLine{00519\ \textcolor{comment}{\ \ \ \ \ \ \ \ The\ second\ term\ accounts\ for\ non\ continuous\ distributions.}}
+\DoxyCodeLine{00520\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00521\ \ \ \ \ \}}
+\DoxyCodeLine{00522\ }
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00524\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00525\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{RandomLM<D,\ C,\ URNG>::percentile}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ perc)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ need\ to\ specify\ return\ type\ in\ tuples'\ get\ is\ parametric}}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::get<0>(\mbox{\hyperlink{class_quant_lib_1_1_random_l_m_aa3b6a096daf1a894f4b06c5d6ae68934}{percentileAndInterval}}(d,\ perc));}
+\DoxyCodeLine{00528\ \ \ \ \ \}}
+\DoxyCodeLine{00529\ }
+\DoxyCodeLine{00530\ }
+\DoxyCodeLine{00531\ \ \ \ \ \textcolor{comment}{/*\ See\ Appendix-\/A\ of\ "{}Evaluating\ value-\/at-\/risk\ methodologies:\ Accuracy}}
+\DoxyCodeLine{00532\ \textcolor{comment}{\ \ \ \ \ \ \ \ versus\ computational\ time."{},\ M.\ Pritsker,\ Wharton\ FIC,\ November\ 1996}}
+\DoxyCodeLine{00533\ \textcolor{comment}{\ \ \ \ Strictly\ speaking\ this\ gives\ the\ interval\ with\ a\ 95\%\ probability\ of}}
+\DoxyCodeLine{00534\ \textcolor{comment}{\ \ \ \ the\ true\ value\ being\ within\ the\ interval;\ which\ is\ different\ to\ the\ error}}
+\DoxyCodeLine{00535\ \textcolor{comment}{\ \ \ \ of\ the\ stimator\ just\ computed.\ See\ the\ reference\ for\ a\ discussion.}}
+\DoxyCodeLine{00536\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00537\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00538\ \ \ \ \ std::tuple<Real,\ Real,\ Real>\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_aa3b6a096daf1a894f4b06c5d6ae68934}{RandomLM<D,\ C,\ URNG>::percentileAndInterval}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,}
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00540\ }
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(\mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}}\ >=\ 0.\ \&\&\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}}\ <=\ 1.,}
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Incorrect\ percentile"{}});}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00544\ }
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachAmount\ =\ basket\_-\/>attachmentAmount();}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detachAmount\ =\ basket\_-\/>detachmentAmount();}
+\DoxyCodeLine{00547\ }
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ std::vector<Real>\ rankLosses;}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ val\ =\ d.serialNumber()\ -\/\ today.serialNumber();}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim=0;\ iSim\ <\ nSims\_;\ iSim++)\ \{}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<D<C,\ URNG>\ >\ >\&\ events\ =\ getSim(iSim);}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ portfSimLoss=0.;}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iEvt=0;\ iEvt\ <\ events.size();\ iEvt++)\ \{}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(val\ >\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\textcolor{keyword}{>}(}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ events[iEvt].dayFromRef))\ \{}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName\ =\ events[iEvt].nameIdx;}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ if(basket\_-\/>pool()-\/>has(copula\_-\/>pool()-\/>names()[iName]))}}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portfSimLoss\ +=}
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>exposure(basket\_-\/>names()[iName],}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(events[iEvt].dayFromRef\ +}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ today.serialNumber()))\ *}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/getEventRecovery(events[iEvt]));}
+\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00566\ \ \ \ \ \ \ \ \ \ \ \ \ portfSimLoss\ =\ std::min(std::max(portfSimLoss\ -\/\ attachAmount,\ 0.),}
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\ -\/\ attachAmount);}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ update\ dataset\ for\ rank\ stat:}}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ \ \ \ \ rankLosses.push\_back(portfSimLoss);}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00571\ }
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ std::sort(rankLosses.begin(),\ rankLosses.end());}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ quantilePosition\ =\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\textcolor{keyword}{>}(floor(nSims\_*\mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}}));}
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ quantileValue\ =\ rankLosses[quantilePosition];}
+\DoxyCodeLine{00575\ }
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ compute\ confidence\ interval:}}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ confInterval\ =\ 0.95;\textcolor{comment}{//\ as\ an\ argument?}}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lowerPercentile,\ upperPercentile;}
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ r\ =\ quantilePosition\ -\/\ 1;}
+\DoxyCodeLine{00580\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ s\ =\ quantilePosition\ +\ 1;}
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ rLocked\ =\ \textcolor{keyword}{false},}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \ \ \ \ \ \ sLocked\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00583\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Size\ rfinal\ =\ 0,}}
+\DoxyCodeLine{00584\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ sfinal\ =\ 0;}}
+\DoxyCodeLine{00585\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ delta=1;\ delta\ <\ quantilePosition;\ delta++)\ \{}
+\DoxyCodeLine{00586\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ cached\ =}
+\DoxyCodeLine{00587\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_acb4e789b7691d44e068177242951f60d}{incompleteBetaFunction}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(s),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(nSims\_+1-\/s),}
+\DoxyCodeLine{00588\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}},\ 1.e-\/8,\ 500);}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ pMinus\ =}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ There\ was\ a\ fix\ in\ the\ repository\ on\ the\ gammadistribution.\ It}}
+\DoxyCodeLine{00591\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ might\ impact\ these,\ it\ might\ be\ neccesary\ to\ multiply\ these\ values}}
+\DoxyCodeLine{00592\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ by\ '-\/1'*/}}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_acb4e789b7691d44e068177242951f60d}{incompleteBetaFunction}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(r+1),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(nSims\_-\/r),}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}},\ 1.e-\/8,\ 500)}
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ cached;}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ pPlus\ \ =}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_acb4e789b7691d44e068177242951f60d}{incompleteBetaFunction}}(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(r),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(nSims\_-\/r+1),}
+\DoxyCodeLine{00598\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_ad81926f2a22d5555c4e9c6a1c4df4928}{percentile}},\ 1.e-\/8,\ 500)}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/\ cached;}
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((pMinus\ >\ confInterval)\ \&\&\ !rLocked\ )\ \{}
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ rfinal\ =\ r\ +\ 1;}}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rLocked\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((pPlus\ >=\ confInterval)\ \&\&\ !sLocked)\ \{}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ sfinal\ =\ s;}}
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sLocked\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00607\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00608\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(rLocked\ \&\&\ sLocked)\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \ \ \ \ \ \ r-\/-\/;}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \ \ \ \ \ \ s++;}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \ \ \ \ s\ =\ std::min(nSims\_-\/1,\ s);}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00613\ \ \ \ \ \ \ \ \ lowerPercentile\ =\ rankLosses[r];}
+\DoxyCodeLine{00614\ \ \ \ \ \ \ \ \ upperPercentile\ =\ rankLosses[s];}
+\DoxyCodeLine{00615\ }
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::make\_tuple(quantileValue,\ lowerPercentile,\ upperPercentile);}
+\DoxyCodeLine{00617\ \ \ \ \ \}}
+\DoxyCodeLine{00618\ }
+\DoxyCodeLine{00619\ }
+\DoxyCodeLine{00620\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00621\ \ \ \ \ std::vector<Real>\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a46f349953322fb99f243d90734cf2bbd}{RandomLM<D,\ C,\ URNG>::splitVaRLevel}}(}
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00623\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ std::vector<Real>\ varLevels\ =\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a682e69146ccd628df74a73ed296e32be}{splitVaRAndError}}(date,\ loss,\ 0.95)[0];}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ turn\ relative\ units\ into\ absolute:}}
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ std::transform(varLevels.begin(),\ varLevels.end(),\ varLevels.begin(),}
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [=](\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ -\/>\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \{\ return\ x\ *\ loss;\ \});}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ varLevels;}
+\DoxyCodeLine{00629\ \ \ \ \ \}}
+\DoxyCodeLine{00630\ }
+\DoxyCodeLine{00631\ }
+\DoxyCodeLine{00632\ \ \ \ \ \textcolor{comment}{//\ parallelize\ this\ one(if\ possible),\ it\ is\ really\ expensive}}
+\DoxyCodeLine{00633\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{template}\ <\textcolor{keyword}{class},\ \textcolor{keyword}{class}>\ \textcolor{keyword}{class\ }D,\ \textcolor{keyword}{class\ }C,\ \textcolor{keyword}{class\ }URNG>}
+\DoxyCodeLine{00634\ \ \ \ \ \textcolor{comment}{/*\ FIX\ ME:\ some\ trouble\ on\ limit\ cases,\ like\ zero\ loss\ or\ no\ losses\ over\ the}}
+\DoxyCodeLine{00635\ \textcolor{comment}{\ \ \ \ requested\ level.*/}}
+\DoxyCodeLine{00636\ \ \ \ \ std::vector<std::vector<Real>\ >\ \mbox{\hyperlink{class_quant_lib_1_1_random_l_m_a682e69146ccd628df74a73ed296e32be}{RandomLM<D,\ C,\ URNG>::splitVaRAndError}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ date,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ loss,}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ confInterval)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00638\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Check\ 'loss'\ value\ integrity:\ i.e.\ is\ within\ tranche\ limits?\ (should}}
+\DoxyCodeLine{00640\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ have\ been\ done\ basket...)*/}}
+\DoxyCodeLine{00641\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_a5244c7f83592375a0ea9048296435fd1}{calculate}}();}
+\DoxyCodeLine{00642\ }
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachAmount\ =\ basket\_-\/>attachmentAmount();}
+\DoxyCodeLine{00644\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detachAmount\ =\ basket\_-\/>detachmentAmount();}
+\DoxyCodeLine{00645\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ numLiveNames\ =\ basket\_-\/>remainingSize();}
+\DoxyCodeLine{00646\ }
+\DoxyCodeLine{00647\ \ \ \ \ \ \ \ \ std::vector<Real>\ split(numLiveNames,\ 0.);}
+\DoxyCodeLine{00648\ \ \ \ \ \ \ \ \ std::vector<GeneralStatistics>\ splitStats(numLiveNames,}
+\DoxyCodeLine{00649\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_general_statistics}{GeneralStatistics}}());}
+\DoxyCodeLine{00650\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00651\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\ val\ =\ date.serialNumber()\ -\/\ today.serialNumber();}
+\DoxyCodeLine{00652\ }
+\DoxyCodeLine{00653\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iSim=0;\ iSim\ <\ nSims\_;\ iSim++)\ \{}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<simEvent<D<C,\ URNG>\ >\ >\&\ events\ =\ getSim(iSim);}
+\DoxyCodeLine{00655\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ portfSimLoss=0.;}
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//std::vector<Real>\ splitBuffer(numLiveNames\_,\ 0.);}}
+\DoxyCodeLine{00657\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<simEvent<D<C,\ URNG>\ >\ >\ splitEventsBuffer;}
+\DoxyCodeLine{00658\ }
+\DoxyCodeLine{00659\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iEvt=0;\ iEvt\ <\ events.size();\ iEvt++)\ \{}
+\DoxyCodeLine{00660\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(val\ >\ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{class_quant_lib_1_1_date_a2fbbbf87429ca9d86bde4e068eb028d6}{Date::serial\_type}}\textcolor{keyword}{>}(}
+\DoxyCodeLine{00661\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ events[iEvt].dayFromRef))\ \{}
+\DoxyCodeLine{00662\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName\ =\ events[iEvt].nameIdx;}
+\DoxyCodeLine{00663\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if(basket\_-\/>pool()-\/>has(copula\_-\/>pool()-\/>names()[iName]))\ \{}}
+\DoxyCodeLine{00664\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ portfSimLoss\ +=}
+\DoxyCodeLine{00665\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>exposure(basket\_-\/>names()[iName],}
+\DoxyCodeLine{00666\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(events[iEvt].dayFromRef\ +}
+\DoxyCodeLine{00667\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ today.serialNumber()))\ *}
+\DoxyCodeLine{00668\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/getEventRecovery(events[iEvt]));}
+\DoxyCodeLine{00669\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//and\ will\ sort\ later\ if\ buffer\ applies:}}
+\DoxyCodeLine{00670\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ splitEventsBuffer.push\_back(events[iEvt]);}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00673\ \ \ \ \ \ \ \ \ \ \ \ \ portfSimLoss\ =\ std::min(std::max(portfSimLoss\ -\/\ attachAmount,\ 0.),}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\ -\/\ attachAmount);}
+\DoxyCodeLine{00675\ }
+\DoxyCodeLine{00676\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ second\ pass;\ split\ is\ conditional\ to\ total\ losses\ within\ target}}
+\DoxyCodeLine{00677\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ losses/percentile:\ \ */}}
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ ptflCumulLoss\ =\ 0.;}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(portfSimLoss\ >\ loss)\ \{}
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::sort(splitEventsBuffer.begin(),\ splitEventsBuffer.end());}
+\DoxyCodeLine{00681\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//NOW\ THIS:}}
+\DoxyCodeLine{00682\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ split.assign(numLiveNames,\ 0.);}
+\DoxyCodeLine{00683\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ if\ the\ name\ triggered\ a\ loss\ in\ the\ portf\ limits\ assign}}
+\DoxyCodeLine{00684\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this\ loss\ to\ that\ name..\ \ */}}
+\DoxyCodeLine{00685\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<splitEventsBuffer.size();\ i++)\ \{}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName\ =\ splitEventsBuffer[i].nameIdx;}
+\DoxyCodeLine{00687\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ lossName\ =}
+\DoxyCodeLine{00688\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ allows\ amortizing\ (others\ should\ be\ like\ this)}}
+\DoxyCodeLine{00689\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ basket\_-\/>remainingNotionals(Date(simsBuffer\_[i].dayFromRef\ +}}
+\DoxyCodeLine{00690\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ today.serialNumber()))[iName]\ *}}
+\DoxyCodeLine{00691\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>exposure(basket\_-\/>names()[iName],}
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(splitEventsBuffer[i].dayFromRef\ +}
+\DoxyCodeLine{00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ today.serialNumber()))\ *}
+\DoxyCodeLine{00694\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (1.-\/getEventRecovery(splitEventsBuffer[i]));}
+\DoxyCodeLine{00695\ }
+\DoxyCodeLine{00696\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tranchedLossBefore\ =}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::min(std::max(ptflCumulLoss\ -\/\ attachAmount,\ 0.),}
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\ -\/\ attachAmount);}
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ptflCumulLoss\ +=\ lossName;}
+\DoxyCodeLine{00700\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tranchedLossAfter\ =}
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::min(std::max(ptflCumulLoss\ -\/\ attachAmount,\ 0.),}
+\DoxyCodeLine{00702\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\ -\/\ attachAmount);}
+\DoxyCodeLine{00703\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ assign\ new\ losses:}}
+\DoxyCodeLine{00704\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ split[iName]\ +=\ tranchedLossAfter\ -\/\ tranchedLossBefore;}
+\DoxyCodeLine{00705\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00706\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<numLiveNames;\ iName++)\ \{}
+\DoxyCodeLine{00707\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ splitStats[iName].add(split[iName]\ /}
+\DoxyCodeLine{00708\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::min(std::max(ptflCumulLoss\ -\/\ attachAmount,\ 0.),}
+\DoxyCodeLine{00709\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detachAmount\ -\/\ attachAmount)\ );}
+\DoxyCodeLine{00710\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00711\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00712\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00713\ }
+\DoxyCodeLine{00714\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Compute\ error\ in\ VaR\ split}}
+\DoxyCodeLine{00715\ \ \ \ \ \ \ \ \ std::vector<Real>\ means,\ rangeUp,\ rangeDown;}
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ confidFactor\ =\ \mbox{\hyperlink{class_quant_lib_1_1_inverse_cumulative_normal}{InverseCumulativeNormal}}()(0.5+confInterval/2.);}
+\DoxyCodeLine{00717\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<numLiveNames;\ iName++)\ \{}
+\DoxyCodeLine{00718\ \ \ \ \ \ \ \ \ \ \ \ \ means.push\_back(splitStats[iName].mean());}
+\DoxyCodeLine{00719\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ error\ =\ confidFactor\ *\ splitStats[iName].errorEstimate()\ ;}
+\DoxyCodeLine{00720\ \ \ \ \ \ \ \ \ \ \ \ \ rangeDown.push\_back(means.back()\ -\/\ error);}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \ \ \ \ \ \ rangeUp.push\_back(means.back()\ +\ error);}
+\DoxyCodeLine{00722\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00723\ }
+\DoxyCodeLine{00724\ \ \ \ \ \ \ \ \ std::vector<std::vector<Real>\ >\ results;}
+\DoxyCodeLine{00725\ \ \ \ \ \ \ \ \ results.push\_back(means);}
+\DoxyCodeLine{00726\ \ \ \ \ \ \ \ \ results.push\_back(rangeDown);}
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ results.push\_back(rangeUp);}
+\DoxyCodeLine{00728\ }
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ results;}
+\DoxyCodeLine{00730\ \ \ \ \ \}}
+\DoxyCodeLine{00731\ }
+\DoxyCodeLine{00732\ }
+\DoxyCodeLine{00733\ }
+\DoxyCodeLine{00734\ }
+\DoxyCodeLine{00735\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/\ Time\ inversion\ solver\ target\ function:\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00736\ }
+\DoxyCodeLine{00737\ \ \ \ \ \textcolor{comment}{/*\ It\ could\ be\ argued\ that\ this\ concept\ is\ part\ of\ the\ copula\ (more\ generic)}}
+\DoxyCodeLine{00738\ \textcolor{comment}{\ \ \ \ In\ general\ when\ the\ modelled\ magnitude\ is\ parametric\ one\ can\ solve\ for}}
+\DoxyCodeLine{00739\ \textcolor{comment}{\ \ \ \ inversion\ to\ get\ the\ parameter\ value\ for\ a\ given\ magnitude\ value\ (provided}}
+\DoxyCodeLine{00740\ \textcolor{comment}{\ \ \ \ the\ modelled\ variable\ dependence\ in\ invertible).\ In\ this\ particular\ problem}}
+\DoxyCodeLine{00741\ \textcolor{comment}{\ \ \ \ the\ parameter\ is\ Time\ and\ it\ is\ solved\ here\ where\ we\ are\ alredy\ in\ the}}
+\DoxyCodeLine{00742\ \textcolor{comment}{\ \ \ \ context\ of\ default}}
+\DoxyCodeLine{00743\ \textcolor{comment}{\ \ \ \ See\ default\ transition\ models\ for\ another\ instance\ of\ this\ inversion.}}
+\DoxyCodeLine{00744\ \textcolor{comment}{\ \ \ \ Alternatively\ use\ the\ faster\ trick\ (flat\ HR)\ mentioned\ in\ the\ code\ or\ make}}
+\DoxyCodeLine{00745\ \textcolor{comment}{\ \ \ \ the\ algorithm\ parametric\ on\ the\ type\ of\ interpolation\ in\ the\ default\ TS.}}
+\DoxyCodeLine{00746\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00747\ \ \ \ \ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}}\ \{\textcolor{comment}{//\ not\ template\ dependent\ .....move\ it}}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }Root\ \{}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ See\ a\ faster\ algorithm\ (neeeds\ to\ locate\ the\ points)\ in}}
+\DoxyCodeLine{00752\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ D.O'KANE\ p.249\ sect\ 13.5\ */}}
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \ \ \ \ \ \ Root(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<DefaultProbabilityTermStructure>}}\&\ dts,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ pd)}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ \ \ \ \ :\ dts\_(dts),\ pd\_(pd),\ curveRef\_(dts-\/>referenceDate())\ \{\}}
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ cast\ I\ am\ forcing\ here\ comes\ from\ the\ requirement\ of\ 1D}}
+\DoxyCodeLine{00756\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ solvers\ to\ take\ in\ a\ target\ (cost)\ function\ of\ Real\ domain.\ It\ could}}
+\DoxyCodeLine{00757\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ be\ possible\ to\ change\ the\ template\ arg\ F\ in\ the\ 1D\ solvers\ to\ a}}
+\DoxyCodeLine{00758\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ boost\ function\ and\ then\ use\ the\ (template\ arg)\ domain\ argument\ type}}
+\DoxyCodeLine{00759\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ of\ the\ function\ for\ use\ with\ the\ 'guess'\ and\ operator()\ ?}}
+\DoxyCodeLine{00760\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00761\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator()(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ t)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00762\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}\ (t\ >=\ 0.0,\ \textcolor{stringliteral}{"{}t\ <\ 0"{}});}
+\DoxyCodeLine{00763\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ As\ long\ as\ this\ doesnt\ involve\ modifying\ a\ mutable\ member}}
+\DoxyCodeLine{00764\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ it\ should\ be\ thread\ safe\ (they\ are\ const\ methods\ and\ access\ is}}
+\DoxyCodeLine{00765\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ read\ only)}}
+\DoxyCodeLine{00766\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00767\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dts\_-\/>defaultProbability(curveRef\_\ +}
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}(\textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\textcolor{keyword}{>}(t),\ Days),\ \textcolor{keyword}{true})\ -\/\ pd\_;}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00770\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00771\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<DefaultProbabilityTermStructure>}}\ dts\_;}
+\DoxyCodeLine{00772\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ pd\_;}
+\DoxyCodeLine{00773\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ curveRef\_;}
+\DoxyCodeLine{00774\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00775\ \ \ \ \ \}}
+\DoxyCodeLine{00776\ }
+\DoxyCodeLine{00777\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00778\ \textcolor{comment}{\ \ \ \ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00779\ \textcolor{comment}{\ \ \ \ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00780\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00781\ }
+\DoxyCodeLine{00782\ \ \ \ \ \textcolor{comment}{//\ move\ this\ one\ to\ a\ separte\ file?}}
+\DoxyCodeLine{00790\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ ,\ \textcolor{keyword}{class}\ >\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_random_default_l_m}{RandomDefaultLM}};}
+\DoxyCodeLine{00791\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ copulaPolicy,\ \textcolor{keyword}{class}\ USNG>}
+\DoxyCodeLine{00792\ \ \ \ \ \textcolor{keyword}{struct\ }simEvent<\mbox{\hyperlink{class_quant_lib_1_1_random_default_l_m}{RandomDefaultLM}}<copulaPolicy,\ USNG>\ >\ \{}
+\DoxyCodeLine{00793\ \ \ \ \ \ \ \ \ simEvent(\textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ n,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ d)}
+\DoxyCodeLine{00794\ \ \ \ \ \ \ \ \ :\ nameIdx(n),\ dayFromRef(d)\{\}}
+\DoxyCodeLine{00795\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ nameIdx\ :\ 16;\ \textcolor{comment}{//\ can\ index\ up\ to\ 65535\ names}}
+\DoxyCodeLine{00796\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{int}\ dayFromRef\ :\ 16;\ \textcolor{comment}{//indexes\ up\ to\ 65535\ days\ \string~179\ years}}
+\DoxyCodeLine{00797\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ operator<(\textcolor{keyword}{const}\ simEvent\&\ evt)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00798\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ dayFromRef\ <\ evt.dayFromRef;}
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00800\ \ \ \ \ \};}
+\DoxyCodeLine{00801\ }
+\DoxyCodeLine{00805\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ copulaPolicy,\ \textcolor{keyword}{class}\ USNG\ =\ SobolRsg>}
+\DoxyCodeLine{00806\ \ \ \ \ \textcolor{keyword}{class\ }RandomDefaultLM\ :\ \textcolor{keyword}{public}\ RandomLM<RandomDefaultLM,\ copulaPolicy,\ USNG>}
+\DoxyCodeLine{00807\ \ \ \ \ \{}
+\DoxyCodeLine{00808\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00809\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1sim_event}{simEvent<RandomDefaultLM>}}\ defaultSimEvent;}
+\DoxyCodeLine{00810\ }
+\DoxyCodeLine{00811\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo\ Consider\ this\ to\ be\ only\ a\ ConstantLossLM\ instead}}
+\DoxyCodeLine{00812\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<DefaultLatentModel<copulaPolicy>\ >\ model\_;}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ recoveries\_;}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ for\ time\ inversion:}}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\_;}
+\DoxyCodeLine{00816\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00817\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \(\backslash\)todo:\ Allow\ a\ constructor\ building\ its\ own\ default\ latent\ model.}}
+\DoxyCodeLine{00818\ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ RandomDefaultLM(\textcolor{keyword}{const}\ ext::shared\_ptr<\mbox{\hyperlink{class_quant_lib_1_1_default_latent_model}{DefaultLatentModel<copulaPolicy>}}\ >\&\ model,}
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries\ =\ std::vector<Real>(),}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nSims\ =\ 0,\ \textcolor{comment}{//\ stats\ will\ crash\ on\ div\ by\ zero,\ FIX\ ME.}}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ 1.e-\/6,}
+\DoxyCodeLine{00822\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\ =\ 2863311530UL)}
+\DoxyCodeLine{00823\ \ \ \ \ \ \ :\ RandomLM<\ ::QuantLib::RandomDefaultLM,\ copulaPolicy,\ USNG>(}
+\DoxyCodeLine{00824\ \ \ \ \ \ \ \ \ \ \ \ \ model-\/>numFactors(),\ model-\/>size(),\ model-\/>copula(),\ nSims,\ seed),}
+\DoxyCodeLine{00825\ \ \ \ \ \ \ \ \ model\_(model),}
+\DoxyCodeLine{00826\ \ \ \ \ \ \ \ \ recoveries\_(recoveries.empty()\ ?\ std::vector<Real>(model-\/>size(),\ 0.)\ :\ recoveries),}
+\DoxyCodeLine{00827\ \ \ \ \ \ \ \ \ accuracy\_(accuracy)\ \{}
+\DoxyCodeLine{00828\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ redundant\ through\ basket?}}
+\DoxyCodeLine{00829\ \ \ \ \ \ \ \ \ \ \ this-\/>registerWith(\mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().evaluationDate());}
+\DoxyCodeLine{00830\ \ \ \ \ \ \ \ \ \ \ this-\/>registerWith(model\_);}
+\DoxyCodeLine{00831\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00832\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ RandomDefaultLM(}
+\DoxyCodeLine{00833\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<\mbox{\hyperlink{class_quant_lib_1_1_constant_loss_latentmodel}{ConstantLossLatentmodel<copulaPolicy>}}\ >\&\ model,}
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nSims\ =\ 0,\textcolor{comment}{//\ stats\ will\ crash\ on\ div\ by\ zero,\ FIX\ ME.}}
+\DoxyCodeLine{00835\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ accuracy\ =\ 1.e-\/6,}
+\DoxyCodeLine{00836\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9fbc8c414c2b597d214cca2f9e914740}{BigNatural}}\ seed\ =\ 2863311530UL)}
+\DoxyCodeLine{00837\ \ \ \ \ \ \ \ \ :\ RandomLM<\ ::QuantLib::RandomDefaultLM,\ copulaPolicy,\ USNG>}
+\DoxyCodeLine{00838\ \ \ \ \ \ \ \ \ \ \ \ \ (model-\/>numFactors(),\ model-\/>size(),\ model-\/>copula(),}
+\DoxyCodeLine{00839\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ nSims,\ seed\ ),}
+\DoxyCodeLine{00840\ \ \ \ \ \ \ \ \ \ \ model\_(model),}
+\DoxyCodeLine{00841\ \ \ \ \ \ \ \ \ \ \ recoveries\_(model-\/>recoveries()),}
+\DoxyCodeLine{00842\ \ \ \ \ \ \ \ \ \ \ accuracy\_(accuracy)}
+\DoxyCodeLine{00843\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00844\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ redundant\ through\ basket?}}
+\DoxyCodeLine{00845\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>registerWith(\mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().evaluationDate());}
+\DoxyCodeLine{00846\ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>registerWith(model\_);}
+\DoxyCodeLine{00847\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00848\ }
+\DoxyCodeLine{00849\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ grant\ access\ to\ static\ polymorphism:}}
+\DoxyCodeLine{00850\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ While\ this\ works\ on\ g++,\ VC9\ refuses\ to\ compile\ it.}}
+\DoxyCodeLine{00851\ \textcolor{comment}{\ \ \ \ \ \ \ \ Not\ completely\ sure\ whos\ right;\ individually\ making\ friends\ of\ the}}
+\DoxyCodeLine{00852\ \textcolor{comment}{\ \ \ \ \ \ \ \ calling\ members\ or\ writting\ explicitly\ the\ derived\ class\ T\ parameters}}
+\DoxyCodeLine{00853\ \textcolor{comment}{\ \ \ \ \ \ \ \ throws\ the\ same\ errors.}}
+\DoxyCodeLine{00854\ \textcolor{comment}{\ \ \ \ \ \ \ \ The\ access\ is\ then\ open\ to\ the\ member\ fucntions.}}
+\DoxyCodeLine{00855\ \textcolor{comment}{\ \ \ \ \ \ \ \ Another\ solution\ is\ to\ use\ this\ http://accu.org/index.php/journals/296}}
+\DoxyCodeLine{00856\ \textcolor{comment}{}}
+\DoxyCodeLine{00857\ \textcolor{comment}{\ \ \ \ \ \ \ \ It\ might\ well\ be\ that\ gcc\ is\ allowing\ some\ c11\ features\ silently,\ which}}
+\DoxyCodeLine{00858\ \textcolor{comment}{\ \ \ \ \ \ \ \ wont\ pass\ on\ a\ lower\ gcc\ version.}}
+\DoxyCodeLine{00859\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00860\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }RandomLM<\ ::\mbox{\hyperlink{class_quant_lib_1_1_random_default_l_m}{QuantLib::RandomDefaultLM}},\ copulaPolicy,\ USNG>;}
+\DoxyCodeLine{00861\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00862\ \ \ \ \ \ \ \ \ void\ nextSample(const\ std::vector<Real>\&\ values)\ const;}
+\DoxyCodeLine{00863\ \ \ \ \ \ \ \ \ void\ initDates()\ const\ \{}
+\DoxyCodeLine{00864\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Precalculate\ horizon\ time\ default\ probabilities\ (used\ to}}
+\DoxyCodeLine{00865\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ determine\ if\ the\ default\ took\ place\ and\ subsequently\ compute\ its}}
+\DoxyCodeLine{00866\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ event\ time)}}
+\DoxyCodeLine{00867\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00868\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ today\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{Settings::instance}}().\mbox{\hyperlink{class_quant_lib_1_1_settings_a908ff4717a9706c4329fb316a49a5720}{evaluationDate}}();}
+\DoxyCodeLine{00869\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ maxHorizonDate\ =\ today\ \ +\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}(this-\/>maxHorizon\_,\ Days);}
+\DoxyCodeLine{00870\ }
+\DoxyCodeLine{00871\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ this-\/>basket\_-\/>pool();}
+\DoxyCodeLine{00872\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName\ <\ this-\/>basket\_-\/>size();\ ++iName)\textcolor{comment}{//use'live'}}
+\DoxyCodeLine{00873\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ horizonDefaultPs\_.push\_back(pool-\/>get(pool-\/>names()[iName]).}
+\DoxyCodeLine{00874\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(this-\/>basket\_-\/>defaultKeys()[iName])}
+\DoxyCodeLine{00875\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/>defaultProbability(maxHorizonDate,\ \textcolor{keyword}{true}));}
+\DoxyCodeLine{00876\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00877\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ getEventRecovery(\textcolor{keyword}{const}\ defaultSimEvent\&\ evt)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00878\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ recoveries\_[evt.nameIdx];}
+\DoxyCodeLine{00879\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00880\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_random_default_l_m_afeef248e85b2286a2b5494fc9beb73b5}{expectedRecovery}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_default_prob_key}{DefaultProbKey}}\&)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ deterministic}}
+\DoxyCodeLine{00882\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ recoveries\_[iName];}
+\DoxyCodeLine{00883\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00884\ }
+\DoxyCodeLine{00885\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ latentVarValue(\textcolor{keyword}{const}\ std::vector<Real>\&\ factorsSample,}
+\DoxyCodeLine{00886\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iVar)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00887\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ model\_-\/>latentVarValue(factorsSample,\ iVar);}
+\DoxyCodeLine{00888\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00889\ \ \ \ \ \ \ \ \ \textcolor{comment}{//allows\ statistics\ to\ know\ the\ portfolio\ size\ (could\ be\ moved\ to\ parent}}
+\DoxyCodeLine{00890\ \ \ \ \ \ \ \ \ \textcolor{comment}{//invoking\ duck\ typing\ on\ the\ variable\ name\ or\ a\ handle\ to\ the\ basket)}}
+\DoxyCodeLine{00891\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ basketSize()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ model\_-\/>size();\ \}}
+\DoxyCodeLine{00892\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00893\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ resetModel()\ override\ \textcolor{comment}{/*const*/}\ \{}
+\DoxyCodeLine{00894\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Explore:\ might\ save\ recalculation\ if\ the\ basket\ is\ the\ same}}
+\DoxyCodeLine{00895\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ (some\ situations,\ like\ BC\ or\ control\ variates)\ in\ that\ case\ do\ not}}
+\DoxyCodeLine{00896\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ update,\ only\ reset\ the\ model's\ basket.}}
+\DoxyCodeLine{00897\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00898\ \ \ \ \ \ \ \ \ \ \ model\_-\/>resetBasket(this-\/>basket\_.currentLink());}
+\DoxyCodeLine{00899\ }
+\DoxyCodeLine{00900\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(this-\/>basket\_-\/>size()\ ==\ model\_-\/>size(),}
+\DoxyCodeLine{00901\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Incompatible\ basket\ and\ model\ sizes."{}});}
+\DoxyCodeLine{00902\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(recoveries\_.size()\ ==\ this-\/>basket\_-\/>size(),}
+\DoxyCodeLine{00903\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Incompatible\ basket\ and\ recovery\ sizes."{}});}
+\DoxyCodeLine{00904\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ invalidate\ current\ calculations\ if\ any\ and\ notify\ observers}}
+\DoxyCodeLine{00905\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ NOLINTNEXTLINE(bugprone-\/parent-\/virtual-\/call)}}
+\DoxyCodeLine{00906\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_lazy_object_adee2bf49be5c4c78736be293321a856d}{LazyObject::update}}();}
+\DoxyCodeLine{00907\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00908\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ This\ one\ and\ the\ buffer\ might\ be\ moved\ to\ the\ parent,\ only\ some}}
+\DoxyCodeLine{00909\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ dates\ might\ be\ specific\ to\ a\ particular\ model.}}
+\DoxyCodeLine{00910\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Default\ probabilities\ for\ each\ name\ at\ the\ time\ of\ the\ maximun}}
+\DoxyCodeLine{00911\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ horizon\ date.\ Cached\ for\ perf.}}
+\DoxyCodeLine{00912\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Probability>\ horizonDefaultPs\_;}
+\DoxyCodeLine{00913\ \ \ \ \ \};}
+\DoxyCodeLine{00914\ }
+\DoxyCodeLine{00915\ }
+\DoxyCodeLine{00916\ }
+\DoxyCodeLine{00917\ }
+\DoxyCodeLine{00918\ }
+\DoxyCodeLine{00919\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ C,\ \textcolor{keyword}{class}\ URNG>}
+\DoxyCodeLine{00920\ \ \ \ \ \textcolor{keywordtype}{void}\ RandomDefaultLM<C,\ URNG>::nextSample(}
+\DoxyCodeLine{00921\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ values)\textcolor{keyword}{\ const}}
+\DoxyCodeLine{00922\ \textcolor{keyword}{\ \ \ \ }\{}
+\DoxyCodeLine{00923\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Pool>\&\ pool\ =\ this-\/>basket\_-\/>pool();}
+\DoxyCodeLine{00924\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ starts\ with\ no\ events}}
+\DoxyCodeLine{00925\ \ \ \ \ \ \ \ \ this-\/>simsBuffer\_.push\_back(std::vector<defaultSimEvent>\ ());}
+\DoxyCodeLine{00926\ }
+\DoxyCodeLine{00927\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName=0;\ iName<model\_-\/>size();\ iName++)\ \{}
+\DoxyCodeLine{00928\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ latentVarSample\ =}
+\DoxyCodeLine{00929\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_-\/>latentVarValue(values,\ iName);}
+\DoxyCodeLine{00930\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ simDefaultProb\ =}
+\DoxyCodeLine{00931\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ model\_-\/>cumulativeY(latentVarSample,\ iName);}
+\DoxyCodeLine{00932\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ If\ the\ default\ simulated\ lies\ before\ the\ max\ date:}}
+\DoxyCodeLine{00933\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (horizonDefaultPs\_[iName]\ >=\ simDefaultProb)\ \{}
+\DoxyCodeLine{00934\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<DefaultProbabilityTermStructure>}}\&\ dfts\ =}
+\DoxyCodeLine{00935\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pool-\/>get(pool-\/>names()[iName]).\textcolor{comment}{//\ use\ 'live'\ names}}
+\DoxyCodeLine{00936\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ defaultProbability(this-\/>basket\_-\/>defaultKeys()[iName]);}
+\DoxyCodeLine{00937\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ compute\ and\ store\ default\ time\ with\ respect\ to\ the}}
+\DoxyCodeLine{00938\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ curve\ ref\ date:}}
+\DoxyCodeLine{00939\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dateSTride\ =}
+\DoxyCodeLine{00940\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{static\_cast<}\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\textcolor{keyword}{>}(\mbox{\hyperlink{class_quant_lib_1_1_brent}{Brent}}().\mbox{\hyperlink{class_quant_lib_1_1_solver1_d_a137cd2caf0042ad6fd2c409a9ebc8226}{solve}}(\textcolor{comment}{//\ casted\ from\ Real:}}
+\DoxyCodeLine{00941\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1_root}{detail::Root}}(dfts,\ simDefaultProb),}
+\DoxyCodeLine{00942\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ accuracy\_,0.,1.));}
+\DoxyCodeLine{00943\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00944\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //\ value\ if\ one\ approximates\ to\ a\ flat\ HR;}}
+\DoxyCodeLine{00945\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //\ \ \ faster\ (>x2)\ but\ it\ introduces\ an\ error:..}}
+\DoxyCodeLine{00946\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //\ \(\backslash\)todo:\ see\ how\ to\ include\ this\ 'polymorphically'.}}
+\DoxyCodeLine{00947\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //\ While\ not\ the\ case\ in\ pricing\ in\ risk\ metrics/real}}
+\DoxyCodeLine{00948\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //\ \ \ probabilities\ the\ curves\ are\ often\ flat}}
+\DoxyCodeLine{00949\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ static\_cast<Size>(ceil(maxHorizon\_\ *}}
+\DoxyCodeLine{00950\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::log(1.-\/simDefaultProb)}}
+\DoxyCodeLine{00951\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /std::log(1.-\/data\_.horizonDefaultPs\_[iName])));}}
+\DoxyCodeLine{00952\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00953\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this-\/>simsBuffer\_.back().push\_back(defaultSimEvent(iName,}
+\DoxyCodeLine{00954\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ dateSTride));}
+\DoxyCodeLine{00955\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//emplace\_back}}
+\DoxyCodeLine{00956\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00957\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Used\ to\ remove\ sims\ with\ no\ events.\ Uses\ less\ memory,\ faster}}
+\DoxyCodeLine{00958\ \textcolor{comment}{\ \ \ \ \ \ \ \ post-\/statistics.\ But\ only\ if\ all\ names\ in\ the\ portfolio\ have\ low}}
+\DoxyCodeLine{00959\ \textcolor{comment}{\ \ \ \ \ \ \ \ default\ probability,\ otherwise\ is\ more\ expensive\ and\ sim\ access\ has}}
+\DoxyCodeLine{00960\ \textcolor{comment}{\ \ \ \ \ \ \ \ to\ be\ modified.\ However\ low\ probability\ is\ also\ an\ indicator\ that}}
+\DoxyCodeLine{00961\ \textcolor{comment}{\ \ \ \ \ \ \ \ variance\ reduction\ is\ needed.\ */}}
+\DoxyCodeLine{00962\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00963\ \ \ \ \ \}}
+\DoxyCodeLine{00964\ }
+\DoxyCodeLine{00965\ }
+\DoxyCodeLine{00966\ }
+\DoxyCodeLine{00967\ }
+\DoxyCodeLine{00968\ \ \ \ \ \textcolor{comment}{//\ Common\ usage\ typedefs\ (notice\ they\ vary\ in\ the\ multithread\ version)}}
+\DoxyCodeLine{00969\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ Gaussian\ default\ generators\ options\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00970\ \ \ \ \ \textcolor{comment}{/*\ Uses\ copula\ direct\ normal\ inversion\ and\ MT\ generator}}
+\DoxyCodeLine{00971\ \textcolor{comment}{\ \ \ \ typedef\ RandomDefaultLM<GaussianCopulaPolicy,}}
+\DoxyCodeLine{00972\ \textcolor{comment}{\ \ \ \ \ \ \ \ RandomSequenceGenerator<MersenneTwisterUniformRng>\ >}}
+\DoxyCodeLine{00973\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ GaussianRandomDefaultLM;}}
+\DoxyCodeLine{00974\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00975\ \ \ \ \ \textcolor{comment}{/*\ Uses\ BoxMuller\ for\ gaussian\ generation,\ bypassing\ copula\ inversions}}
+\DoxyCodeLine{00976\ \textcolor{comment}{\ \ \ \ typedef\ RandomDefaultLM<GaussianCopulaPolicy,\ RandomSequenceGenerator<}}
+\DoxyCodeLine{00977\ \textcolor{comment}{\ \ \ \ \ \ \ \ BoxMullerGaussianRng<MersenneTwisterUniformRng>\ >\ >}}
+\DoxyCodeLine{00978\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ GaussianRandomDefaultLM;}}
+\DoxyCodeLine{00979\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00980\ \ \ \ \ \textcolor{comment}{/*\ Default\ case,\ uses\ the\ copula\ inversion\ directly\ and\ sobol\ sequence\ */}}
+\DoxyCodeLine{00981\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_random_default_l_m}{RandomDefaultLM<GaussianCopulaPolicy>}}\ GaussianRandomDefaultLM;}
+\DoxyCodeLine{00982\ }
+\DoxyCodeLine{00983\ \ \ \ \ \textcolor{comment}{//\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ T\ default\ generators\ options\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00984\ \ \ \ \ \textcolor{comment}{/*\ Uses\ copula\ inversion\ and\ MT\ base\ generation}}
+\DoxyCodeLine{00985\ \textcolor{comment}{\ \ \ \ typedef\ RandomDefaultLM<TCopulaPolicy,}}
+\DoxyCodeLine{00986\ \textcolor{comment}{\ \ \ \ \ \ RandomSequenceGenerator<MersenneTwisterUniformRng>\ >\ TRandomDefaultLM;}}
+\DoxyCodeLine{00987\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00988\ \ \ \ \ \textcolor{comment}{/*\ Uses\ MT\ and\ polar\ direct\ strudent-\/T\ generation}}
+\DoxyCodeLine{00989\ \textcolor{comment}{\ \ \ \ typedef\ RandomDefaultLM<TCopulaPolicy,}}
+\DoxyCodeLine{00990\ \textcolor{comment}{\ \ \ \ \ \ \ \ RandomSequenceGenerator<PolarStudentTRng<MersenneTwisterUniformRng>\ >\ >}}
+\DoxyCodeLine{00991\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ TRandomDefaultLM;}}
+\DoxyCodeLine{00992\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00993\ \ \ \ \ \textcolor{comment}{/*\ Default\ case,\ uses\ sobol\ sequence\ and\ copula\ inversion\ */}}
+\DoxyCodeLine{00994\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_random_default_l_m}{RandomDefaultLM<TCopulaPolicy>}}\ TRandomDefaultLM;}
+\DoxyCodeLine{00995\ }
+\DoxyCodeLine{00996\ \}}
+\DoxyCodeLine{00997\ }
+\DoxyCodeLine{00998\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

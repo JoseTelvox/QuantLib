@@ -1,0 +1,1163 @@
+\doxysection{sabrswaptionvolatilitycube.\+hpp}
+\hypertarget{sabrswaptionvolatilitycube_8hpp_source}{}\label{sabrswaptionvolatilitycube_8hpp_source}\index{ql/termstructures/volatility/swaption/sabrswaptionvolatilitycube.hpp@{ql/termstructures/volatility/swaption/sabrswaptionvolatilitycube.hpp}}
+\mbox{\hyperlink{sabrswaptionvolatilitycube_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2006,\ 2007\ Giorgio\ Facchinetti}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2014,\ 2015\ Peter\ Caspers}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2023\ Ignacio\ Anguita}}
+\DoxyCodeLine{00007\ \textcolor{comment}{}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00016\ \textcolor{comment}{}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#ifndef\ quantlib\_sabr\_swaption\_volatility\_cube\_hpp}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ quantlib\_sabr\_swaption\_volatility\_cube\_hpp}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{backwardflatlinearinterpolation_8hpp}{ql/math/interpolations/backwardflatlinearinterpolation.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{bilinearinterpolation_8hpp}{ql/math/interpolations/bilinearinterpolation.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{flatextrapolation2d_8hpp}{ql/math/interpolations/flatextrapolation2d.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{linearinterpolation_8hpp}{ql/math/interpolations/linearinterpolation.hpp}}>}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{sabrinterpolation_8hpp}{ql/math/interpolations/sabrinterpolation.hpp}}>}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{matrix_8hpp}{ql/math/matrix.hpp}}>}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{quote_8hpp}{ql/quote.hpp}}>}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{sabrsmilesection_8hpp}{ql/termstructures/volatility/sabrsmilesection.hpp}}>}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{swaptionvolcube_8hpp}{ql/termstructures/volatility/swaption/swaptionvolcube.hpp}}>}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#ifndef\ SWAPTIONVOLCUBE\_VEGAWEIGHTED\_TOL}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\ \ \ \ \#define\ SWAPTIONVOLCUBE\_VEGAWEIGHTED\_TOL\ 15.0e-\/4}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#ifndef\ SWAPTIONVOLCUBE\_TOL}}
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\ \ \ \ \#define\ SWAPTIONVOLCUBE\_TOL\ 100.0e-\/4}}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{\ \ \ \ }
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_interpolation2_d}{Interpolation2D}};}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}};}
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{OptimizationMethod}};}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keyword}{class\ }XabrSwaptionVolatilityCube\ :\ \textcolor{keyword}{public}\ SwaptionVolatilityCube\ \{}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }Cube\ \{\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/special-\/member-\/functions)}}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ Cube()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ Cube(\textcolor{keyword}{const}\ std::vector<Date>\&\ optionDates,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ swapTenors,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ optionTimes,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ swapLengths,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nLayers,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolation\ =\ \textcolor{keyword}{true},}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ backwardFlat\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ Cube\&\ \mbox{\hyperlink{class_quant_lib_1_1_observable_ad1e086da62f05b4bc5eafa698ef6fbc3}{operator=}}(\textcolor{keyword}{const}\ Cube\&\ o);}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ Cube(\textcolor{keyword}{const}\ Cube\&);}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \string~Cube()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setElement(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ IndexOfLayer,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ IndexOfRow,}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ IndexOfColumn,}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x);}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setPoints(\textcolor{keyword}{const}\ std::vector<Matrix>\&\ x);}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setPoint(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ optionDate,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ swapTenor,}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}},}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ point);}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setLayer(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i,}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\&\ x);}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ expandLayers(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ expandOptionTimes,}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j,}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ expandSwapLengths);}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ optionDates()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ optionDates\_;}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ swapTenors()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ swapTenors\_;}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ optionTimes()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ swapLengths()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Matrix>\&\ points()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ operator()(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ swapLengths)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ updateInterpolators()\textcolor{keyword}{const};}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ browse()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Time>\ optionTimes\_,\ swapLengths\_;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Date>\ optionDates\_;}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Period>\ swapTenors\_;}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nLayers\_;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Matrix>\ points\_;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Matrix>\ transposedPoints\_;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolation\_;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ backwardFlat\_;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<\ ext::shared\_ptr<Interpolation2D>\ >\ interpolators\_;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ XabrSwaptionVolatilityCube(}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<SwaptionVolatilityStructure>}}\&\ atmVolStructure,}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ optionTenors,}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ swapTenors,}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Spread>\&\ strikeSpreads,}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\ >\&\ volSpreads,}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<SwapIndex>\&\ swapIndexBase,}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<SwapIndex>\&\ shortSwapIndexBase,}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ vegaWeightedSmileFit,}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\ >\ parametersGuess,}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<bool>\ isParameterFixed,}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isAtmCalibrated,}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria\ =\ ext::shared\_ptr<EndCriteria>(),}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxErrorTolerance\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optMethod\ =\ ext::shared\_ptr<OptimizationMethod>(),}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ errorAccept\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Real>}}(),}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ useMaxError\ =\ \textcolor{keyword}{false},}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxGuesses\ =\ 50,}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ backwardFlat\ =\ \textcolor{keyword}{false},}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ cutoffStrike\ =\ 0.0001);}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_xabr_swaption_volatility_cube_a50a98cfa80dc5a17afb95c30b8a8d0b8}{performCalculations}}()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SmileSection>\ smileSectionImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}})\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\&\ marketVolCube(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ marketVolCube\_.points()[i];}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ sparseSabrParameters()\textcolor{keyword}{const};}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ denseSabrParameters()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ marketVolCube()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ volCubeAtmCalibrated()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ sabrCalibrationSection(\textcolor{keyword}{const}\ Cube\&\ marketVolCube,}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Cube\&\ parametersCube,}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ swapTenor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ recalibration(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta,}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ swapTenor);}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ recalibration(\textcolor{keyword}{const}\ std::vector<Real>\ \&beta,}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ swapTenor);}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ recalibration(\textcolor{keyword}{const}\ std::vector<Period>\ \&swapLengths,}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ \&beta,}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ swapTenor);}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ updateAfterRecalibration();}
+\DoxyCodeLine{00167\ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ registerWithParametersGuess();}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_xabr_swaption_volatility_cube_a257d635c4a91b20e9db791f25859f709}{setParameterGuess}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ ext::shared\_ptr<SmileSection>\ smileSection(}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}},}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Cube\&\ sabrParametersCube)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ Cube\ sabrCalibration(\textcolor{keyword}{const}\ Cube\ \&marketVolCube)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ fillVolatilityCube()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ createSparseSmiles()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ std::vector<Real>\ spreadVolInterpolation(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ atmOptionDate,}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ atmSwapTenor)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ requiredNumberOfStrikes()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ 1;\ \}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ Cube\ marketVolCube\_;}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ Cube\ volCubeAtmCalibrated\_;}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ Cube\ sparseParameters\_;}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ Cube\ denseParameters\_;}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<\ std::vector<ext::shared\_ptr<SmileSection>\ >\ >}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sparseSmiles\_;}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ std::vector<std::vector<Handle<Quote>\ >\ >\ parametersGuessQuotes\_;}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ Cube\ parametersGuess\_;}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ std::vector<bool>\ isParameterFixed\_;}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isAtmCalibrated\_;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<EndCriteria>\ endCriteria\_;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxErrorTolerance\_;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<OptimizationMethod>\ optMethod\_;}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ errorAccept\_;}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ useMaxError\_;}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxGuesses\_;}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ backwardFlat\_;}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ cutoffStrike\_;}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ VolatilityType\ volatilityType\_;}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }PrivateObserver\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}\ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ PrivateObserver(\mbox{\hyperlink{class_quant_lib_1_1_xabr_swaption_volatility_cube}{XabrSwaptionVolatilityCube<Model>}}\ *v)}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ :\ v\_(v)\ \{\}}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\_-\/>setParameterGuess();}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\_-\/>update();}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ XabrSwaptionVolatilityCube<Model>\ *v\_;}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ ext::shared\_ptr<PrivateObserver>\ privateObserver\_;}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \};}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \ \ \ \ \textcolor{comment}{//=======================================================================//}}
+\DoxyCodeLine{00219\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ XabrSwaptionVolatilityCube\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //}}
+\DoxyCodeLine{00220\ \ \ \ \ \textcolor{comment}{//=======================================================================//}}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Model>}
+\DoxyCodeLine{00223\ \ \ \ \ XabrSwaptionVolatilityCube<Model>::XabrSwaptionVolatilityCube(}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<SwaptionVolatilityStructure>}}\&\ atmVolStructure,}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ optionTenors,}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ swapTenors,}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Spread>\&\ strikeSpreads,}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\ >\&\ volSpreads,}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<SwapIndex>\&\ swapIndexBase,}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<SwapIndex>\&\ shortSwapIndexBase,}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ vegaWeightedSmileFit,}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ std::vector<std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ >\ >\ parametersGuess,}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ std::vector<bool>\ isParameterFixed,}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isAtmCalibrated,}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ ext::shared\_ptr<EndCriteria>\ endCriteria,}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxErrorTolerance,}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ ext::shared\_ptr<OptimizationMethod>\ optMethod,}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ errorAccept,}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ useMaxError,}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ maxGuesses,}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ backwardFlat,}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ cutoffStrike)}
+\DoxyCodeLine{00243\ \ \ \ \ :\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_cube}{SwaptionVolatilityCube}}(atmVolStructure,}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTenors,}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapTenors,}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strikeSpreads,}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volSpreads,}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapIndexBase,}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shortSwapIndexBase,}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vegaWeightedSmileFit),}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ parametersGuessQuotes\_(std::move(parametersGuess)),}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ isParameterFixed\_(std::move(isParameterFixed)),\ isAtmCalibrated\_(isAtmCalibrated),}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ endCriteria\_(std::move(endCriteria)),\ optMethod\_(std::move(optMethod)),}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ useMaxError\_(useMaxError),\ maxGuesses\_(maxGuesses),\ backwardFlat\_(backwardFlat),}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ cutoffStrike\_(cutoffStrike),\ volatilityType\_(atmVolStructure-\/>volatilityType())\ \{}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (maxErrorTolerance\ !=\ Null<Rate>())\ \{}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ maxErrorTolerance\_\ =\ maxErrorTolerance;}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ maxErrorTolerance\_\ =\ SWAPTIONVOLCUBE\_TOL;}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (vegaWeightedSmileFit\_)\ maxErrorTolerance\_\ =\ \ SWAPTIONVOLCUBE\_VEGAWEIGHTED\_TOL;}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (errorAccept\ !=\ Null<Rate>())\ \{}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ errorAccept\_\ =\ errorAccept;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}\{}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ errorAccept\_\ =\ maxErrorTolerance\_\ /\ 5.0;}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ privateObserver\_\ =\ ext::make\_shared<PrivateObserver>(\textcolor{keyword}{this});}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ registerWithParametersGuess();}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_xabr_swaption_volatility_cube_a257d635c4a91b20e9db791f25859f709}{setParameterGuess}}();}
+\DoxyCodeLine{00272\ \ \ \ \ \}}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::registerWithParametersGuess()}
+\DoxyCodeLine{00275\ \ \ \ \ \{}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<4;\ i++)}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<nOptionTenors\_;\ j++)}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nSwapTenors\_;\ k++)}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ privateObserver\_-\/>registerWith(parametersGuessQuotes\_[j*nSwapTenors\_+k][i]);}
+\DoxyCodeLine{00280\ \ \ \ \ \}}
+\DoxyCodeLine{00281\ }
+\DoxyCodeLine{00282\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_xabr_swaption_volatility_cube_a257d635c4a91b20e9db791f25859f709}{XabrSwaptionVolatilityCube<Model>::setParameterGuess}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ parametersGuess\_\ =\ Cube(optionDates\_,\ swapTenors\_,}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_,\ swapLengths\_,\ 4,}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{true},\ backwardFlat\_);}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i;}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<4;\ i++)}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<nOptionTenors\_\ ;\ j++)}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nSwapTenors\_;\ k++)\ \{}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ parametersGuess\_.setElement(i,\ j,\ k,}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ parametersGuessQuotes\_[j*nSwapTenors\_+k][i]-\/>value());}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ parametersGuess\_.updateInterpolators();}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \ \ \ \ \}}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_xabr_swaption_volatility_cube_a50a98cfa80dc5a17afb95c30b8a8d0b8}{XabrSwaptionVolatilityCube<Model>::performCalculations}}()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00300\ }
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_cube_aefb66aac228027210b8de2efe915878e}{SwaptionVolatilityCube::performCalculations}}();}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ marketVolCube\_\ =\ Cube(optionDates\_,\ swapTenors\_,}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_,\ swapLengths\_,\ nStrikes\_);}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ atmForward;}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ atmVol,\ vol;}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<nOptionTenors\_;\ ++j)\ \{}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nSwapTenors\_;\ ++k)\ \{}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmForward\ =\ atmStrike(optionDates\_[j],\ swapTenors\_[k]);}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmVol\ =\ atmVol\_-\/>volatility(optionDates\_[j],\ swapTenors\_[k],}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmForward);}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<nStrikes\_;\ ++i)\ \{}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vol\ =\ atmVol\ +\ volSpreads\_[j*nSwapTenors\_+k][i]-\/>value();}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ marketVolCube\_.setElement(i,\ j,\ k,\ vol);}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ marketVolCube\_.updateInterpolators();}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ sparseParameters\_\ =\ sabrCalibration(marketVolCube\_);}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \textcolor{comment}{//parametersGuess\_\ =\ sparseParameters\_;}}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ sparseParameters\_.updateInterpolators();}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \textcolor{comment}{//parametersGuess\_.updateInterpolators();}}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ volCubeAtmCalibrated\_=\ marketVolCube\_;}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(isAtmCalibrated\_)\{}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ \ \ \ fillVolatilityCube();}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ denseParameters\_\ =\ sabrCalibration(volCubeAtmCalibrated\_);}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ denseParameters\_.updateInterpolators();}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00332\ \ \ \ \ \}}
+\DoxyCodeLine{00333\ }
+\DoxyCodeLine{00334\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::updateAfterRecalibration()\ \{}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ volCubeAtmCalibrated\_\ =\ marketVolCube\_;}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(isAtmCalibrated\_)\{}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ fillVolatilityCube();}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ denseParameters\_\ =\ sabrCalibration(volCubeAtmCalibrated\_);}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ denseParameters\_.updateInterpolators();}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ notifyObservers();}
+\DoxyCodeLine{00342\ \ \ \ \ \}}
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Model>}
+\DoxyCodeLine{00345\ \ \ \ \ \textcolor{keyword}{typename}\ XabrSwaptionVolatilityCube<Model>::Cube}
+\DoxyCodeLine{00346\ \ \ \ \ XabrSwaptionVolatilityCube<Model>::sabrCalibration(\textcolor{keyword}{const}\ Cube\ \&marketVolCube)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00347\ }
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ optionTimes\ =\ marketVolCube.optionTimes();}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ swapLengths\ =\ marketVolCube.swapLengths();}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ optionDates\ =\ marketVolCube.optionDates();}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ swapTenors\ =\ marketVolCube.swapTenors();}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ alphas(optionTimes.size(),\ swapLengths.size(),0.);}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ betas(alphas);}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ nus(alphas);}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ rhos(alphas);}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ forwards(alphas);}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ errors(alphas);}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ maxErrors(alphas);}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ endCriteria(alphas);}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Matrix>\&\ tmpMarketVolCube\ =\ marketVolCube.points();}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ std::vector<Real>\ strikes(strikeSpreads\_.size());}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ std::vector<Real>\ volatilities(strikeSpreads\_.size());}
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<optionTimes.size();\ j++)\ \{}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<swapLengths.size();\ k++)\ \{}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ atmForward\ =\ atmStrike(optionDates[j],\ swapTenors[k]);}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ shiftTmp\ =\ atmVol\_-\/>shift(optionTimes[j],\ swapLengths[k]);}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strikes.clear();}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volatilities.clear();}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<nStrikes\_;\ i++)\{}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike\ =\ atmForward+strikeSpreads\_[i];}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(strike\ +\ shiftTmp\ >=cutoffStrike\_)\ \{}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strikes.push\_back(strike);}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volatilities.push\_back(tmpMarketVolCube[i][j][k]);}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00379\ }
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ guess\ =}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ parametersGuess\_(optionTimes[j],\ swapLengths[k]);}
+\DoxyCodeLine{00382\ }
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<typename\ Model::Interpolation>\ sabrInterpolation\ =}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<typename\ Model::Interpolation>(\textcolor{keyword}{new}}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{keyword}{typename}\ Model::Interpolation)(strikes.begin(),\ strikes.end(),}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volatilities.begin(),}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes[j],\ atmForward,}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ guess[0],\ guess[1],}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ guess[2],\ guess[3],}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isParameterFixed\_[0],}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isParameterFixed\_[1],}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isParameterFixed\_[2],}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isParameterFixed\_[3],}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vegaWeightedSmileFit\_,}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ endCriteria\_,}
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optMethod\_,}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorAccept\_,}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ useMaxError\_,}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxGuesses\_,}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shiftTmp,}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volatilityType\_));}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sabrInterpolation-\/>update();}
+\DoxyCodeLine{00403\ }
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rmsError\ =\ sabrInterpolation-\/>rmsError();}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ maxError\ =\ sabrInterpolation-\/>maxError();}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ alphas\ \ \ \ \ [j][k]\ =\ sabrInterpolation-\/>alpha();}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ betas\ \ \ \ \ \ [j][k]\ =\ sabrInterpolation-\/>beta();}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ nus\ \ \ \ \ \ \ \ [j][k]\ =\ sabrInterpolation-\/>nu();}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rhos\ \ \ \ \ \ \ [j][k]\ =\ sabrInterpolation-\/>rho();}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ forwards\ \ \ [j][k]\ =\ atmForward;}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errors\ \ \ \ \ [j][k]\ =\ rmsError;}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxErrors\ \ [j][k]\ =\ maxError;}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ endCriteria[j][k]\ =\ sabrInterpolation-\/>endCriteria();}
+\DoxyCodeLine{00414\ }
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a394b39aa396098345f86d243f207f7af}{QL\_ENSURE}}(endCriteria[j][k]\ !=\ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}(EndCriteria::MaxIterations),}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}global\ swaptions\ calibration\ failed:\ "{}}}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}MaxIterations\ reached:\ "{}}\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}\ <<}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}option\ maturity\ =\ "{}}\ <<\ optionDates[j]\ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}\ <<}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}swap\ tenor\ =\ "{}}\ <<\ swapTenors[k]\ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}\ <<}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}rms\ error\ =\ "{}}\ <<\ \mbox{\hyperlink{group__manips_gac9152aad6a69c41f5d30bb1dcb9b2236}{io::rate}}(errors[j][k])\ \ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}\ <<}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}max\ error\ =\ "{}}\ <<\ \mbox{\hyperlink{group__manips_gac9152aad6a69c41f5d30bb1dcb9b2236}{io::rate}}(maxErrors[j][k])\ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}\ <<}
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ alpha\ =\ "{}}\ <<\ \ alphas[j][k]\ <<\ \textcolor{stringliteral}{"{}n"{}}\ <<}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ beta\ =\ "{}}\ <<\ \ betas[j][k]\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}\ <<}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ nu\ =\ "{}}\ <<\ \ nus[j][k]\ \ \ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}\ <<}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ \ \ rho\ =\ "{}}\ <<\ \ rhos[j][k]\ \ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a394b39aa396098345f86d243f207f7af}{QL\_ENSURE}}((useMaxError\_\ ?\ maxError\ :\ rmsError)\ <\ maxErrorTolerance\_,}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}global\ swaptions\ calibration\ failed:\ "{}}}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}error\ tolerance\ exceeded:\ "{}}}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}using\ "{}}\ <<\ (useMaxError\_\ ?\ \textcolor{stringliteral}{"{}maxError"{}}\ :\ \textcolor{stringliteral}{"{}rmsError"{}})}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ tolerance\ "{}}\ <<\ maxErrorTolerance\_\ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}option\ maturity\ =\ "{}}\ <<\ optionDates[j]\ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}swap\ tenor\ =\ "{}}\ <<\ swapTenors[k]\ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}rms\ error\ =\ "{}}\ <<\ \mbox{\hyperlink{group__manips_gac9152aad6a69c41f5d30bb1dcb9b2236}{io::rate}}(errors[j][k])\ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}max\ error\ =\ "{}}\ <<\ \mbox{\hyperlink{group__manips_gac9152aad6a69c41f5d30bb1dcb9b2236}{io::rate}}(maxErrors[j][k])\ <<\ \textcolor{stringliteral}{"{},\ \(\backslash\)n"{}}}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ \ \ alpha\ =\ "{}}\ <<\ alphas[j][k]\ <<\ \textcolor{stringliteral}{"{}n"{}}}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ \ \ beta\ =\ "{}}\ <<\ betas[j][k]\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ \ \ nu\ =\ "{}}\ <<\ nus[j][k]\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}}}
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ \ \ rho\ =\ "{}}\ <<\ rhos[j][k]\ <<\ \textcolor{stringliteral}{"{}\(\backslash\)n"{}});}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ Cube\ sabrParametersCube(optionDates,\ swapTenors,}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes,\ swapLengths,\ 8,}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{true},\ backwardFlat\_);}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ sabrParametersCube.setLayer(0,\ alphas);}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \ \ sabrParametersCube.setLayer(1,\ betas);}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ sabrParametersCube.setLayer(2,\ nus);}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ sabrParametersCube.setLayer(3,\ rhos);}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ sabrParametersCube.setLayer(4,\ forwards);}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ sabrParametersCube.setLayer(5,\ errors);}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \ \ sabrParametersCube.setLayer(6,\ maxErrors);}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ sabrParametersCube.setLayer(7,\ endCriteria);}
+\DoxyCodeLine{00455\ }
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sabrParametersCube;}
+\DoxyCodeLine{00457\ }
+\DoxyCodeLine{00458\ \ \ \ \ \}}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::sabrCalibrationSection(}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Cube\&\ marketVolCube,}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Cube\&\ parametersCube,}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ swapTenor)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00464\ }
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ optionTimes\ =\ marketVolCube.optionTimes();}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ swapLengths\ =\ marketVolCube.swapLengths();}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ optionDates\ =\ marketVolCube.optionDates();}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ swapTenors\ =\ marketVolCube.swapTenors();}
+\DoxyCodeLine{00469\ }
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k\ =\ std::find(swapTenors.begin(),\ swapTenors.end(),}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapTenor)\ -\/\ swapTenors.begin();}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(k\ !=\ swapTenors.size(),\ \textcolor{stringliteral}{"{}swap\ tenor\ not\ found"{}});}
+\DoxyCodeLine{00473\ }
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \ \ std::vector<Real>\ calibrationResult(8,0.);}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Matrix>\&\ tmpMarketVolCube\ =\ marketVolCube.points();}
+\DoxyCodeLine{00476\ }
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \ \ std::vector<Real>\ strikes(strikeSpreads\_.size());}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ std::vector<Real>\ volatilities(strikeSpreads\_.size());}
+\DoxyCodeLine{00479\ }
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<optionTimes.size();\ j++)\ \{}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ atmForward\ =\ atmStrike(optionDates[j],\ swapTenors[k]);}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ shiftTmp\ =\ atmVol\_-\/>shift(optionTimes[j],\ swapLengths[k]);}
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \ \ \ \ \ \ strikes.clear();}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ \ \ \ \ volatilities.clear();}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<nStrikes\_;\ i++)\{}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike\ =\ atmForward+strikeSpreads\_[i];}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(strike+shiftTmp>=cutoffStrike\_)\ \{}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strikes.push\_back(strike);}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volatilities.push\_back(tmpMarketVolCube[i][j][k]);}
+\DoxyCodeLine{00490\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00492\ }
+\DoxyCodeLine{00493\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ guess\ =}
+\DoxyCodeLine{00494\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ parametersGuess\_(optionTimes[j],\ swapLengths[k]);}
+\DoxyCodeLine{00495\ }
+\DoxyCodeLine{00496\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<typename\ Model::Interpolation>\ sabrInterpolation\ =}
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<typename\ Model::Interpolation>(\textcolor{keyword}{new}}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\textcolor{keyword}{typename}\ Model::Interpolation)(strikes.begin(),\ strikes.end(),}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volatilities.begin(),}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes[j],\ atmForward,}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ guess[0],\ guess[1],}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ guess[2],\ guess[3],}
+\DoxyCodeLine{00503\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isParameterFixed\_[0],}
+\DoxyCodeLine{00504\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isParameterFixed\_[1],}
+\DoxyCodeLine{00505\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isParameterFixed\_[2],}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isParameterFixed\_[3],}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vegaWeightedSmileFit\_,}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ endCriteria\_,}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optMethod\_,}
+\DoxyCodeLine{00510\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errorAccept\_,}
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ useMaxError\_,}
+\DoxyCodeLine{00512\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ maxGuesses\_,}
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shiftTmp));}
+\DoxyCodeLine{00514\ }
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \ \ \ \ sabrInterpolation-\/>update();}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ interpolationError\ =\ sabrInterpolation-\/>rmsError();}
+\DoxyCodeLine{00517\ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult[0]=sabrInterpolation-\/>alpha();}
+\DoxyCodeLine{00518\ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult[1]=sabrInterpolation-\/>beta();}
+\DoxyCodeLine{00519\ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult[2]=sabrInterpolation-\/>nu();}
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult[3]=sabrInterpolation-\/>rho();}
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult[4]=atmForward;}
+\DoxyCodeLine{00522\ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult[5]=interpolationError;}
+\DoxyCodeLine{00523\ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult[6]=sabrInterpolation-\/>maxError();}
+\DoxyCodeLine{00524\ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult[7]=sabrInterpolation-\/>endCriteria();}
+\DoxyCodeLine{00525\ }
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a394b39aa396098345f86d243f207f7af}{QL\_ENSURE}}(calibrationResult[7]\ !=\ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}(EndCriteria::MaxIterations),}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}section\ calibration\ failed:\ "{}}}
+\DoxyCodeLine{00528\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}option\ tenor\ "{}}\ <<\ optionDates[j]\ <<}
+\DoxyCodeLine{00529\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ swap\ tenor\ "{}}\ <<\ swapTenors[k]\ <<}
+\DoxyCodeLine{00530\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}:\ max\ iteration\ ("{}}\ <<}
+\DoxyCodeLine{00531\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ endCriteria\_-\/>maxIterations()\ <<\ \textcolor{stringliteral}{"{})"{}}\ <<}
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ alpha\ "{}}\ <<\ \ calibrationResult[0]<<}
+\DoxyCodeLine{00533\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ beta\ "{}}\ \ <<\ \ calibrationResult[1]\ <<}
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ nu\ "{}}\ \ \ \ <<\ \ calibrationResult[2]\ \ \ <<}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ rho\ "{}}\ \ \ <<\ \ calibrationResult[3]\ \ <<}
+\DoxyCodeLine{00536\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ max\ error\ "{}}\ <<\ calibrationResult[6]\ <<}
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ error\ "{}}\ <<\ \ calibrationResult[5]}
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{00539\ }
+\DoxyCodeLine{00540\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a394b39aa396098345f86d243f207f7af}{QL\_ENSURE}}((useMaxError\_\ ?\ calibrationResult[6]\ :\ calibrationResult[5])\ <\ maxErrorTolerance\_,}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}section\ calibration\ failed:\ "{}}}
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}option\ tenor\ "{}}\ <<\ optionDates[j]\ <<}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ swap\ tenor\ "{}}\ <<\ swapTenors[k]\ <<}
+\DoxyCodeLine{00544\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (useMaxError\_\ ?\ \textcolor{stringliteral}{"{}:\ max\ error\ "{}}\ :\ \textcolor{stringliteral}{"{}:\ error\ "{}})\ <<}
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (useMaxError\_\ ?\ calibrationResult[6]\ :\ calibrationResult[5])\ <<}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ alpha\ "{}}\ <<\ \ calibrationResult[0]\ <<}
+\DoxyCodeLine{00547\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ beta\ "{}}\ \ <<\ \ calibrationResult[1]\ <<}
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ nu\ "{}}\ \ \ \ <<\ \ calibrationResult[2]\ <<}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{},\ rho\ "{}}\ \ \ <<\ \ calibrationResult[3]\ <<}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (useMaxError\_\ ?\ \textcolor{stringliteral}{"{}:\ error"{}}\ :\ \textcolor{stringliteral}{"{}:\ max\ error\ "{}})\ <<}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (useMaxError\_\ ?\ calibrationResult[5]\ :\ calibrationResult[6])}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \ \ \ );}
+\DoxyCodeLine{00553\ }
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \ \ \ \ parametersCube.setPoint(optionDates[j],\ swapTenors[k],}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes[j],\ swapLengths[k],}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ calibrationResult);}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \ \ \ parametersCube.updateInterpolators();}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00559\ }
+\DoxyCodeLine{00560\ \ \ \ \ \}}
+\DoxyCodeLine{00561\ }
+\DoxyCodeLine{00562\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::fillVolatilityCube()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00563\ }
+\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<SwaptionVolatilityDiscrete>\ atmVolStructure\ =}
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \ \ \ \ \ \ ext::dynamic\_pointer\_cast<SwaptionVolatilityDiscrete>(*atmVol\_);}
+\DoxyCodeLine{00566\ }
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ std::vector<Time>\ atmOptionTimes(atmVolStructure-\/>optionTimes());}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ std::vector<Time>\ optionTimes(volCubeAtmCalibrated\_.optionTimes());}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ atmOptionTimes.insert(atmOptionTimes.end(),}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes.begin(),\ optionTimes.end());}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ std::sort(atmOptionTimes.begin(),atmOptionTimes.end());}
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ new\_end\ =\ std::unique(atmOptionTimes.begin(),\ atmOptionTimes.end());}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \ \ atmOptionTimes.erase(new\_end,\ atmOptionTimes.end());}
+\DoxyCodeLine{00574\ }
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ std::vector<Time>\ atmSwapLengths(atmVolStructure-\/>swapLengths());}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \ \ std::vector<Time>\ swapLengths(volCubeAtmCalibrated\_.swapLengths());}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \ \ atmSwapLengths.insert(atmSwapLengths.end(),}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths.begin(),\ swapLengths.end());}
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \ \ std::sort(atmSwapLengths.begin(),atmSwapLengths.end());}
+\DoxyCodeLine{00580\ \ \ \ \ \ \ \ \ new\_end\ =\ std::unique(atmSwapLengths.begin(),\ atmSwapLengths.end());}
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ atmSwapLengths.erase(new\_end,\ atmSwapLengths.end());}
+\DoxyCodeLine{00582\ }
+\DoxyCodeLine{00583\ \ \ \ \ \ \ \ \ std::vector<Date>\ atmOptionDates\ =\ atmVolStructure-\/>optionDates();}
+\DoxyCodeLine{00584\ \ \ \ \ \ \ \ \ std::vector<Date>\ optionDates(volCubeAtmCalibrated\_.optionDates());}
+\DoxyCodeLine{00585\ \ \ \ \ \ \ \ \ atmOptionDates.insert(atmOptionDates.end(),}
+\DoxyCodeLine{00586\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionDates.begin(),\ optionDates.end());}
+\DoxyCodeLine{00587\ \ \ \ \ \ \ \ \ std::sort(atmOptionDates.begin(),atmOptionDates.end());}
+\DoxyCodeLine{00588\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ new\_end\_1\ =\ std::unique(atmOptionDates.begin(),\ atmOptionDates.end());}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ atmOptionDates.erase(new\_end\_1,\ atmOptionDates.end());}
+\DoxyCodeLine{00590\ }
+\DoxyCodeLine{00591\ \ \ \ \ \ \ \ \ std::vector<Period>\ atmSwapTenors\ =\ atmVolStructure-\/>swapTenors();}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \ \ std::vector<Period>\ swapTenors(volCubeAtmCalibrated\_.swapTenors());}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ atmSwapTenors.insert(atmSwapTenors.end(),}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapTenors.begin(),\ swapTenors.end());}
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \ \ std::sort(atmSwapTenors.begin(),atmSwapTenors.end());}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \textcolor{keyword}{auto}\ new\_end\_2\ =\ std::unique(atmSwapTenors.begin(),\ atmSwapTenors.end());}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ atmSwapTenors.erase(new\_end\_2,\ atmSwapTenors.end());}
+\DoxyCodeLine{00598\ }
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ createSparseSmiles();}
+\DoxyCodeLine{00600\ }
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<atmOptionTimes.size();\ j++)\ \{}
+\DoxyCodeLine{00602\ }
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<atmSwapLengths.size();\ k++)\ \{}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ expandOptionTimes\ =}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !(std::binary\_search(optionTimes.begin(),}
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes.end(),}
+\DoxyCodeLine{00607\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmOptionTimes[j]));}
+\DoxyCodeLine{00608\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ expandSwapLengths\ =}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ !(std::binary\_search(swapLengths.begin(),}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths.end(),}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmSwapLengths[k]));}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(expandOptionTimes\ ||\ expandSwapLengths)\{}
+\DoxyCodeLine{00613\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ atmForward\ =\ atmStrike(atmOptionDates[j],}
+\DoxyCodeLine{00614\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmSwapTenors[k]);}
+\DoxyCodeLine{00615\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ atmVol\ =\ atmVol\_-\/>volatility(}
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmOptionDates[j],\ atmSwapTenors[k],\ atmForward);}
+\DoxyCodeLine{00617\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ spreadVols\ =}
+\DoxyCodeLine{00618\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ spreadVolInterpolation(atmOptionDates[j],}
+\DoxyCodeLine{00619\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmSwapTenors[k]);}
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ volAtmCalibrated;}
+\DoxyCodeLine{00621\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volAtmCalibrated.reserve(nStrikes\_);}
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<nStrikes\_;\ i++)}
+\DoxyCodeLine{00623\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volAtmCalibrated.push\_back(atmVol\ +\ spreadVols[i]);}
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volCubeAtmCalibrated\_.setPoint(}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmOptionDates[j],\ atmSwapTenors[k],}
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmOptionTimes[j],\ atmSwapLengths[k],}
+\DoxyCodeLine{00627\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volAtmCalibrated);}
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00630\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \ volCubeAtmCalibrated\_.updateInterpolators();}
+\DoxyCodeLine{00632\ \ \ \ \ \}}
+\DoxyCodeLine{00633\ }
+\DoxyCodeLine{00634\ }
+\DoxyCodeLine{00635\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::createSparseSmiles()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00636\ }
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ std::vector<Time>\ optionTimes(sparseParameters\_.optionTimes());}
+\DoxyCodeLine{00638\ \ \ \ \ \ \ \ \ std::vector<Time>\ swapLengths(sparseParameters\_.swapLengths());}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \ \ sparseSmiles\_.clear();}
+\DoxyCodeLine{00640\ }
+\DoxyCodeLine{00641\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ optionTime\ :\ optionTimes)\ \{}
+\DoxyCodeLine{00642\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<SmileSection>\ >\ tmp;}
+\DoxyCodeLine{00643\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n\ =\ swapLengths.size();}
+\DoxyCodeLine{00644\ \ \ \ \ \ \ \ \ \ \ \ \ tmp.reserve(n);}
+\DoxyCodeLine{00645\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<n;\ ++k)\ \{}
+\DoxyCodeLine{00646\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ tmp.push\_back(smileSection(optionTime,\ swapLengths[k],\ sparseParameters\_));}
+\DoxyCodeLine{00647\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00648\ \ \ \ \ \ \ \ \ \ \ \ \ sparseSmiles\_.push\_back(tmp);}
+\DoxyCodeLine{00649\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00650\ \ \ \ \ \}}
+\DoxyCodeLine{00651\ }
+\DoxyCodeLine{00652\ }
+\DoxyCodeLine{00653\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ std::vector<Real>\ XabrSwaptionVolatilityCube<Model>::spreadVolInterpolation(}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ atmOptionDate,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ atmSwapTenor)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00655\ }
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ atmOptionTime\ =\ timeFromReference(atmOptionDate);}
+\DoxyCodeLine{00657\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ atmTimeLength\ =\ swapLength(atmSwapTenor);}
+\DoxyCodeLine{00658\ }
+\DoxyCodeLine{00659\ \ \ \ \ \ \ \ \ std::vector<Real>\ result;}
+\DoxyCodeLine{00660\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ optionTimes(sparseParameters\_.optionTimes());}
+\DoxyCodeLine{00661\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ swapLengths(sparseParameters\_.swapLengths());}
+\DoxyCodeLine{00662\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ optionDates\ =}
+\DoxyCodeLine{00663\ \ \ \ \ \ \ \ \ \ \ \ \ sparseParameters\_.optionDates();}
+\DoxyCodeLine{00664\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ swapTenors\ =\ sparseParameters\_.swapTenors();}
+\DoxyCodeLine{00665\ }
+\DoxyCodeLine{00666\ \ \ \ \ \ \ \ \ std::vector<Real>::const\_iterator\ optionTimesPreviousNode,}
+\DoxyCodeLine{00667\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengthsPreviousNode;}
+\DoxyCodeLine{00668\ }
+\DoxyCodeLine{00669\ \ \ \ \ \ \ \ \ optionTimesPreviousNode\ =\ std::lower\_bound(optionTimes.begin(),}
+\DoxyCodeLine{00670\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes.end(),}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmOptionTime);}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ optionTimesPreviousIndex\ =}
+\DoxyCodeLine{00673\ \ \ \ \ \ \ \ \ \ \ \ \ optionTimesPreviousNode\ -\/\ optionTimes.begin();}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (optionTimesPreviousIndex\ >0)}
+\DoxyCodeLine{00675\ \ \ \ \ \ \ \ \ \ \ \ \ optionTimesPreviousIndex\ -\/-\/;}
+\DoxyCodeLine{00676\ }
+\DoxyCodeLine{00677\ \ \ \ \ \ \ \ \ swapLengthsPreviousNode\ =\ std::lower\_bound(swapLengths.begin(),}
+\DoxyCodeLine{00678\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths.end(),}
+\DoxyCodeLine{00679\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmTimeLength);}
+\DoxyCodeLine{00680\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ swapLengthsPreviousIndex\ =\ swapLengthsPreviousNode\ -\/\ swapLengths.begin();}
+\DoxyCodeLine{00681\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (swapLengthsPreviousIndex\ >0)}
+\DoxyCodeLine{00682\ \ \ \ \ \ \ \ \ \ \ \ \ swapLengthsPreviousIndex\ -\/-\/;}
+\DoxyCodeLine{00683\ }
+\DoxyCodeLine{00684\ \ \ \ \ \ \ \ \ std::vector<\ std::vector<ext::shared\_ptr<SmileSection>\ >\ >\ smiles;}
+\DoxyCodeLine{00685\ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<SmileSection>\ >\ \ smilesOnPreviousExpiry;}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \ \ std::vector<ext::shared\_ptr<SmileSection>\ >\ \ smilesOnNextExpiry;}
+\DoxyCodeLine{00687\ }
+\DoxyCodeLine{00688\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(optionTimesPreviousIndex+1\ <\ sparseSmiles\_.size(),}
+\DoxyCodeLine{00689\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}optionTimesPreviousIndex+1\ >=\ sparseSmiles\_.size()"{}});}
+\DoxyCodeLine{00690\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(swapLengthsPreviousIndex+1\ <\ sparseSmiles\_[0].size(),}
+\DoxyCodeLine{00691\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}swapLengthsPreviousIndex+1\ >=\ sparseSmiles\_[0].size()"{}});}
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \ \ smilesOnPreviousExpiry.push\_back(}
+\DoxyCodeLine{00693\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sparseSmiles\_[optionTimesPreviousIndex][swapLengthsPreviousIndex]);}
+\DoxyCodeLine{00694\ \ \ \ \ \ \ \ \ smilesOnPreviousExpiry.push\_back(}
+\DoxyCodeLine{00695\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sparseSmiles\_[optionTimesPreviousIndex][swapLengthsPreviousIndex+1]);}
+\DoxyCodeLine{00696\ \ \ \ \ \ \ \ \ smilesOnNextExpiry.push\_back(}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sparseSmiles\_[optionTimesPreviousIndex+1][swapLengthsPreviousIndex]);}
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \ \ smilesOnNextExpiry.push\_back(}
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sparseSmiles\_[optionTimesPreviousIndex+1][swapLengthsPreviousIndex+1]);}
+\DoxyCodeLine{00700\ }
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \ \ smiles.push\_back(smilesOnPreviousExpiry);}
+\DoxyCodeLine{00702\ \ \ \ \ \ \ \ \ smiles.push\_back(smilesOnNextExpiry);}
+\DoxyCodeLine{00703\ }
+\DoxyCodeLine{00704\ \ \ \ \ \ \ \ \ std::vector<Real>\ optionsNodes(2);}
+\DoxyCodeLine{00705\ \ \ \ \ \ \ \ \ optionsNodes[0]\ =\ optionTimes[optionTimesPreviousIndex];}
+\DoxyCodeLine{00706\ \ \ \ \ \ \ \ \ optionsNodes[1]\ =\ optionTimes[optionTimesPreviousIndex+1];}
+\DoxyCodeLine{00707\ }
+\DoxyCodeLine{00708\ \ \ \ \ \ \ \ \ std::vector<Date>\ optionsDateNodes(2);}
+\DoxyCodeLine{00709\ \ \ \ \ \ \ \ \ optionsDateNodes[0]\ =\ optionDates[optionTimesPreviousIndex];}
+\DoxyCodeLine{00710\ \ \ \ \ \ \ \ \ optionsDateNodes[1]\ =\ optionDates[optionTimesPreviousIndex+1];}
+\DoxyCodeLine{00711\ }
+\DoxyCodeLine{00712\ \ \ \ \ \ \ \ \ std::vector<Real>\ swapLengthsNodes(2);}
+\DoxyCodeLine{00713\ \ \ \ \ \ \ \ \ swapLengthsNodes[0]\ =\ swapLengths[swapLengthsPreviousIndex];}
+\DoxyCodeLine{00714\ \ \ \ \ \ \ \ \ swapLengthsNodes[1]\ =\ swapLengths[swapLengthsPreviousIndex+1];}
+\DoxyCodeLine{00715\ }
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \ \ std::vector<Period>\ swapTenorNodes(2);}
+\DoxyCodeLine{00717\ \ \ \ \ \ \ \ \ swapTenorNodes[0]\ =\ swapTenors[swapLengthsPreviousIndex];}
+\DoxyCodeLine{00718\ \ \ \ \ \ \ \ \ swapTenorNodes[1]\ =\ swapTenors[swapLengthsPreviousIndex+1];}
+\DoxyCodeLine{00719\ }
+\DoxyCodeLine{00720\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ atmForward\ =\ atmStrike(atmOptionDate,\ atmSwapTenor);}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ shift\ =\ atmVol\_-\/>shift(atmOptionTime,\ atmTimeLength);}
+\DoxyCodeLine{00722\ }
+\DoxyCodeLine{00723\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ atmForwards(2,\ 2,\ 0.0);}
+\DoxyCodeLine{00724\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ atmShifts(2,2,0.0);}
+\DoxyCodeLine{00725\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ atmVols(2,\ 2,\ 0.0);}
+\DoxyCodeLine{00726\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<2;\ i++)\ \{}
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<2;\ j++)\ \{}
+\DoxyCodeLine{00728\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmForwards[i][j]\ =\ atmStrike(optionsDateNodes[i],}
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapTenorNodes[j]);}
+\DoxyCodeLine{00730\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmShifts[i][j]\ =\ atmVol\_-\/>shift(optionsNodes[i],\ swapLengthsNodes[j]);}
+\DoxyCodeLine{00731\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ atmVols[i][j]\ =\ smiles[i][j]-\/>volatility(atmForwards[i][j]);}}
+\DoxyCodeLine{00732\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ atmVols[i][j]\ =\ atmVol\_-\/>volatility(}
+\DoxyCodeLine{00733\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionsDateNodes[i],\ swapTenorNodes[j],\ atmForwards[i][j]);}
+\DoxyCodeLine{00734\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ With\ the\ old\ implementation\ the\ interpolated\ spreads\ on\ ATM}}
+\DoxyCodeLine{00735\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volatilities\ were\ null\ even\ if\ the\ spreads\ on\ ATM\ volatilities\ to\ be}}
+\DoxyCodeLine{00736\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolated\ were\ non-\/zero.\ The\ new\ implementation\ removes}}
+\DoxyCodeLine{00737\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ this\ behaviour,\ but\ introduces\ a\ small\ ERROR\ in\ the\ cube:}}
+\DoxyCodeLine{00738\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ even\ if\ no\ spreads\ are\ applied\ on\ any\ cube\ ATM\ volatility\ corresponding}}
+\DoxyCodeLine{00739\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ to\ quoted\ smile\ sections\ (that\ is\ ATM\ volatilities\ in\ sparse\ cube),\ the}}
+\DoxyCodeLine{00740\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cube\ ATM\ volatilities\ corresponding\ to\ not\ quoted\ smile\ sections\ (that}}
+\DoxyCodeLine{00741\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ is\ ATM\ volatilities\ in\ dense\ cube)\ are\ no\ more\ exactly\ the\ quoted\ values,}}
+\DoxyCodeLine{00742\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ but\ that\ ones\ PLUS\ the\ linear\ interpolation\ of\ the\ fit\ errors\ on\ the\ ATM}}
+\DoxyCodeLine{00743\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ volatilities\ in\ sparse\ cube\ whose\ spreads\ are\ used\ in\ the\ calculation.}}
+\DoxyCodeLine{00744\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ A\ similar\ imprecision\ is\ introduced\ to\ the\ volatilities\ in\ dense\ cube}}
+\DoxyCodeLine{00745\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ whith\ moneyness\ near\ to\ 1.}}
+\DoxyCodeLine{00746\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (See\ below\ how\ spreadVols\ are\ calculated).}}
+\DoxyCodeLine{00747\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ The\ extent\ of\ this\ error\ depends\ on\ the\ quality\ of\ the\ fit:\ in\ case\ of}}
+\DoxyCodeLine{00748\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ good\ fits\ it\ is\ negligibile.}}
+\DoxyCodeLine{00749\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00752\ }
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nStrikes\_;\ k++)\{}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike\ =\ std::max(atmForward\ +\ strikeSpreads\_[k],cutoffStrike\_-\/shift);}
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ moneyness\ =\ (atmForward+shift)/(strike+shift);}
+\DoxyCodeLine{00756\ }
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ strikes(2,2,0.);}
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ spreadVols(2,2,0.);}
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<2;\ i++)\{}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<2;\ j++)\{}
+\DoxyCodeLine{00761\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ strikes[i][j]\ =\ (atmForwards[i][j]+atmShifts[i][j])/moneyness\ -\/\ atmShifts[i][j];}
+\DoxyCodeLine{00762\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ spreadVols[i][j]\ =}
+\DoxyCodeLine{00763\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ smiles[i][j]-\/>volatility(strikes[i][j])\ -\/\ atmVols[i][j];}
+\DoxyCodeLine{00764\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00765\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00766\ \ \ \ \ \ \ \ \ \ \ \ Cube\ localInterpolator(optionsDateNodes,\ swapTenorNodes,}
+\DoxyCodeLine{00767\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionsNodes,\ swapLengthsNodes,\ 1);}
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \ \ \ \ \ localInterpolator.setLayer(0,\ spreadVols);}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ \ \ \ localInterpolator.updateInterpolators();}
+\DoxyCodeLine{00770\ }
+\DoxyCodeLine{00771\ \ \ \ \ \ \ \ \ \ \ \ result.push\_back(localInterpolator(atmOptionTime,\ atmTimeLength)[0]);}
+\DoxyCodeLine{00772\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00773\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00774\ \ \ \ \ \}}
+\DoxyCodeLine{00775\ }
+\DoxyCodeLine{00776\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ ext::shared\_ptr<SmileSection>}
+\DoxyCodeLine{00777\ \ \ \ \ XabrSwaptionVolatilityCube<Model>::smileSection(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ swapLength,}
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Cube\&\ sabrParametersCube)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00779\ }
+\DoxyCodeLine{00780\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00781\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ sabrParameters\ =}
+\DoxyCodeLine{00782\ \ \ \ \ \ \ \ \ \ \ \ \ sabrParametersCube(optionTime,\ swapLength);}
+\DoxyCodeLine{00783\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ shiftTmp\ =\ atmVol\_-\/>shift(optionTime,swapLength);}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ ext::shared\_ptr<SmileSection>(\textcolor{keyword}{new}\ (\textcolor{keyword}{typename}\ Model::SmileSection)(}
+\DoxyCodeLine{00785\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTime,\ sabrParameters[4],\ sabrParameters,shiftTmp,\ volatilityType\_));}
+\DoxyCodeLine{00786\ \ \ \ \ \}}
+\DoxyCodeLine{00787\ }
+\DoxyCodeLine{00788\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ ext::shared\_ptr<SmileSection>}
+\DoxyCodeLine{00789\ \ \ \ \ XabrSwaptionVolatilityCube<Model>::smileSectionImpl(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,}
+\DoxyCodeLine{00790\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ swapLength)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00791\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (isAtmCalibrated\_)}
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ smileSection(optionTime,\ swapLength,\ denseParameters\_);}
+\DoxyCodeLine{00793\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00794\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ smileSection(optionTime,\ swapLength,\ sparseParameters\_);}
+\DoxyCodeLine{00795\ \ \ \ \ \}}
+\DoxyCodeLine{00796\ }
+\DoxyCodeLine{00797\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ XabrSwaptionVolatilityCube<Model>::sparseSabrParameters()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00798\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ sparseParameters\_.browse();}
+\DoxyCodeLine{00800\ \ \ \ \ \}}
+\DoxyCodeLine{00801\ }
+\DoxyCodeLine{00802\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ XabrSwaptionVolatilityCube<Model>::denseSabrParameters()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00803\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00804\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ denseParameters\_.browse();}
+\DoxyCodeLine{00805\ \ \ \ \ \}}
+\DoxyCodeLine{00806\ }
+\DoxyCodeLine{00807\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ XabrSwaptionVolatilityCube<Model>::marketVolCube()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00808\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00809\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ marketVolCube\_.browse();}
+\DoxyCodeLine{00810\ \ \ \ \ \}}
+\DoxyCodeLine{00811\ }
+\DoxyCodeLine{00812\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \mbox{\hyperlink{class_quant_lib_1_1_matrix}{Matrix}}\ XabrSwaptionVolatilityCube<Model>::volCubeAtmCalibrated()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ calculate();}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ volCubeAtmCalibrated\_.browse();}
+\DoxyCodeLine{00815\ \ \ \ \ \}}
+\DoxyCodeLine{00816\ }
+\DoxyCodeLine{00817\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::recalibration(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta,}
+\DoxyCodeLine{00818\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ swapTenor)\ \{}
+\DoxyCodeLine{00819\ }
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ std::vector<Real>\ betaVector(nOptionTenors\_,\ beta);}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \ \ recalibration(betaVector,swapTenor);}
+\DoxyCodeLine{00822\ }
+\DoxyCodeLine{00823\ \ \ \ \ \}}
+\DoxyCodeLine{00824\ }
+\DoxyCodeLine{00825\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::recalibration(\textcolor{keyword}{const}\ std::vector<Real>\ \&beta,}
+\DoxyCodeLine{00826\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ swapTenor)\ \{}
+\DoxyCodeLine{00827\ }
+\DoxyCodeLine{00828\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(beta.size()\ ==\ nOptionTenors\_,}
+\DoxyCodeLine{00829\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}beta\ size\ ("{}}}
+\DoxyCodeLine{00830\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ beta.size()}
+\DoxyCodeLine{00831\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{})\ must\ be\ equal\ to\ number\ of\ option\ tenors\ ("{}}}
+\DoxyCodeLine{00832\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ nOptionTenors\_\ <<\ \textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{00833\ }
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\ \&swapTenors\ =\ marketVolCube\_.swapTenors();}
+\DoxyCodeLine{00835\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k\ =\ std::find(swapTenors.begin(),\ swapTenors.end(),\ swapTenor)\ -\/}
+\DoxyCodeLine{00836\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapTenors.begin();}
+\DoxyCodeLine{00837\ }
+\DoxyCodeLine{00838\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(k\ !=\ swapTenors.size(),\ \textcolor{stringliteral}{"{}swap\ tenor\ ("{}}\ <<\ swapTenor}
+\DoxyCodeLine{00839\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{})\ not\ found"{}});}
+\DoxyCodeLine{00840\ }
+\DoxyCodeLine{00841\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ nOptionTenors\_;\ ++i)\ \{}
+\DoxyCodeLine{00842\ \ \ \ \ \ \ \ \ \ \ \ \ parametersGuess\_.setElement(1,\ i,\ k,\ beta[i]);}
+\DoxyCodeLine{00843\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00844\ }
+\DoxyCodeLine{00845\ \ \ \ \ \ \ \ \ parametersGuess\_.updateInterpolators();}
+\DoxyCodeLine{00846\ \ \ \ \ \ \ \ \ sabrCalibrationSection(marketVolCube\_,\ sparseParameters\_,\ swapTenor);}
+\DoxyCodeLine{00847\ }
+\DoxyCodeLine{00848\ \ \ \ \ \ \ \ \ volCubeAtmCalibrated\_\ =\ marketVolCube\_;}
+\DoxyCodeLine{00849\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (isAtmCalibrated\_)\ \{}
+\DoxyCodeLine{00850\ \ \ \ \ \ \ \ \ \ \ \ \ fillVolatilityCube();}
+\DoxyCodeLine{00851\ \ \ \ \ \ \ \ \ \ \ \ \ sabrCalibrationSection(volCubeAtmCalibrated\_,\ denseParameters\_,}
+\DoxyCodeLine{00852\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapTenor);}
+\DoxyCodeLine{00853\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00854\ \ \ \ \ \ \ \ \ notifyObservers();}
+\DoxyCodeLine{00855\ }
+\DoxyCodeLine{00856\ \ \ \ \ \}}
+\DoxyCodeLine{00857\ }
+\DoxyCodeLine{00858\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::recalibration(\textcolor{keyword}{const}\ std::vector<Period>\ \&swapLengths,}
+\DoxyCodeLine{00859\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ \&beta,}
+\DoxyCodeLine{00860\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\ \&swapTenor)\ \{}
+\DoxyCodeLine{00861\ }
+\DoxyCodeLine{00862\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(beta.size()\ ==\ swapLengths.size(),}
+\DoxyCodeLine{00863\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}beta\ size\ ("{}}}
+\DoxyCodeLine{00864\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ beta.size()}
+\DoxyCodeLine{00865\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{})\ must\ be\ equal\ to\ number\ of\ swap\ lengths\ ("{}}}
+\DoxyCodeLine{00866\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ swapLengths.size()\ <<\ \textcolor{stringliteral}{"{})"{}});}
+\DoxyCodeLine{00867\ }
+\DoxyCodeLine{00868\ \ \ \ \ \ \ \ \ std::vector<Time>\ betaTimes;}
+\DoxyCodeLine{00869\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ beta.size();\ i++)}
+\DoxyCodeLine{00870\ \ \ \ \ \ \ \ \ \ \ \ \ betaTimes.push\_back(}
+\DoxyCodeLine{00871\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ timeFromReference(optionDateFromTenor(swapLengths[i])));}
+\DoxyCodeLine{00872\ }
+\DoxyCodeLine{00873\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_linear_interpolation}{LinearInterpolation}}\ betaInterpolation(betaTimes.begin(),}
+\DoxyCodeLine{00874\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ betaTimes.end(),\ beta.begin());}
+\DoxyCodeLine{00875\ }
+\DoxyCodeLine{00876\ \ \ \ \ \ \ \ \ std::vector<Real>\ cubeBeta;}
+\DoxyCodeLine{00877\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ optionTimes().size();\ i++)\ \{}
+\DoxyCodeLine{00878\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ t\ =\ optionTimes()[i];}
+\DoxyCodeLine{00879\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ flat\ extrapolation\ ensures\ admissable\ values}}
+\DoxyCodeLine{00880\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (t\ <\ betaTimes.front())}
+\DoxyCodeLine{00881\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ t\ =\ betaTimes.front();}
+\DoxyCodeLine{00882\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (t\ >\ betaTimes.back())}
+\DoxyCodeLine{00883\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ t\ =\ betaTimes.back();}
+\DoxyCodeLine{00884\ \ \ \ \ \ \ \ \ \ \ \ \ cubeBeta.push\_back(betaInterpolation(t));}
+\DoxyCodeLine{00885\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00886\ }
+\DoxyCodeLine{00887\ \ \ \ \ \ \ \ \ recalibration(cubeBeta,\ swapTenor);}
+\DoxyCodeLine{00888\ }
+\DoxyCodeLine{00889\ \ \ \ \ \}}
+\DoxyCodeLine{00890\ }
+\DoxyCodeLine{00891\ \ \ \ \ \textcolor{comment}{//======================================================================//}}
+\DoxyCodeLine{00892\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ XabrSwaptionVolatilityCube::Cube\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //}}
+\DoxyCodeLine{00893\ \ \ \ \ \textcolor{comment}{//======================================================================//}}
+\DoxyCodeLine{00894\ }
+\DoxyCodeLine{00895\ }
+\DoxyCodeLine{00896\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ XabrSwaptionVolatilityCube<Model>::Cube::Cube(\textcolor{keyword}{const}\ std::vector<Date>\&\ optionDates,}
+\DoxyCodeLine{00897\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Period>\&\ swapTenors,}
+\DoxyCodeLine{00898\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ optionTimes,}
+\DoxyCodeLine{00899\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ swapLengths,}
+\DoxyCodeLine{00900\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ nLayers,}
+\DoxyCodeLine{00901\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ extrapolation,}
+\DoxyCodeLine{00902\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ backwardFlat)}
+\DoxyCodeLine{00903\ \ \ \ \ :\ optionTimes\_(optionTimes),\ swapLengths\_(swapLengths),}
+\DoxyCodeLine{00904\ \ \ \ \ \ \ optionDates\_(optionDates),\ swapTenors\_(swapTenors),}
+\DoxyCodeLine{00905\ \ \ \ \ \ \ \ \ nLayers\_(nLayers),\ extrapolation\_(extrapolation),}
+\DoxyCodeLine{00906\ \ \ \ \ \ \ \ \ backwardFlat\_(backwardFlat)\ \{}
+\DoxyCodeLine{00907\ }
+\DoxyCodeLine{00908\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(optionTimes.size()>1,\textcolor{stringliteral}{"{}Cube::Cube(...):\ optionTimes.size()<2"{}});}
+\DoxyCodeLine{00909\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(swapLengths.size()>1,\textcolor{stringliteral}{"{}Cube::Cube(...):\ swapLengths.size()<2"{}});}
+\DoxyCodeLine{00910\ }
+\DoxyCodeLine{00911\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(optionTimes.size()==optionDates.size(),}
+\DoxyCodeLine{00912\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::Cube(...):\ optionTimes/optionDates\ mismatch"{}});}
+\DoxyCodeLine{00913\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(swapTenors.size()==swapLengths.size(),}
+\DoxyCodeLine{00914\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::Cube(...):\ swapTenors/swapLengths\ mismatch"{}});}
+\DoxyCodeLine{00915\ }
+\DoxyCodeLine{00916\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ points(nLayers\_,\ Matrix(optionTimes\_.size(),}
+\DoxyCodeLine{00917\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.size(),\ 0.0));}
+\DoxyCodeLine{00918\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;k<nLayers\_;k++)\ \{}
+\DoxyCodeLine{00919\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Interpolation2D>\ interpolation;}
+\DoxyCodeLine{00920\ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_.push\_back(transpose(points[k]));}
+\DoxyCodeLine{00921\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (k\ <=\ 4\ \&\&\ backwardFlat\_)}
+\DoxyCodeLine{00922\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\ =}
+\DoxyCodeLine{00923\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<BackwardflatLinearInterpolation>(}
+\DoxyCodeLine{00924\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.begin(),\ optionTimes\_.end(),}
+\DoxyCodeLine{00925\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.begin(),\ swapLengths\_.end(),}
+\DoxyCodeLine{00926\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]);}
+\DoxyCodeLine{00927\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00928\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\ =}
+\DoxyCodeLine{00929\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<BilinearInterpolation>(}
+\DoxyCodeLine{00930\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.begin(),\ optionTimes\_.end(),}
+\DoxyCodeLine{00931\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.begin(),\ swapLengths\_.end(),}
+\DoxyCodeLine{00932\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]);}
+\DoxyCodeLine{00933\ \ \ \ \ \ \ \ \ \ \ \ \ interpolators\_.push\_back(ext::shared\_ptr<Interpolation2D>(}
+\DoxyCodeLine{00934\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ FlatExtrapolator2D(interpolation)));}
+\DoxyCodeLine{00935\ \ \ \ \ \ \ \ \ \ \ \ \ interpolators\_[k]-\/>enableExtrapolation();}
+\DoxyCodeLine{00936\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00937\ \ \ \ \ \ \ \ \ setPoints(points);}
+\DoxyCodeLine{00938\ \ \ \ \ \ \}}
+\DoxyCodeLine{00939\ }
+\DoxyCodeLine{00940\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ XabrSwaptionVolatilityCube<Model>::Cube::Cube(\textcolor{keyword}{const}\ Cube\&\ o)}
+\DoxyCodeLine{00941\ \ \ \ \ :\ optionTimes\_(o.optionTimes\_),\ swapLengths\_(o.swapLengths\_),}
+\DoxyCodeLine{00942\ \ \ \ \ \ \ optionDates\_(o.optionDates\_),\ swapTenors\_(o.swapTenors\_),}
+\DoxyCodeLine{00943\ \ \ \ \ \ \ nLayers\_(o.nLayers\_),\ transposedPoints\_(o.transposedPoints\_),}
+\DoxyCodeLine{00944\ \ \ \ \ \ \ extrapolation\_(o.extrapolation\_),\ backwardFlat\_(o.backwardFlat\_)\ \{}
+\DoxyCodeLine{00945\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nLayers\_;\ ++k)\ \{}
+\DoxyCodeLine{00946\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Interpolation2D>\ interpolation;}
+\DoxyCodeLine{00947\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (k\ <=\ 4\ \&\&\ backwardFlat\_)}
+\DoxyCodeLine{00948\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\ =}
+\DoxyCodeLine{00949\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<BackwardflatLinearInterpolation>(}
+\DoxyCodeLine{00950\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.begin(),\ optionTimes\_.end(),}
+\DoxyCodeLine{00951\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.begin(),\ swapLengths\_.end(),}
+\DoxyCodeLine{00952\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]);}
+\DoxyCodeLine{00953\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00954\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\ =}
+\DoxyCodeLine{00955\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<BilinearInterpolation>(}
+\DoxyCodeLine{00956\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.begin(),\ optionTimes\_.end(),}
+\DoxyCodeLine{00957\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.begin(),\ swapLengths\_.end(),}
+\DoxyCodeLine{00958\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]);}
+\DoxyCodeLine{00959\ \ \ \ \ \ \ \ \ \ \ \ \ interpolators\_.push\_back(ext::shared\_ptr<Interpolation2D>(}
+\DoxyCodeLine{00960\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ FlatExtrapolator2D(interpolation)));}
+\DoxyCodeLine{00961\ \ \ \ \ \ \ \ \ \ \ \ \ interpolators\_[k]-\/>enableExtrapolation();}
+\DoxyCodeLine{00962\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00963\ \ \ \ \ \ \ \ \ setPoints(o.points\_);}
+\DoxyCodeLine{00964\ \ \ \ \ \}}
+\DoxyCodeLine{00965\ }
+\DoxyCodeLine{00966\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keyword}{typename}\ XabrSwaptionVolatilityCube<Model>::Cube\&}
+\DoxyCodeLine{00967\ \ \ \ \ XabrSwaptionVolatilityCube<Model>::Cube::operator=(\textcolor{keyword}{const}\ Cube\&\ o)\ \{}
+\DoxyCodeLine{00968\ \ \ \ \ \ \ \ \ optionTimes\_\ =\ o.optionTimes\_;}
+\DoxyCodeLine{00969\ \ \ \ \ \ \ \ \ swapLengths\_\ =\ o.swapLengths\_;}
+\DoxyCodeLine{00970\ \ \ \ \ \ \ \ \ optionDates\_\ =\ o.optionDates\_;}
+\DoxyCodeLine{00971\ \ \ \ \ \ \ \ \ swapTenors\_\ =\ o.swapTenors\_;}
+\DoxyCodeLine{00972\ \ \ \ \ \ \ \ \ nLayers\_\ =\ o.nLayers\_;}
+\DoxyCodeLine{00973\ \ \ \ \ \ \ \ \ extrapolation\_\ =\ o.extrapolation\_;}
+\DoxyCodeLine{00974\ \ \ \ \ \ \ \ \ backwardFlat\_\ =\ o.backwardFlat\_;}
+\DoxyCodeLine{00975\ \ \ \ \ \ \ \ \ transposedPoints\_\ =\ o.transposedPoints\_;}
+\DoxyCodeLine{00976\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;k<nLayers\_;k++)\{}
+\DoxyCodeLine{00977\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Interpolation2D>\ interpolation;}
+\DoxyCodeLine{00978\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (k\ <=\ 4\ \&\&\ backwardFlat\_)}
+\DoxyCodeLine{00979\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\ =}
+\DoxyCodeLine{00980\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<BackwardflatLinearInterpolation>(}
+\DoxyCodeLine{00981\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.begin(),\ optionTimes\_.end(),}
+\DoxyCodeLine{00982\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.begin(),\ swapLengths\_.end(),}
+\DoxyCodeLine{00983\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]);}
+\DoxyCodeLine{00984\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00985\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\ =}
+\DoxyCodeLine{00986\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<BilinearInterpolation>(}
+\DoxyCodeLine{00987\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.begin(),\ optionTimes\_.end(),}
+\DoxyCodeLine{00988\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.begin(),\ swapLengths\_.end(),}
+\DoxyCodeLine{00989\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]);}
+\DoxyCodeLine{00990\ \ \ \ \ \ \ \ \ \ \ \ \ interpolators\_.push\_back(ext::shared\_ptr<Interpolation2D>(}
+\DoxyCodeLine{00991\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ FlatExtrapolator2D(interpolation)));}
+\DoxyCodeLine{00992\ \ \ \ \ \ \ \ \ \ \ \ \ interpolators\_[k]-\/>enableExtrapolation();}
+\DoxyCodeLine{00993\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00994\ \ \ \ \ \ \ \ \ setPoints(o.points\_);}
+\DoxyCodeLine{00995\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00996\ \ \ \ \ \}}
+\DoxyCodeLine{00997\ }
+\DoxyCodeLine{00998\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::Cube::setElement(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ IndexOfLayer,}
+\DoxyCodeLine{00999\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ IndexOfRow,}
+\DoxyCodeLine{01000\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ IndexOfColumn,}
+\DoxyCodeLine{01001\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ x)\ \{}
+\DoxyCodeLine{01002\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(IndexOfLayer<nLayers\_,}
+\DoxyCodeLine{01003\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setElement:\ incompatible\ IndexOfLayer\ "{}});}
+\DoxyCodeLine{01004\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(IndexOfRow<optionTimes\_.size(),}
+\DoxyCodeLine{01005\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setElement:\ incompatible\ IndexOfRow"{}});}
+\DoxyCodeLine{01006\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(IndexOfColumn<swapLengths\_.size(),}
+\DoxyCodeLine{01007\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setElement:\ incompatible\ IndexOfColumn"{}});}
+\DoxyCodeLine{01008\ \ \ \ \ \ \ \ \ points\_[IndexOfLayer][IndexOfRow][IndexOfColumn]\ =\ x;}
+\DoxyCodeLine{01009\ \ \ \ \ \}}
+\DoxyCodeLine{01010\ }
+\DoxyCodeLine{01011\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::Cube::setPoints(}
+\DoxyCodeLine{01012\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Matrix>\&\ x)\ \{}
+\DoxyCodeLine{01013\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(x.size()==nLayers\_,}
+\DoxyCodeLine{01014\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setPoints:\ incompatible\ number\ of\ layers\ "{}});}
+\DoxyCodeLine{01015\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(x[0].rows()==optionTimes\_.size(),}
+\DoxyCodeLine{01016\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setPoints:\ incompatible\ size\ 1"{}});}
+\DoxyCodeLine{01017\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(x[0].columns()==swapLengths\_.size(),}
+\DoxyCodeLine{01018\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setPoints:\ incompatible\ size\ 2"{}});}
+\DoxyCodeLine{01019\ }
+\DoxyCodeLine{01020\ \ \ \ \ \ \ \ \ points\_\ =\ x;}
+\DoxyCodeLine{01021\ \ \ \ \ \}}
+\DoxyCodeLine{01022\ }
+\DoxyCodeLine{01023\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::Cube::setLayer(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i,}
+\DoxyCodeLine{01024\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Matrix\&\ x)\ \{}
+\DoxyCodeLine{01025\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(i<nLayers\_,}
+\DoxyCodeLine{01026\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setLayer:\ incompatible\ number\ of\ layer\ "{}});}
+\DoxyCodeLine{01027\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(x.rows()==optionTimes\_.size(),}
+\DoxyCodeLine{01028\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setLayer:\ incompatible\ size\ 1"{}});}
+\DoxyCodeLine{01029\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(x.columns()==swapLengths\_.size(),}
+\DoxyCodeLine{01030\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Cube::setLayer:\ incompatible\ size\ 2"{}});}
+\DoxyCodeLine{01031\ }
+\DoxyCodeLine{01032\ \ \ \ \ \ \ \ \ points\_[i]\ =\ x;}
+\DoxyCodeLine{01033\ \ \ \ \ \}}
+\DoxyCodeLine{01034\ }
+\DoxyCodeLine{01035\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Model>}
+\DoxyCodeLine{01036\ \ \ \ \ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::Cube::setPoint(\textcolor{keyword}{const}\ Date\&\ optionDate,}
+\DoxyCodeLine{01037\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Period\&\ swapTenor,}
+\DoxyCodeLine{01038\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,}
+\DoxyCodeLine{01039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}},}
+\DoxyCodeLine{01040\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ point)}
+\DoxyCodeLine{01041\ \ \ \ \ \{}
+\DoxyCodeLine{01042\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ expandOptionTimes\ =}
+\DoxyCodeLine{01043\ \ \ \ \ \ \ \ \ \ \ \ \ !(std::binary\_search(optionTimes\_.begin(),optionTimes\_.end(),optionTime));}
+\DoxyCodeLine{01044\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{bool}\ expandSwapLengths\ =}
+\DoxyCodeLine{01045\ \ \ \ \ \ \ \ \ \ \ \ \ !(std::binary\_search(swapLengths\_.begin(),swapLengths\_.end(),\mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}}));}
+\DoxyCodeLine{01046\ }
+\DoxyCodeLine{01047\ \ \ \ \ \ \ \ \ std::vector<Real>::const\_iterator\ optionTimesPreviousNode,}
+\DoxyCodeLine{01048\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengthsPreviousNode;}
+\DoxyCodeLine{01049\ }
+\DoxyCodeLine{01050\ \ \ \ \ \ \ \ \ optionTimesPreviousNode\ =}
+\DoxyCodeLine{01051\ \ \ \ \ \ \ \ \ \ \ \ \ std::lower\_bound(optionTimes\_.begin(),optionTimes\_.end(),optionTime);}
+\DoxyCodeLine{01052\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ optionTimesIndex\ =\ optionTimesPreviousNode\ -\/\ optionTimes\_.begin();}
+\DoxyCodeLine{01053\ }
+\DoxyCodeLine{01054\ \ \ \ \ \ \ \ \ swapLengthsPreviousNode\ =}
+\DoxyCodeLine{01055\ \ \ \ \ \ \ \ \ \ \ \ \ std::lower\_bound(swapLengths\_.begin(),swapLengths\_.end(),\mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}});}
+\DoxyCodeLine{01056\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ swapLengthsIndex\ =\ swapLengthsPreviousNode\ -\/\ swapLengths\_.begin();}
+\DoxyCodeLine{01057\ }
+\DoxyCodeLine{01058\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (expandOptionTimes\ ||\ expandSwapLengths)}
+\DoxyCodeLine{01059\ \ \ \ \ \ \ \ \ \ \ \ \ expandLayers(optionTimesIndex,\ expandOptionTimes,}
+\DoxyCodeLine{01060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengthsIndex,\ expandSwapLengths);}
+\DoxyCodeLine{01061\ }
+\DoxyCodeLine{01062\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nLayers\_;\ ++k)}
+\DoxyCodeLine{01063\ \ \ \ \ \ \ \ \ \ \ \ \ points\_[k][optionTimesIndex][swapLengthsIndex]\ =\ point[k];}
+\DoxyCodeLine{01064\ }
+\DoxyCodeLine{01065\ \ \ \ \ \ \ \ \ optionTimes\_[optionTimesIndex]\ =\ optionTime;}
+\DoxyCodeLine{01066\ \ \ \ \ \ \ \ \ swapLengths\_[swapLengthsIndex]\ =\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}};}
+\DoxyCodeLine{01067\ \ \ \ \ \ \ \ \ optionDates\_[optionTimesIndex]\ =\ optionDate;}
+\DoxyCodeLine{01068\ \ \ \ \ \ \ \ \ swapTenors\_[swapLengthsIndex]\ =\ swapTenor;}
+\DoxyCodeLine{01069\ \ \ \ \ \}}
+\DoxyCodeLine{01070\ }
+\DoxyCodeLine{01071\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::Cube::expandLayers(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i,\ \textcolor{keywordtype}{bool}\ expandOptionTimes,}
+\DoxyCodeLine{01072\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j,\ \textcolor{keywordtype}{bool}\ expandSwapLengths)\ \{}
+\DoxyCodeLine{01073\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(i<=optionTimes\_.size(),\textcolor{stringliteral}{"{}Cube::expandLayers:\ incompatible\ size\ 1"{}});}
+\DoxyCodeLine{01074\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(j<=swapLengths\_.size(),\textcolor{stringliteral}{"{}Cube::expandLayers:\ incompatible\ size\ 2"{}});}
+\DoxyCodeLine{01075\ }
+\DoxyCodeLine{01076\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (expandOptionTimes)\ \{}
+\DoxyCodeLine{01077\ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.insert(optionTimes\_.begin()+i,0.);}
+\DoxyCodeLine{01078\ \ \ \ \ \ \ \ \ \ \ \ \ optionDates\_.insert(optionDates\_.begin()+i,\ Date());}
+\DoxyCodeLine{01079\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01080\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (expandSwapLengths)\ \{}
+\DoxyCodeLine{01081\ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.insert(swapLengths\_.begin()+j,0.);}
+\DoxyCodeLine{01082\ \ \ \ \ \ \ \ \ \ \ \ \ swapTenors\_.insert(swapTenors\_.begin()+j,\ Period());}
+\DoxyCodeLine{01083\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01084\ }
+\DoxyCodeLine{01085\ \ \ \ \ \ \ \ \ std::vector<Matrix>\ newPoints(nLayers\_,Matrix(optionTimes\_.size(),}
+\DoxyCodeLine{01086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.size(),\ 0.));}
+\DoxyCodeLine{01087\ }
+\DoxyCodeLine{01088\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nLayers\_;\ ++k)\ \{}
+\DoxyCodeLine{01089\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ u=0;\ u<points\_[k].rows();\ ++u)\ \{}
+\DoxyCodeLine{01090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ indexOfRow\ =\ u;}
+\DoxyCodeLine{01091\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (u>=i\ \&\&\ expandOptionTimes)\ indexOfRow\ =\ u+1;}
+\DoxyCodeLine{01092\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ v=0;\ v<points\_[k].columns();\ ++v)\ \{}
+\DoxyCodeLine{01093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ indexOfCol\ =\ v;}
+\DoxyCodeLine{01094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v>=j\ \&\&\ expandSwapLengths)\ indexOfCol\ =\ v+1;}
+\DoxyCodeLine{01095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ newPoints[k][indexOfRow][indexOfCol]=points\_[k][u][v];}
+\DoxyCodeLine{01096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01097\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01098\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01099\ \ \ \ \ \ \ \ \ setPoints(newPoints);}
+\DoxyCodeLine{01100\ \ \ \ \ \}}
+\DoxyCodeLine{01101\ }
+\DoxyCodeLine{01102\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keyword}{const}\ std::vector<Matrix>\&}
+\DoxyCodeLine{01103\ \ \ \ \ XabrSwaptionVolatilityCube<Model>::Cube::points()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{01104\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ points\_;}
+\DoxyCodeLine{01105\ \ \ \ \ \}}
+\DoxyCodeLine{01106\ }
+\DoxyCodeLine{01107\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ std::vector<Real>\ XabrSwaptionVolatilityCube<Model>::Cube::operator()(}
+\DoxyCodeLine{01108\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ optionTime,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}})\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{01109\ \ \ \ \ \ \ \ \ std::vector<Real>\ result;}
+\DoxyCodeLine{01110\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nLayers\_;\ ++k)}
+\DoxyCodeLine{01111\ \ \ \ \ \ \ \ \ \ \ \ \ result.push\_back((*interpolators\_[k])(optionTime,\ \mbox{\hyperlink{class_quant_lib_1_1_swaption_volatility_structure_a1fbd0d2ce647f1c95a042aeceff4f5e4}{swapLength}}));}
+\DoxyCodeLine{01112\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{01113\ \ \ \ \ \}}
+\DoxyCodeLine{01114\ }
+\DoxyCodeLine{01115\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keyword}{const}\ std::vector<Time>\&}
+\DoxyCodeLine{01116\ \ \ \ \ XabrSwaptionVolatilityCube<Model>::Cube::optionTimes()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{01117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ optionTimes\_;}
+\DoxyCodeLine{01118\ \ \ \ \ \}}
+\DoxyCodeLine{01119\ }
+\DoxyCodeLine{01120\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keyword}{const}\ std::vector<Time>\&}
+\DoxyCodeLine{01121\ \ \ \ \ XabrSwaptionVolatilityCube<Model>::Cube::swapLengths()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{01122\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ swapLengths\_;}
+\DoxyCodeLine{01123\ \ \ \ \ \}}
+\DoxyCodeLine{01124\ }
+\DoxyCodeLine{01125\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ \textcolor{keywordtype}{void}\ XabrSwaptionVolatilityCube<Model>::Cube::updateInterpolators()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{01126\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k\ =\ 0;\ k\ <\ nLayers\_;\ ++k)\ \{}
+\DoxyCodeLine{01127\ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]\ =\ transpose(points\_[k]);}
+\DoxyCodeLine{01128\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Interpolation2D>\ interpolation;}
+\DoxyCodeLine{01129\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (k\ <=\ 4\ \&\&\ backwardFlat\_)}
+\DoxyCodeLine{01130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\ =}
+\DoxyCodeLine{01131\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<BackwardflatLinearInterpolation>(}
+\DoxyCodeLine{01132\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.begin(),\ optionTimes\_.end(),}
+\DoxyCodeLine{01133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.begin(),\ swapLengths\_.end(),}
+\DoxyCodeLine{01134\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]);}
+\DoxyCodeLine{01135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{01136\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ interpolation\ =}
+\DoxyCodeLine{01137\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::make\_shared<BilinearInterpolation>(}
+\DoxyCodeLine{01138\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ optionTimes\_.begin(),\ optionTimes\_.end(),}
+\DoxyCodeLine{01139\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ swapLengths\_.begin(),\ swapLengths\_.end(),}
+\DoxyCodeLine{01140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ transposedPoints\_[k]);}
+\DoxyCodeLine{01141\ \ \ \ \ \ \ \ \ \ \ \ \ interpolators\_[k]\ =\ ext::shared\_ptr<Interpolation2D>(}
+\DoxyCodeLine{01142\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ FlatExtrapolator2D(interpolation));}
+\DoxyCodeLine{01143\ \ \ \ \ \ \ \ \ \ \ \ \ interpolators\_[k]-\/>enableExtrapolation();}
+\DoxyCodeLine{01144\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01145\ \ \ \ \ \}}
+\DoxyCodeLine{01146\ }
+\DoxyCodeLine{01147\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ Model>\ Matrix\ XabrSwaptionVolatilityCube<Model>::Cube::browse()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{01148\ \ \ \ \ \ \ \ \ Matrix\ result(swapLengths\_.size()*optionTimes\_.size(),\ nLayers\_+2,\ 0.0);}
+\DoxyCodeLine{01149\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<swapLengths\_.size();\ ++i)\ \{}
+\DoxyCodeLine{01150\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j=0;\ j<optionTimes\_.size();\ ++j)\ \{}
+\DoxyCodeLine{01151\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result[i*optionTimes\_.size()+j][0]\ =\ swapLengths\_[i];}
+\DoxyCodeLine{01152\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result[i*optionTimes\_.size()+j][1]\ =\ optionTimes\_[j];}
+\DoxyCodeLine{01153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k=0;\ k<nLayers\_;\ ++k)}
+\DoxyCodeLine{01154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result[i*optionTimes\_.size()+j][2+k]\ =\ points\_[k][j][i];}
+\DoxyCodeLine{01155\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01156\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{01158\ \ \ \ \ \}}
+\DoxyCodeLine{01159\ }
+\DoxyCodeLine{01160\ \ \ \ \ \textcolor{comment}{//======================================================================//}}
+\DoxyCodeLine{01161\ \ \ \ \ \textcolor{comment}{//\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SabrSwaptionVolatilityCube\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ //}}
+\DoxyCodeLine{01162\ \ \ \ \ \textcolor{comment}{//======================================================================//}}
+\DoxyCodeLine{01163\ }
+\DoxyCodeLine{01165\ }
+\DoxyCodeLine{01169\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_swaption_vol_cube_sabr_model}{SwaptionVolCubeSabrModel}}\ \{}
+\DoxyCodeLine{01170\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_s_a_b_r_interpolation}{SABRInterpolation}}\ Interpolation;}
+\DoxyCodeLine{01171\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_sabr_smile_section}{SabrSmileSection}}\ SmileSection;}
+\DoxyCodeLine{01172\ \ \ \ \ \};}
+\DoxyCodeLine{01173\ }
+\DoxyCodeLine{01174\ }
+\DoxyCodeLine{01176\ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_xabr_swaption_volatility_cube}{XabrSwaptionVolatilityCube<SwaptionVolCubeSabrModel>}}\ \mbox{\hyperlink{namespace_quant_lib_a8887e3f28942e045870489ae2587331e}{SabrSwaptionVolatilityCube}};}
+\DoxyCodeLine{01177\ }
+\DoxyCodeLine{01178\ \}}
+\DoxyCodeLine{01179\ }
+\DoxyCodeLine{01180\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

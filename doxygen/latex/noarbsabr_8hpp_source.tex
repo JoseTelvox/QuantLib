@@ -1,0 +1,131 @@
+\doxysection{noarbsabr.\+hpp}
+\hypertarget{noarbsabr_8hpp_source}{}\label{noarbsabr_8hpp_source}\index{ql/experimental/volatility/noarbsabr.hpp@{ql/experimental/volatility/noarbsabr.hpp}}
+\mbox{\hyperlink{noarbsabr_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Peter\ Caspers}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#ifndef\ quantlib\_noarb\_sabr}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#define\ quantlib\_noarb\_sabr}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{qldefines_8hpp}{ql/qldefines.hpp}}>}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{types_8hpp}{ql/types.hpp}}>}}
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{gausslobattointegral_8hpp}{ql/math/integrals/gausslobattointegral.hpp}}>}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \textcolor{keyword}{namespace\ }detail::NoArbSabrModel\ \{}
+\DoxyCodeLine{00062\ \textcolor{comment}{//\ parameter\ bounds}}
+\DoxyCodeLine{00063\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta\_min\ =\ 0.01;}
+\DoxyCodeLine{00064\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta\_max\ =\ 0.99;}
+\DoxyCodeLine{00065\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expiryTime\_max\ =\ 30.0;}
+\DoxyCodeLine{00066\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sigmaI\_min\ =\ 0.05;}
+\DoxyCodeLine{00067\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sigmaI\_max\ =\ 1.00;}
+\DoxyCodeLine{00068\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nu\_min\ =\ 0.01;}
+\DoxyCodeLine{00069\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nu\_max\ =\ 0.80;}
+\DoxyCodeLine{00070\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho\_min\ =\ -\/0.99;}
+\DoxyCodeLine{00071\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho\_max\ =\ 0.99;}
+\DoxyCodeLine{00072\ \textcolor{comment}{//\ cutoff\ for\ phi(d0)\ /\ tau}}
+\DoxyCodeLine{00073\ \textcolor{comment}{//\ if\ beta\ =\ 0.99,\ d0\ is\ below\ 1E-\/14\ for}}
+\DoxyCodeLine{00074\ \textcolor{comment}{//\ bigger\ values\ than\ this}}
+\DoxyCodeLine{00075\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ phiByTau\_cutoff\ =\ 124.587;}
+\DoxyCodeLine{00076\ \textcolor{comment}{//\ number\ of\ mc\ simulations\ in\ tabulated}}
+\DoxyCodeLine{00077\ \textcolor{comment}{//\ absorption\ probabilities}}
+\DoxyCodeLine{00078\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nsim\ =\ 2500000.0;}
+\DoxyCodeLine{00079\ \textcolor{comment}{//\ small\ probability\ used\ for\ extrapolation}}
+\DoxyCodeLine{00080\ \textcolor{comment}{//\ of\ beta\ towards\ 1}}
+\DoxyCodeLine{00081\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ tiny\_prob\ =\ 1E-\/5;}
+\DoxyCodeLine{00082\ \textcolor{comment}{//\ minimum\ strike\ used\ for\ normal\ case\ integration}}
+\DoxyCodeLine{00083\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike\_min\ =\ 1E-\/6;}
+\DoxyCodeLine{00084\ \textcolor{comment}{//\ accuracy\ and\ max\ iterations\ for}}
+\DoxyCodeLine{00085\ \textcolor{comment}{//\ numerical\ integration}}
+\DoxyCodeLine{00086\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ i\_accuracy\ =\ 1E-\/7;}
+\DoxyCodeLine{00087\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\_max\_iterations\ =\ 10000;}
+\DoxyCodeLine{00088\ \textcolor{comment}{//\ accuracy\ when\ adjusting\ the\ model\ forward}}
+\DoxyCodeLine{00089\ \textcolor{comment}{//\ to\ match\ the\ given\ forward}}
+\DoxyCodeLine{00090\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forward\_accuracy\ =\ 1E-\/6;}
+\DoxyCodeLine{00091\ \textcolor{comment}{//\ step\ for\ searching\ the\ model\ forward}}
+\DoxyCodeLine{00092\ \textcolor{comment}{//\ in\ newton\ algorithm}}
+\DoxyCodeLine{00093\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forward\_search\_step\ =\ 0.0010;}
+\DoxyCodeLine{00094\ \textcolor{comment}{//\ lower\ bound\ for\ density\ evaluation}}
+\DoxyCodeLine{00095\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ density\_lower\_bound\ =\ 1E-\/50;}
+\DoxyCodeLine{00096\ \textcolor{comment}{//\ threshold\ to\ identify\ a\ zero\ density}}
+\DoxyCodeLine{00097\ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ density\_threshold\ =\ 1E-\/100;}
+\DoxyCodeLine{00098\ \}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \textcolor{keyword}{class\ }NoArbSabrModel\ \{}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00103\ \ \ \ \ NoArbSabrModel(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expiryTime,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forward,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ alpha,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nu,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho);}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ optionPrice(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00106\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ digitalOptionPrice(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00107\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ density(\textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ p(strike)\ *\ (1\ -\/\ absProb\_)\ /\ numericalIntegralOverP\_;}
+\DoxyCodeLine{00109\ \ \ \ \ \}}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forward()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ externalForward\_;\ \}}
+\DoxyCodeLine{00112\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ numericalForward()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ numericalForward\_;\ \}}
+\DoxyCodeLine{00113\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expiryTime()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ expiryTime\_;\ \}}
+\DoxyCodeLine{00114\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ alpha()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ alpha\_;\ \}}
+\DoxyCodeLine{00115\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ beta\_;\ \}}
+\DoxyCodeLine{00116\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nu()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ nu\_;\ \}}
+\DoxyCodeLine{00117\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ rho\_;\ \}}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ absorptionProbability()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ absProb\_;\ \}}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ p(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ f)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forwardError(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forward)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expiryTime\_,\ externalForward\_;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ alpha\_,\ beta\_,\ nu\_,\ rho\_;}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ absProb\_,\ fmin\_,\ fmax\_;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forward\_,\ numericalIntegralOverP\_;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ numericalForward\_;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ ext::shared\_ptr<GaussLobattoIntegral>\ integrator\_;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_no_arb_sabr_model_1_1integrand}{integrand}};}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_no_arb_sabr_model_1_1p__integrand}{p\_integrand}};}
+\DoxyCodeLine{00132\ \};}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}}\ \{}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ sabrabsprob[1209600];}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{keyword}{class\ }D0Interpolator\ \{}
+\DoxyCodeLine{00139\ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00140\ \ \ \ \ D0Interpolator(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forward,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expiryTime,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ alpha,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nu,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ rho);}
+\DoxyCodeLine{00141\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator()()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00144\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ phi(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ d0)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00145\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ d0(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ phi)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ forward\_,\ expiryTime\_,\ alpha\_,\ beta\_,\ nu\_,\ rho\_,\ gamma\_;}
+\DoxyCodeLine{00147\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sigmaI\_;}
+\DoxyCodeLine{00148\ \ \ \ \ std::vector<Real>\ tauG\_,\ sigmaIG\_,\ rhoG\_,\ nuG\_,\ betaG\_;}
+\DoxyCodeLine{00149\ \};}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \}\ \textcolor{comment}{//\ namespace\ detail}}
+\DoxyCodeLine{00152\ \}\ \textcolor{comment}{//\ namespace\ QuantLib}}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

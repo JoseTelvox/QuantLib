@@ -1,0 +1,560 @@
+\doxysection{multicubicspline.\+hpp}
+\hypertarget{multicubicspline_8hpp_source}{}\label{multicubicspline_8hpp_source}\index{ql/math/interpolations/multicubicspline.hpp@{ql/math/interpolations/multicubicspline.hpp}}
+\mbox{\hyperlink{multicubicspline_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2003,\ 2004\ Roman\ Gitlin}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_multi\_cubic\_spline\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_multi\_cubic\_spline\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{errors_8hpp}{ql/errors.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{types_8hpp}{ql/types.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <algorithm>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <functional>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ data\ structures}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::vector<std::vector<Real>\ >\ SplineGrid;}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ different\ termination\ markers\ are\ necessary}}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ to\ maintain\ separation\ of\ possibly\ overlapping\ types}}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_arg}{EmptyArg}}\ \{\};\ \ \textcolor{comment}{//\ arg\_type\ termination\ marker}}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_res}{EmptyRes}}\ \{\};\ \ \textcolor{comment}{//\ res\_type\ termination\ marker}}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_dim}{EmptyDim}}\ \{\};\ \ \textcolor{comment}{//\ size\_t\ termination\ marker}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ X>\ \textcolor{keyword}{struct\ }DataTable\ \{}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ DataTable(\textcolor{keyword}{const}\ std::vector<Size>::const\_iterator\ \&i)\ \{}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<X>\ temp(*i,\ X(i\ +\ 1));}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_table\_.swap(temp);}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ DataTable(\textcolor{keyword}{const}\ SplineGrid::const\_iterator\ \&i)\ \{}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<X>\ temp(i-\/>size(),\ X(i\ +\ 1));}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_table\_.swap(temp);}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ U>\ DataTable(\textcolor{keyword}{const}\ std::vector<U>\ \&v)\ \{}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DataTable\ temp(v.begin());}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_table\_.swap(temp.data\_table\_);}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ data\_table\_.size();}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ X\ \&operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ data\_table\_[n];\}}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ X\ \&operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ \{\textcolor{keywordflow}{return}\ data\_table\_[n];\}}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<X>\ data\_table\_;}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data_table}{DataTable}}<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}>\ \{}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data_table}{DataTable}}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ :\ data\_table\_(n)\ \{\}}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ DataTable(\textcolor{keyword}{const}\ std::vector<Size>::const\_iterator\&\ i)}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ :\ data\_table\_(*i)\ \{\}}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ DataTable(\textcolor{keyword}{const}\ SplineGrid::const\_iterator\ \&i)}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ :\ data\_table\_(i-\/>size())\ \{\}}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ U>\ DataTable(\textcolor{keyword}{const}\ std::vector<U>\ \&v)\ \{}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DataTable\ temp(v.begin());}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\_table\_.swap(temp.data\_table\_);}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ size()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ data\_table\_.size();}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ data\_table\_[n];\}}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ \{\textcolor{keywordflow}{return}\ data\_table\_[n];\}}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ data\_table\_;}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data_table}{DataTable<Real>}}\ base\_data\_table;}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ X,\ \textcolor{keyword}{class}\ Y>\ \textcolor{keyword}{struct\ }Data\ \{}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ Data()}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(X()),\ second(Y())\ \{\}}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ Data(\textcolor{keyword}{const}\ SplineGrid::const\_iterator\ \&i)}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(*i),\ second(i\ +\ 1)\ \{\}}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ Data(\textcolor{keyword}{const}\ SplineGrid\ \&v)}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(v[0]),\ second(v.begin()+1)\ \{\}}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ swap(Data<X,\ Y>\ \&d)\ \textcolor{keyword}{noexcept}\ \{}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ first.swap(d.first);}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ second.swap(d.second);}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ X\ first;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ Y\ second;}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data}{Data}}<std::vector<Real>,\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_arg}{EmptyArg}}>\ \{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data}{Data}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data}{Data}}(\textcolor{keyword}{const}\ SplineGrid::const\_iterator\ \&i)}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(*i)\ \{\}}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ Data(\textcolor{keyword}{const}\ SplineGrid\ \&v)}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(v[0])\ \{\}}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ Data(std::vector<Real>\ v)\ :\ first(std::move(v))\ \{\}}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ swap(Data<std::vector<Real>,\ EmptyArg>\ \&d)\ \textcolor{keyword}{noexcept}\ \{}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ first.swap(d.first);}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ first[n];\}}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ \{\textcolor{keywordflow}{return}\ first[n];\}}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ first;}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ EmptyArg\ second;}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data}{Data<std::vector<Real>}},\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_arg}{EmptyArg}}>\ base\_data;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ X,\ \textcolor{keyword}{class}\ Y>\ \textcolor{keyword}{struct\ }Point\ \{}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ X\ data\_type;}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ Point()}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(data\_type()),\ second(Y())\ \{\}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ Point(\textcolor{keyword}{const}\ std::vector<Real>::const\_iterator\ \&i)}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(*i),\ second(i\ +\ 1)\ \{\}}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ Point(\textcolor{keyword}{const}\ std::vector<Real>\ \&v)}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(v[0]),\ second(v.begin()+1)\ \{\}}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ Point(\textcolor{keyword}{const}\ SplineGrid::const\_iterator\ \&i)}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(i-\/>size()),\ second(i\ +\ 1)\ \{\}}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ Point(\textcolor{keyword}{const}\ SplineGrid\ \&grid)}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(grid[0].size()),\ second(grid.begin()+1)\ \{\}}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ data\_type()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ first;}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ n\ !=\ 0U\ ?\ second[n\ -\/\ 1]\ :\ first;\ \}}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\&\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ \{\ \textcolor{keywordflow}{return}\ n\ !=\ 0U\ ?\ second[n\ -\/\ 1]\ :\ first;\ \}}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ first;}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ Y\ second;}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point}}<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_arg}{EmptyArg}}>\ \{}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ data\_type;}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point}}(data\_type\ s)}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(s)\ \{\}}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ Point(\textcolor{keyword}{const}\ std::vector<Real>::const\_iterator\ \&i)}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(*i)\ \{\}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ Point(\textcolor{keyword}{const}\ std::vector<Real>\ \&v)}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(v[0])\ \{\}}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ data\_type()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ first;\}}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ ==\ 0,\ \textcolor{stringliteral}{"{}operator[]\ :\ access\ violation"{}});}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ first;}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\&\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ \{}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ ==\ 0,\ \textcolor{stringliteral}{"{}operator[]\ :\ access\ violation"{}});}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ first;}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ first;}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ \ \ \ EmptyArg\ second;}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point<Real,\ EmptyArg>}}\ base\_arg\_type;}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point}}<\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}},\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_res}{EmptyRes}}>\ \{}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ data\_type;}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \ Point()}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(data\_type())\ \{\}}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ Point(data\_type\ s)}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(s)\ \{\}}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ data\_type()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ first;\}}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\_type\ \&operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ ==\ 0,\ \textcolor{stringliteral}{"{}operator[]\ :\ access\ violation"{}});}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ first;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ \&operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ ==\ 0,\ \textcolor{stringliteral}{"{}operator[]\ :\ access\ violation"{}});}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ first;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ first;}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ EmptyRes\ second;}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point<Real,\ EmptyRes>}}\ base\_return\_type;}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point}}<\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}},\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_dim}{EmptyDim}}>\ \{}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ data\_type;}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ Point()}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(data\_type())\ \{\}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ Point(data\_type\ s)}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(s)\ \{\}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ data\_type()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ first;\}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ ==\ 0,\ \textcolor{stringliteral}{"{}operator[]\ :\ access\ violation"{}});}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ first;}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\&\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ \{}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(n\ ==\ 0,\ \textcolor{stringliteral}{"{}operator[]\ :\ access\ violation"{}});}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ first;}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ first;}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ EmptyDim\ second;}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point<Size,\ EmptyDim>}}\ base\_dimensions;}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point}}<base\_data\_table,\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_empty_res}{EmptyRes}}>\ \{}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_data\_table\ data\_type;}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ Point(data\_type\ s)\ :\ first(std::move(s))\ \{\}}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ Point(\textcolor{keyword}{const}\ SplineGrid::const\_iterator\ \&i)}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(i-\/>size())\ \{\}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ Point(\textcolor{keyword}{const}\ SplineGrid\ \&grid)}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ :\ first(grid[0].size())\ \{\}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ first[n];\}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\&\ operator[](\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n)\ \{\textcolor{keywordflow}{return}\ first[n];\}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ data\_type\ first;}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ EmptyRes\ second;}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point<base\_data\_table,\ EmptyRes>}}\ base\_output\_data;}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cubic\ spline\ iplementations}}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ no\ heap\ memory\ is\ allocated}}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ in\ any\ of\ the\ recursive\ calls}}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }base\_cubic\_spline\ \{}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ argument\_type;}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ result\_type;}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_data\ data;}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_data\_table\ data\_table;}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_output\_data\ output\_data;}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ base\_cubic\_spline(\textcolor{keyword}{const}\ data\ \&d,\ \textcolor{keyword}{const}\ data\ \&d2,}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\_table\&\ y,\ data\_table\ \&y2,}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ output\_data\ \&v)\ \{}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ dim\ =\ d.first.size();}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 1,\ k\ =\ 2,\ l\ =\ 3;}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result\_type\ \ \&w\ =\ ((y2[dim]\ =\ y[1])\ -\/=\ y[0])\ /=\ d[0],}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&u\ =\ ((y2[0]\ =\ y[2])\ -\/=\ y[1])\ /=\ d[1],\ \&t\ =\ v[dim];}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y2[1]\ =\ -\/d[1]\ /\ d2[0],\ v[1]\ =\ 6.0\ *\ (u\ -\/\ w)\ /\ d2[0];}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;\ k\ <\ dim;\ u\ =\ w,\ j\ =\ k,\ k\ =\ l,\ ++l)\ \{}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ w\ =\ (y[l]-\/y[k])/d[k];}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ u\ =\ (u-\/w)*6.0;}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (y2[k]\ =\ d[k])\ /=\ ((t\ =\ -\/y2[j])\ *=\ d[j])\ -\/=\ d2[j];}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (v[k]\ =\ (u\ +=\ d[j]\ *\ v[j]))\ /=\ t;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y2[0]\ =\ y2[dim]\ =\ 0.0;}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (k\ !=\ 0U)\ \{}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (y2[k-\/1]\ *=\ y2[l-\/1])\ +=\ v[k-\/1];}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/-\/k;\ -\/-\/l;}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ X>}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }n\_cubic\_spline\ \{}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data}{Data<base\_data,\ typename\ X::data>}}\ data;}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data_table}{DataTable<typename\ X::data\_table>}}\ data\_table;}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point<base\_output\_data,\ typename\ X::output\_data>}}\ output\_data;}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ n\_cubic\_spline(\textcolor{keyword}{const}\ data\ \&d,\ \textcolor{keyword}{const}\ data\ \&d2,}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\_table\ \&y,\ data\_table\ \&y2,\ output\_data\ \&v)}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ :\ \ d\_(d),\ d2\_(d2),\ y\_(y),\ y2\_(y2),\ v\_(v)\ \{}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0,\ dim\ =\ y\_.size();\ \ j\ <\ dim;\ ++j)}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X(d\_.second,\ d2\_.second,\ y\_[j],\ y2\_[j],\ v\_.second);}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ \string~n\_cubic\_spline()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\ \&d\_,\ \&d2\_;}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\_table\ \&y\_;}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ data\_table\ \&y2\_;}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ output\_data\ \&v\_;}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }base\_cubic\_splint\ \{}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_arg\_type\ argument\_type;}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ result\_type;}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_data\ data;}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_data\_table\ data\_table;}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_dimensions\ dimensions;}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_output\_data\ output\_data;}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ base\_return\_type\ return\_type;}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ \ base\_cubic\_splint(\textcolor{keyword}{const}\ return\_type\ \&a,\ \textcolor{keyword}{const}\ return\_type\ \&b,}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ return\_type\ \&a2,\ \textcolor{keyword}{const}\ return\_type\ \&b2,}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ dimensions\ \&i,}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\&,\ \textcolor{keyword}{const}\ data\&,}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\_table\ \&y,\ data\_table\ \&y2,}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ output\_data\&,}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ output\_data\&,\ output\_data\&,}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result\_type\ \&res)\ \{}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ res\ =\ a\ *\ y[i]\ +\ b\ *\ y[i\ +\ 1]\ +\ a2\ *\ y2[i]\ +\ b2\ *\ y2[i\ +\ 1];}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{class}\ X>}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }n\_cubic\_splint\ \{}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point<Real,\ typename\ X::argument\_type>}}\ argument\_type;}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ result\_type;}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data}{Data<base\_data,\ typename\ X::data>}}\ data;}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_data_table}{DataTable<typename\ X::data\_table>}}\ data\_table;}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point<Size,\ typename\ X::dimensions>}}\ dimensions;}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point<base\_output\_data,\ typename\ X::output\_data>}}\ output\_data;}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_point}{Point}}<result\_type,}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ X::return\_type>\ return\_type;}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \ \ \ \ n\_cubic\_splint(\textcolor{keyword}{const}\ return\_type\ \&a,\ \textcolor{keyword}{const}\ return\_type\ \&b,}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ return\_type\ \&a2,\ \textcolor{keyword}{const}\ return\_type\ \&b2,}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ dimensions\ \&i,\ \textcolor{keyword}{const}\ data\ \&d,\ \textcolor{keyword}{const}\ data\ \&d2,}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\_table\ \&y,\ data\_table\ \&y2,\ output\_data\ \&v,}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ output\_data\ \&v1,\ output\_data\ \&v2,}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ result\_type\&\ r)}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ \ \ :\ \ a\_(a),\ b\_(b),\ a2\_(a2),\ b2\_(b2),\ i\_(i),\ d\_(d),\ d2\_(d2),}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y\_(y),\ y2\_(y2),\ v\_(v),\ v1\_(v1),\ v2\_(v2)\ \{}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0,\ dim\ =\ y\_.size();\ j\ <\ dim;\ ++j)}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X(a\_.second,\ b\_.second,\ a2\_.second,\ b2\_.second,\ i\_.second,}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ d\_.second,\ d2\_.second,\ y\_[j],\ y2\_[j],\ v\_.second,}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v1\_.second,\ v2\_.second,\ v1\_.first[j]);}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1base__cubic__spline}{base\_cubic\_spline}}(d\_.first,\ d2\_.first,}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v1\_.first.first,\ v2\_.first.first,\ v\_.first);}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1base__cubic__splint}{base\_cubic\_splint}}(a\_.first,\ b\_.first,\ a2\_.first,\ b2\_.first,}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i\_.first,\ d\_.first,\ d2\_.first,}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v1\_.first.first,\ v2\_.first.first,}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\_.first,\ v1\_.first,\ v2\_.first,\ r);}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \string~n\_cubic\_splint()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ return\_type\ \&a\_,\ \&b\_,\ \&a2\_,\ \&b2\_;}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ dimensions\ \&i\_;}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\ \&d\_,\ \&d2\_;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\_table\ \&y\_;}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ data\_table\ \&y2\_;}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ output\_data\ \&v\_,\ \&v1\_,\ \&v2\_;}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1base__cubic__spline}{base\_cubic\_spline}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cubic\_spline\_01;}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_01>}}\ cubic\_spline\_02;}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_02>}}\ cubic\_spline\_03;}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_03>}}\ cubic\_spline\_04;}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_04>}}\ cubic\_spline\_05;}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_05>}}\ cubic\_spline\_06;}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_06>}}\ cubic\_spline\_07;}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_07>}}\ cubic\_spline\_08;}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_08>}}\ cubic\_spline\_09;}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_09>}}\ cubic\_spline\_10;}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_10>}}\ cubic\_spline\_11;}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_11>}}\ cubic\_spline\_12;}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_12>}}\ cubic\_spline\_13;}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_13>}}\ cubic\_spline\_14;}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__spline}{n\_cubic\_spline<cubic\_spline\_14>}}\ cubic\_spline\_15;}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1base__cubic__splint}{base\_cubic\_splint}}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cubic\_splint\_01;}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_01>}}\ cubic\_splint\_02;}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_02>}}\ cubic\_splint\_03;}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_03>}}\ cubic\_splint\_04;}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_04>}}\ cubic\_splint\_05;}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_05>}}\ cubic\_splint\_06;}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_06>}}\ cubic\_splint\_07;}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_07>}}\ cubic\_splint\_08;}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_08>}}\ cubic\_splint\_09;}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_09>}}\ cubic\_splint\_10;}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_10>}}\ cubic\_splint\_11;}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_11>}}\ cubic\_splint\_12;}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_12>}}\ cubic\_splint\_13;}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_13>}}\ cubic\_splint\_14;}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1detail_1_1n__cubic__splint}{n\_cubic\_splint<cubic\_splint\_14>}}\ cubic\_splint\_15;}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<Size\ i>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}\ \{}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_01\ c\_spline;}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_01\ c\_splint;}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00376\ }
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<2>\ \{}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_02\ c\_spline;}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_02\ c\_splint;}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<3>\ \{}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_03\ c\_spline;}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_03\ c\_splint;}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<4>\ \{}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_04\ c\_spline;}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_04\ c\_splint;}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00391\ }
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<5>\ \{}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_05\ c\_spline;}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_05\ c\_splint;}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00396\ }
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<6>\ \{}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_06\ c\_splint;}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_06\ c\_spline;}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00401\ }
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<7>\ \{}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_07\ c\_spline;}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_07\ c\_splint;}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<8>\ \{}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_08\ c\_spline;}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_08\ c\_splint;}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00411\ }
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<9>\ \{}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_09\ c\_spline;}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_09\ c\_splint;}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00416\ }
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<10>\ \{}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_10\ c\_spline;}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_10\ c\_splint;}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00421\ }
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<11>\ \{}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_11\ c\_splint;}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_11\ c\_spline;}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00426\ }
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<12>\ \{}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_12\ c\_spline;}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_12\ c\_splint;}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<13>\ \{}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_13\ c\_spline;}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_13\ c\_splint;}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00436\ }
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<14>\ \{}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_14\ c\_spline;}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_14\ c\_splint;}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \ \ \textcolor{keyword}{template}<>\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1detail_1_1_int2_type}{Int2Type}}<15>\ \{}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_spline\_15\ c\_spline;}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ cubic\_splint\_15\ c\_splint;}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00446\ }
+\DoxyCodeLine{00447\ \ \ \ \ \}}
+\DoxyCodeLine{00448\ }
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \ \ \ \ \textcolor{comment}{//\ Multi-\/cubic\ spline}}
+\DoxyCodeLine{00451\ }
+\DoxyCodeLine{00452\ \ \ \ \ \textcolor{keyword}{typedef}\ detail::SplineGrid\ SplineGrid;}
+\DoxyCodeLine{00453\ }
+\DoxyCodeLine{00455\ }
+\DoxyCodeLine{00466\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ i>\ \textcolor{keyword}{class\ }MultiCubicSpline\ \{}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ detail::Int2Type<i>::c\_spline\ c\_spline;}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ detail::Int2Type<i>::c\_splint\ c\_splint;}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ c\_splint::argument\_type\ argument\_type;}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ c\_splint::result\_type\ result\_type;}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ c\_splint::data\_table\ data\_table;}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ c\_splint::return\_type\ return\_type;}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ c\_splint::output\_data\ output\_data;}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ c\_splint::dimensions\ dimensions;}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ c\_splint::data\ data;}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \ \ MultiCubicSpline(\textcolor{keyword}{const}\ SplineGrid\&\ grid,\ \textcolor{keyword}{const}\ data\_table\ \&y,}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<bool>\&\ ae\ =}
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<bool>(20,\ \textcolor{keyword}{false}))}
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ :\ grid\_(grid),\ y\_(y),\ ae\_(ae),\ v\_(grid),\ v1\_(grid),}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \ \ \ \ v2\_(grid),\ y2\_(grid)\ \{}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ \ \ \ \ \ \ set\_shared\_increments();}
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \ \ \ \ \ \ c\_spline(d\_,\ d2\_,\ y\_,\ y2\_,\ v\_);}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ result\_type\ operator()(\textcolor{keyword}{const}\ argument\_type\&\ x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ \ \ \ \ set\_shared\_coefficients(x);}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \ \ \ \ c\_splint(a\_,\ b\_,\ a2\_,\ b2\_,\ i\_,\ d\_,\ d2\_,\ y\_,\ y2\_,}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v\_,\ v1\_,\ v2\_,\ res\_);}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ res\_;}
+\DoxyCodeLine{00490\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_shared\_increments()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00492\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ set\_shared\_coefficients(\textcolor{keyword}{const}\ argument\_type\ \&x)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00493\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00494\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ SplineGrid\ \&grid\_;}
+\DoxyCodeLine{00495\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ data\_table\ \&y\_;}
+\DoxyCodeLine{00496\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<bool>\ \&ae\_;}
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ return\_type\ a\_,\ b\_,\ a2\_,\ b2\_;}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ output\_data\ v\_,\ v1\_,\ v2\_;}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ result\_type\ res\_;}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ dimensions\ i\_;}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ data\ d\_,\ d2\_;}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ data\_table\ y2\_;}
+\DoxyCodeLine{00503\ \ \ \ \ \};}
+\DoxyCodeLine{00504\ }
+\DoxyCodeLine{00505\ \ \ \ \ \textcolor{comment}{//\ the\ data\ is\ checked\ and,\ in\ case\ of\ insufficient\ number\ of\ points,}}
+\DoxyCodeLine{00506\ \ \ \ \ \textcolor{comment}{//\ exception\ is\ thrown\ BEFORE\ the\ main\ body\ of\ interpolation\ begins}}
+\DoxyCodeLine{00507\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ i>}
+\DoxyCodeLine{00508\ \ \ \ \ \textcolor{keywordtype}{void}\ MultiCubicSpline<i>::set\_shared\_increments()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \ \ SplineGrid\ x(i),\ y(i);}
+\DoxyCodeLine{00510\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ k\ =\ 0,\ dim\ =\ 0;}
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ i;\ k\ =\ 0,\ ++j)\ \{}
+\DoxyCodeLine{00512\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ \&v\ =\ grid\_[j];}
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((dim\ =\ v.size()\ -\/\ 1)\ >\ 2)\ \{}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ tmp1(dim);}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x[j].swap(tmp1);}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ tmp2(dim\ -\/\ 1);}
+\DoxyCodeLine{00517\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y[j].swap(tmp2);}
+\DoxyCodeLine{00518\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;\ k\ <\ dim;\ ++k)\ \{}
+\DoxyCodeLine{00519\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}((x[j][k]\ =\ v[k\ +\ 1]\ -\/\ v[k])\ <=\ 0.0)\ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (k\ !=\ 0U)}
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y[j][k\ -\/\ 1]\ =\ 2.0\ *\ (v[k\ +\ 1]\ -\/\ v[k\ -\/\ 1]);}
+\DoxyCodeLine{00522\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00523\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00524\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(dim\ >=\ 3,}
+\DoxyCodeLine{00525\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Dimension\ "{}}\ <<\ j}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}\ :\ not\ enough\ points\ for\ interpolation"{}});}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(k\ >=\ dim,}
+\DoxyCodeLine{00528\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Dimension\ "{}}\ <<\ j\ <<\ \textcolor{stringliteral}{"{}\ :\ invalid\ data"{}});}
+\DoxyCodeLine{00529\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00530\ }
+\DoxyCodeLine{00531\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typename}\ c\_splint::data\ tmp1(x),\ tmp2(y);}
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \ \ d\_.swap(tmp1);}
+\DoxyCodeLine{00533\ \ \ \ \ \ \ \ \ d2\_.swap(tmp2);}
+\DoxyCodeLine{00534\ \ \ \ \ \}}
+\DoxyCodeLine{00535\ }
+\DoxyCodeLine{00536\ \textcolor{preprocessor}{\ \ \ \ \#ifndef\ \_\_DOXYGEN\_\_}}
+\DoxyCodeLine{00537\ \ \ \ \ \textcolor{comment}{//\ the\ argument\ value\ is\ checked\ and,\ in\ out\ of\ boundaries\ case,}}
+\DoxyCodeLine{00538\ \ \ \ \ \textcolor{comment}{//\ exception\ is\ thrown\ BEFORE\ the\ main\ body\ of\ interpolation\ begins}}
+\DoxyCodeLine{00539\ \ \ \ \ \textcolor{keyword}{template}\ <Size\ i>}
+\DoxyCodeLine{00540\ \ \ \ \ \textcolor{keywordtype}{void}\ MultiCubicSpline<i>::set\_shared\_coefficients(}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keyword}{typename}\ MultiCubicSpline<i>::argument\_type\ \&x)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ j\ =\ 0;\ j\ <\ i;\ ++j)\ \{}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ \&k\ =\ i\_[j],\ sz\ =\ grid\_[j].size()\ -\/\ 1;}
+\DoxyCodeLine{00544\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ \&v\ =\ grid\_[j];}
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(x[j]\ <\ v[0]\ ||\ x[j]\ >=\ v[sz])\ \{}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(ae\_[j],}
+\DoxyCodeLine{00547\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}Dimension\ "{}}\ <<\ j}
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ \textcolor{stringliteral}{"{}:\ extrapolation\ is\ not\ allowed."{}});}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ a\_[j]\ =\ 1.0,\ a2\_[j]\ =\ b\_[j]\ =\ b2\_[j]\ =\ 0.0;}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ k\ =\ \ x[j]\ <\ v[0]\ ?\ 0\ :\ sz;}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ k\ =\ v[k]\ <=\ x[j]\ \&\&\ x[j]\ <\ v[k\ +\ 1]\ ?\ k\ :}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::upper\_bound(v.begin(),v.end(),x[j])-\/v.begin()-\/1;}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ h\ =\ v[k\ +\ 1]\ -\/\ v[k];}
+\DoxyCodeLine{00556\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ a\_[j]\ =\ (v[k\ +\ 1]\ -\/\ x[j])\ /\ h,\ b\_[j]\ =\ (x[j]\ -\/\ v[k])\ /\ h;}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ a2\_[j]\ =\ (a\_[j]\ *\ a\_[j]\ *\ a\_[j]\ -\/\ a\_[j])\ *\ h\ *\ h\ /\ 6.0,}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ b2\_[j]\ =\ (b\_[j]\ *\ b\_[j]\ *\ b\_[j]\ -\/\ b\_[j])\ *\ h\ *\ h\ /\ 6.0;}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00561\ \ \ \ \ \}}
+\DoxyCodeLine{00562\ \textcolor{preprocessor}{\ \ \ \ \#endif}}
+\DoxyCodeLine{00563\ }
+\DoxyCodeLine{00564\ \}}
+\DoxyCodeLine{00565\ }
+\DoxyCodeLine{00566\ }
+\DoxyCodeLine{00567\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00568\ }
+
+\end{DoxyCode}

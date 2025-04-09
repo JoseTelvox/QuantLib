@@ -1,0 +1,198 @@
+\doxysection{gaussianlhplossmodel.\+hpp}
+\hypertarget{gaussianlhplossmodel_8hpp_source}{}\label{gaussianlhplossmodel_8hpp_source}\index{ql/experimental/credit/gaussianlhplossmodel.hpp@{ql/experimental/credit/gaussianlhplossmodel.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2008\ Roland\ Lichters}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2009,\ 2014\ Jose\ Aparicio}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#ifndef\ quantlib\_gaussian\_lhp\_lossmodel\_hpp}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ quantlib\_gaussian\_lhp\_lossmodel\_hpp}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{qldefines_8hpp}{ql/qldefines.hpp}}>}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ QL\_PATCH\_SOLARIS}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{bivariatenormaldistribution_8hpp}{ql/math/distributions/bivariatenormaldistribution.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/recoveryratequote.hpp>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{simplequote_8hpp}{ql/quotes/simplequote.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <ql/experimental/credit/defaultlossmodel.hpp>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{basket_8hpp}{ql/experimental/credit/basket.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{latentmodel_8hpp}{ql/experimental/math/latentmodel.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{functional_8hpp}{ql/functional.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <numeric>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{comment}{/*\ Intended\ to\ replace\ GaussianLHPCDOEngine\ in\ }}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ \ \ \ ql/experimental/credit/syntheticcdoengines.hpp}}
+\DoxyCodeLine{00039\ \textcolor{comment}{\ \ \ Moved\ from\ an\ engine\ to\ a\ loss\ model,\ CDO\ engines\ might\ refer\ to\ it.}}
+\DoxyCodeLine{00040\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{class\ }GaussianLHPLossModel\ :\ \textcolor{keyword}{public}\ DefaultLossModel,\ }
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_latent_model_a2423b7437ca2ba9796e153bd9b9df050}{LatentModel}}<GaussianCopulaPolicy>\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{struct_quant_lib_1_1_gaussian_copula_policy}{GaussianCopulaPolicy}}\ copulaType;}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ GaussianLHPLossModel(}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ correlQuote,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<\mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<RecoveryRateQuote>}}\ >\&\ quotes);}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ GaussianLHPLossModel(}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ correlation,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries);}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ GaussianLHPLossModel(}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ correlQuote,}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\&\ recoveries);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_l_h_p_loss_model_ab0bcd15e41f85db6045faba749987887}{update}}()\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ \ \ \ sqrt1minuscorrel\_\ =\ std::sqrt(1.-\/correl\_-\/>value());}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ \ \ \ beta\_\ =\ std::sqrt(correl\_-\/>value());}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ \ \ \ biphi\_\ =\ \mbox{\hyperlink{namespace_quant_lib_a267ca1390f600848cd9bea25f3d468ec}{BivariateCumulativeNormalDistribution}}(}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/beta\_);}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ tell\ basket\ to\ notify\ instruments,\ etc,\ we\ are\ invalid}}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(!basket\_.empty())\ basket\_-\/>notifyObservers();}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ resetModel()\textcolor{keyword}{\ override\ }\{\}}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedTrancheLossImpl(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingNot,\ \textcolor{comment}{//\ <<\ at\ the\ given\ date\ 'd'}}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ prob,\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ <<\ at\ the\ given\ date\ 'd'}}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ averageRR,\ \ \ \ \textcolor{comment}{//\ <<\ at\ the\ given\ date\ 'd'}}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attachLimit,}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detachLimit)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ expectedTrancheLoss(\textcolor{keyword}{const}\ Date\&\ d)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ can\ calls\ to\ Basket::remainingNotional(d)\ be\ cached?<<<<<<<<<<<<<}}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingfullNot\ =\ basket\_-\/>remainingNotional(d);}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ averageRR\ =\ averageRecovery(d);}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ prob\ =\ averageProb(d);}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingAttachAmount\ =\ basket\_-\/>remainingAttachmentAmount();}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingDetachAmount\ =\ basket\_-\/>remainingDetachmentAmount();}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ const\ Real\ attach\ =\ std::min(remainingAttachAmount}}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ /\ remainingfullNot,\ 1.);}}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ const\ Real\ detach\ =\ std::min(remainingDetachAmount}}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ /\ remainingfullNot,\ 1.);}}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attach\ =\ remainingAttachAmount\ /\ remainingfullNot;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detach\ =\ remainingDetachAmount\ /\ remainingfullNot;}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ expectedTrancheLossImpl(remainingfullNot,\ prob,\ averageRR,\ attach,\ detach);}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_l_h_p_loss_model_af7cbfe0087be4a3176cbcf4858abbb35}{probOverLoss}}(\textcolor{keyword}{const}\ Date\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingLossFraction)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ way\ it\ is\ implemented\ here\ is\ a\ transformation\ from\ ETL\ to\ ESF}}
+\DoxyCodeLine{00125\ \textcolor{comment}{\ \ \ \ \ \ is\ a\ generic\ algorithm,\ not\ specific\ to\ this\ model\ so\ it\ should\ be\ moved}}
+\DoxyCodeLine{00126\ \textcolor{comment}{\ \ \ \ \ \ to\ the\ Basket/DefaultLossModel\ class.}}
+\DoxyCodeLine{00127\ \textcolor{comment}{\ \ \ \ \ \ TO\ DO:\ Implement\ the\ inverse\ transformation}}
+\DoxyCodeLine{00128\ \textcolor{comment}{\ \ \ \ \ \ */}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_l_h_p_loss_model_ac9bc74e6442c0793d204abca5f006ede}{expectedShortfall}}(\textcolor{keyword}{const}\ Date\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ perctl)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ This\ is\ wrong,\ it\ is\ not\ accounting\ for\ the\ current\ defaults\ ....}}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ returns\ the\ loss\ value\ in\ actual\ loss\ units,\ returns\ the\ loss\ value\ }}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ for\ the\ underlying\ portfolio,\ untranched}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ percentilePortfolioLossFraction(\textcolor{keyword}{const}\ Date\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ perctl)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_l_h_p_loss_model_a08280f18afc778b2861374ada981a5f6}{expectedRecovery}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iName,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_default_prob_key}{DefaultProbKey}}\&\ ik)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ rrQuotes\_[iName].currentLink()-\/>value();}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ same\ as\ percentilePortfolio\ but\ tranched}}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_gaussian_l_h_p_loss_model_a4038f595a6bdac5f6820abe2f11a6bcb}{percentile}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ perctl)\textcolor{keyword}{\ const\ override\ }\{}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingNot\ =\ basket\_-\/>remainingNotional(d);}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingAttachAmount\ =\ basket\_-\/>remainingAttachmentAmount();}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ remainingDetachAmount\ =\ basket\_-\/>remainingDetachmentAmount();}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ attach\ =\ std::min(remainingAttachAmount\ /\ remainingNot,\ 1.);}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ detach\ =\ std::min(remainingDetachAmount\ /\ remainingNot,\ 1.);}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ remainingNot\ *}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::min(std::max(percentilePortfolioLossFraction(d,\ perctl)\ -\/\ attach,\ 0.),}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ detach\ -\/\ attach);}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac41728dd3be3e1869bbb9aec06a89d60}{Probability}}\ averageProb(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ d)\textcolor{keyword}{\ const\ }\{\textcolor{comment}{//\ not\ an\ overload\ of\ Deflossmodel\ ???<<<<<???}}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ weighted\ average\ by\ programmed\ exposure.}}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Probability>\ probs\ =\ }
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(d);\textcolor{comment}{//use\ remaining\ basket}}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Real>\ remainingNots\ =\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingNotionals(d);}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::inner\_product(probs.begin(),\ probs.end(),\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ remainingNots.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.))\ /\ basket\_-\/>remainingNotional(d);}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ One\ could\ define\ the\ average\ recovery\ without\ the\ probability}}
+\DoxyCodeLine{00164\ \textcolor{comment}{\ \ \ \ \ \ \ \ factor,\ weighting\ only\ by\ notional\ instead,\ but\ that\ way\ the\ expected\ }}
+\DoxyCodeLine{00165\ \textcolor{comment}{\ \ \ \ \ \ \ \ loss\ of\ the\ average/aggregated\ and\ the\ original\ portfolio\ would\ not\ }}
+\DoxyCodeLine{00166\ \textcolor{comment}{\ \ \ \ \ \ \ \ coincide.\ This\ introduces\ however\ a\ time\ dependence\ in\ the\ recovery\ }}
+\DoxyCodeLine{00167\ \textcolor{comment}{\ \ \ \ \ \ \ \ value.}}
+\DoxyCodeLine{00168\ \textcolor{comment}{\ \ \ \ \ \ \ \ Weighting\ by\ notional\ implies\ time\ dependent\ weighting\ since\ the\ basket\ }}
+\DoxyCodeLine{00169\ \textcolor{comment}{\ \ \ \ \ \ \ \ might\ amortize.}}
+\DoxyCodeLine{00170\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ averageRecovery(}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ Date\&\ d)\ \textcolor{keyword}{const}\ \textcolor{comment}{//no\ explicit\ time\ dependence\ in\ this\ model}}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Probability>\ probs\ =\ }
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ basket\_-\/>remainingProbabilities(d);}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ recoveries;}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i=0;\ i<basket\_-\/>remainingSize();\ i++)}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ recoveries.push\_back(rrQuotes\_[i]-\/>value());}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<Real>\ notionals\ =\ basket\_-\/>remainingNotionals(d);}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ denominator\ =\ std::inner\_product(notionals.begin(),\ }
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ notionals.end(),\ probs.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.));}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}(denominator\ ==\ 0.)\ \textcolor{keywordflow}{return}\ 0.;}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ std::transform(notionals.begin(),\ notionals.end(),\ probs.begin(),}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ notionals.begin(),\ std::multiplies<>());}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::inner\_product(recoveries.begin(),\ recoveries.end(),\ }
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ notionals.begin(),\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}(0.))\ /\ denominator;}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ cached}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sqrt1minuscorrel\_;}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ Handle<Quote>\ correl\_;}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ std::vector<Handle<RecoveryRateQuote>\ >\ rrQuotes\_;}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ calculation\ buffers}}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ problem\ with\ defining\ a\ fixed\ average\ recovery\ on\ a\ portfolio\ }}
+\DoxyCodeLine{00200\ \textcolor{comment}{\ \ \ \ \ \ \ \ with\ uneven\ exposures\ is\ that\ it\ does\ not\ preserve\ portfolio}}
+\DoxyCodeLine{00201\ \textcolor{comment}{\ \ \ \ \ \ \ \ moments\ like\ the\ expected\ loss.\ To\ achieve\ it\ one\ should\ define\ the\ }}
+\DoxyCodeLine{00202\ \textcolor{comment}{\ \ \ \ \ \ \ \ averarage\ recovery\ with\ a\ time\ dependence:\ }}
+\DoxyCodeLine{00203\ \textcolor{comment}{\ \ \ \ \ \ \ \ \$\(\backslash\)hat\{R\}(t)\ =\ \(\backslash\)frac\{\(\backslash\)sum\_i\ R\_i\ N\_i\ P\_i(t)\}\{\(\backslash\)sum\_i\ N\_i\ P\_i(t)\}\$}}
+\DoxyCodeLine{00204\ \textcolor{comment}{\ \ \ \ \ \ \ \ But\ the\ date\ dependence\ increases\ significantly\ the\ calculations\ cost.}}
+\DoxyCodeLine{00205\ \textcolor{comment}{\ \ \ \ \ \ \ \ Notice\ that\ this\ problem\ dissapears\ if\ the\ recoveries\ are\ all\ equal.}}
+\DoxyCodeLine{00206\ \textcolor{comment}{\ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta\_;}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a267ca1390f600848cd9bea25f3d468ec}{BivariateCumulativeNormalDistribution}}\ biphi\_;}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \textcolor{keyword}{static}\ CumulativeNormalDistribution\ \textcolor{keyword}{const}\ phi\_;}
+\DoxyCodeLine{00211\ \ \ \ \ \};}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,133 @@
+\doxysection{overnightindexedcoupon.\+hpp}
+\hypertarget{overnightindexedcoupon_8hpp_source}{}\label{overnightindexedcoupon_8hpp_source}\index{ql/cashflows/overnightindexedcoupon.hpp@{ql/cashflows/overnightindexedcoupon.hpp}}
+\mbox{\hyperlink{overnightindexedcoupon_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2009\ Roland\ Lichters}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2009\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ Copyright\ (C)\ 2014\ Peter\ Caspers}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ Copyright\ (C)\ 2017\ Joseph\ Jeisman}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ Copyright\ (C)\ 2017\ Fabrice\ Lecuyer}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00012\ \textcolor{comment}{}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#ifndef\ quantlib\_overnight\_indexed\_coupon\_hpp}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#define\ quantlib\_overnight\_indexed\_coupon\_hpp}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{couponpricer_8hpp}{ql/cashflows/couponpricer.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{floatingratecoupon_8hpp}{ql/cashflows/floatingratecoupon.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{rateaveraging_8hpp}{ql/cashflows/rateaveraging.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{iborindex_8hpp}{ql/indexes/iborindex.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{schedule_8hpp}{ql/time/schedule.hpp}}>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keyword}{class\ }OvernightIndexedCoupon\ :\ \textcolor{keyword}{public}\ FloatingRateCoupon\ \{}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ OvernightIndexedCoupon(}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ paymentDate,}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ nominal,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ startDate,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ endDate,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<OvernightIndex>\&\ overnightIndex,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a1b7a794e6101afb7c3abac1e048c5bd9}{gearing}}\ =\ 1.0,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_a9e3b8c6e6822bb248556c3b041eab229}{spread}}\ =\ 0.0,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodStart\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&\ refPeriodEnd\ =\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}(),}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_floating_rate_coupon_aae98ff6468452fe4c07dde9978c6193c}{dayCounter}}\ =\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}(),}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ telescopicValueDates\ =\ \textcolor{keyword}{false},}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_rate_averaging_a62ddddd541804c42dae5d108a1ae5437}{RateAveraging::Type}}\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_a8595ee0255939121b7ca6feb41f97e9c}{averagingMethod}}\ =\ \mbox{\hyperlink{struct_quant_lib_1_1_rate_averaging_a62ddddd541804c42dae5d108a1ae5437a39cddbbaf5bb1ed36127f08a87d4871f}{RateAveraging::Compound}},}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ lookbackDays\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Natural>}}(),}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_afde3e92b5f0057b094e916cc36620c8a}{lockoutDays}}\ =\ 0,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_afa98f6e4eb6b8602503d140bd359d3c9}{applyObservationShift}}\ =\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_af25489366e0067a561c223a44c869901}{fixingDates}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ fixingDates\_;\ \}}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Time>\&\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_a2434a038a628a3b317405b5232014769}{dt}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ dt\_;\ \}}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Rate>\&\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_a9c27ba2bdcbf16a21e840b4f44fb1e59}{indexFixings}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_aae737125314f93fa5c2cbf5c791b5690}{valueDates}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ valueDates\_;\ \}}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Date>\&\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_ad6c426e118d2083d8483cfdcf484e767}{interestDates}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ interestDates\_;\ \}}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_rate_averaging_a62ddddd541804c42dae5d108a1ae5437}{RateAveraging::Type}}\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_a8595ee0255939121b7ca6feb41f97e9c}{averagingMethod}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ averagingMethod\_;\ \}}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_afde3e92b5f0057b094e916cc36620c8a}{lockoutDays}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ lockoutDays\_;\ \}}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_afa98f6e4eb6b8602503d140bd359d3c9}{applyObservationShift}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ applyObservationShift\_;\ \}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_abc7eda465eee5c318485bbbd505fd209}{fixingDate}}()\textcolor{keyword}{\ const\ override\ }\{\ \textcolor{keywordflow}{return}\ fixingDates\_.back();\ \}}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ \mbox{\hyperlink{class_quant_lib_1_1_overnight_indexed_coupon_a849332726aa71a6ff922b25fc54c34bf}{accruedAmount}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\&)\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ accept(\mbox{\hyperlink{class_quant_lib_1_1_acyclic_visitor}{AcyclicVisitor}}\&)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ canApplyTelescopicFormula()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ fixingDays\_\ ==\ index\_-\/>fixingDays()\ ||}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (applyObservationShift\_\ \&\&\ index\_-\/>fixingDays()\ ==\ 0);}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ std::vector<Date>\ valueDates\_,\ interestDates\_,\ fixingDates\_;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::vector<Rate>\ fixings\_;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ n\_;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ std::vector<Time>\ dt\_;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_rate_averaging_a62ddddd541804c42dae5d108a1ae5437}{RateAveraging::Type}}\ averagingMethod\_;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ lockoutDays\_;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ applyObservationShift\_;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ averageRate(\textcolor{keyword}{const}\ Date\&\ \mbox{\hyperlink{class_quant_lib_1_1_coupon_a36b31db67e84b7858c23b134c3ed9a42}{date}})\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00118\ \ \ \ \ \};}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keyword}{class\ }OvernightLeg\ \{}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ OvernightLeg(\mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\ schedule,\ ext::shared\_ptr<OvernightIndex>\ overnightIndex);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withNotionals(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ notional);}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withNotionals(\textcolor{keyword}{const}\ std::vector<Real>\&\ notionals);}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withPaymentDayCounter(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\&);}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withPaymentAdjustment(\mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}});}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withPaymentCalendar(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\&);}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withPaymentLag(\mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ lag);}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withGearings(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ gearing);}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withGearings(\textcolor{keyword}{const}\ std::vector<Real>\&\ gearings);}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withSpreads(\mbox{\hyperlink{namespace_quant_lib_ad61d2e1a3f01154233de0d5fbb85177c}{Spread}}\ spread);}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withSpreads(\textcolor{keyword}{const}\ std::vector<Spread>\&\ spreads);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withTelescopicValueDates(\textcolor{keywordtype}{bool}\ telescopicValueDates);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withAveragingMethod(\mbox{\hyperlink{struct_quant_lib_1_1_rate_averaging_a62ddddd541804c42dae5d108a1ae5437}{RateAveraging::Type}}\ averagingMethod);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withLookbackDays(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ lookbackDays);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withLockoutDays(\mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ lockoutDays);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ OvernightLeg\&\ withObservationShift(\textcolor{keywordtype}{bool}\ applyObservationShift\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \textcolor{keyword}{operator}\ \mbox{\hyperlink{namespace_quant_lib_a14f786c47ee979097c448d96b2defaab}{Leg}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_schedule}{Schedule}}\ schedule\_;}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ ext::shared\_ptr<OvernightIndex>\ overnightIndex\_;}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ std::vector<Real>\ notionals\_;}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ paymentDayCounter\_;}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\ paymentCalendar\_;}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881}{BusinessDayConvention}}\ paymentAdjustment\_\ =\ \mbox{\hyperlink{namespace_quant_lib_ac95a4b5bc8017f1eb4ad0b54a9af3881ad881bac893a17d75191f0041eefda956}{Following}};}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ paymentLag\_\ =\ 0;}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ std::vector<Real>\ gearings\_;}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ std::vector<Spread>\ spreads\_;}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ telescopicValueDates\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{struct_quant_lib_1_1_rate_averaging_a62ddddd541804c42dae5d108a1ae5437}{RateAveraging::Type}}\ averagingMethod\_\ =\ \mbox{\hyperlink{struct_quant_lib_1_1_rate_averaging_a62ddddd541804c42dae5d108a1ae5437a39cddbbaf5bb1ed36127f08a87d4871f}{RateAveraging::Compound}};}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ lookbackDays\_\ =\ \mbox{\hyperlink{class_quant_lib_1_1_null}{Null<Natural>}}();}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a9adc2615d630d6006896b3402b09b03b}{Natural}}\ lockoutDays\_\ =\ 0;}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ applyObservationShift\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00155\ \ \ \ \ \};}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \}}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,128 @@
+\doxysection{errors.\+hpp}
+\hypertarget{errors_8hpp_source}{}\label{errors_8hpp_source}\index{ql/errors.hpp@{ql/errors.hpp}}
+\mbox{\hyperlink{errors_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2000,\ 2001,\ 2002,\ 2003\ RiskMap\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2003,\ 2004,\ 2005\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ quantlib\_errors\_hpp}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ quantlib\_errors\_hpp}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{qldefines_8hpp}{ql/qldefines.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{shared__ptr_8hpp}{ql/shared\_ptr.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <boost/assert.hpp>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <boost/current\_function.hpp>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <exception>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <sstream>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_error_a9e2974dbf2391ceb4497060b41c7a32f}{Error}}\ :\ \textcolor{keyword}{public}\ std::exception\ \{}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_error_a9e2974dbf2391ceb4497060b41c7a32f}{Error}}(\textcolor{keyword}{const}\ std::string\&\ file,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{long}\ line,}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\&\ functionName,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::string\&\ message\ =\ \textcolor{stringliteral}{"{}"{}});}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{char}*\ \mbox{\hyperlink{class_quant_lib_1_1_error_abbd77f90948a79c9f5739738a6da06ab}{what}}()\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ ext::shared\_ptr<std::string>\ message\_;}
+\DoxyCodeLine{00053\ \ \ \ \ \};}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#define\ QL\_MULTILINE\_FAILURE\_BEGIN\ do\ \{}}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \textcolor{comment}{/*\ Disable\ warning\ C4127\ (conditional\ expression\ is\ constant)\ when}}
+\DoxyCodeLine{00060\ \textcolor{comment}{\ \ \ wrapping\ macros\ with\ the\ do\ \{\ ...\ \}\ while(false)\ construct\ on\ MSVC}}
+\DoxyCodeLine{00061\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#if\ defined(BOOST\_MSVC)}}
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\ \ \ \ \#define\ QL\_MULTILINE\_FAILURE\_END\ \(\backslash\)}}
+\DoxyCodeLine{00064\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(push))\ \(\backslash\)}}
+\DoxyCodeLine{00065\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(disable:4127))\ \(\backslash\)}}
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}\ while(false)\ \(\backslash\)}}
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(pop))}}
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00069\ \textcolor{preprocessor}{\ \ \ \ \#define\ QL\_MULTILINE\_FAILURE\_END\ \}\ while(false)}}
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#define\ QL\_MULTILINE\_ASSERTION\_BEGIN\ do\ \{}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \textcolor{comment}{/*\ Disable\ warning\ C4127\ (conditional\ expression\ is\ constant)\ when}}
+\DoxyCodeLine{00076\ \textcolor{comment}{\ \ \ wrapping\ macros\ with\ the\ do\ \{\ ...\ \}\ while(false)\ construct\ on\ MSVC}}
+\DoxyCodeLine{00077\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00078\ \textcolor{preprocessor}{\#if\ defined(BOOST\_MSVC)}}
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\ \ \ \ \#define\ QL\_MULTILINE\_ASSERTION\_END\ \(\backslash\)}}
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(push))\ \(\backslash\)}}
+\DoxyCodeLine{00081\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(disable:4127))\ \(\backslash\)}}
+\DoxyCodeLine{00082\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}\ while(false)\ \(\backslash\)}}
+\DoxyCodeLine{00083\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \_\_pragma(warning(pop))}}
+\DoxyCodeLine{00084\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00085\ \textcolor{preprocessor}{\ \ \ \ \#define\ QL\_MULTILINE\_ASSERTION\_END\ \}\ while(false)}}
+\DoxyCodeLine{00086\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00092\ \textcolor{preprocessor}{\#define\ QL\_FAIL(message)\ \(\backslash\)}}
+\DoxyCodeLine{00093\ \textcolor{preprocessor}{QL\_MULTILINE\_FAILURE\_BEGIN\ \(\backslash\)}}
+\DoxyCodeLine{00094\ \textcolor{preprocessor}{\ \ \ \ std::ostringstream\ \_ql\_msg\_stream;\ \(\backslash\)}}
+\DoxyCodeLine{00095\ \textcolor{preprocessor}{\ \ \ \ \_ql\_msg\_stream\ <<\ message;\ \(\backslash\)}}
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\ \ \ \ throw\ QuantLib::Error(\_\_FILE\_\_,\_\_LINE\_\_,\ \(\backslash\)}}
+\DoxyCodeLine{00097\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BOOST\_CURRENT\_FUNCTION,\_ql\_msg\_stream.str());\ \(\backslash\)}}
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{QL\_MULTILINE\_FAILURE\_END}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#define\ QL\_ASSERT(condition,message)\ \(\backslash\)}}
+\DoxyCodeLine{00105\ \textcolor{preprocessor}{QL\_MULTILINE\_ASSERTION\_BEGIN\ \(\backslash\)}}
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{if\ (!(condition))\ \{\ \(\backslash\)}}
+\DoxyCodeLine{00107\ \textcolor{preprocessor}{\ \ \ \ std::ostringstream\ \_ql\_msg\_stream;\ \(\backslash\)}}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\ \ \ \ \_ql\_msg\_stream\ <<\ message;\ \(\backslash\)}}
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\ \ \ \ throw\ QuantLib::Error(\_\_FILE\_\_,\_\_LINE\_\_,\ \(\backslash\)}}
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BOOST\_CURRENT\_FUNCTION,\_ql\_msg\_stream.str());\ \(\backslash\)}}
+\DoxyCodeLine{00111\ \textcolor{preprocessor}{\}\ \(\backslash\)}}
+\DoxyCodeLine{00112\ \textcolor{preprocessor}{QL\_MULTILINE\_ASSERTION\_END}}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00117\ \textcolor{preprocessor}{\#define\ QL\_REQUIRE(condition,message)\ \(\backslash\)}}
+\DoxyCodeLine{00118\ \textcolor{preprocessor}{QL\_MULTILINE\_ASSERTION\_BEGIN\ \(\backslash\)}}
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{if\ (!(condition))\ \{\ \(\backslash\)}}
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\ \ \ \ std::ostringstream\ \_ql\_msg\_stream;\ \(\backslash\)}}
+\DoxyCodeLine{00121\ \textcolor{preprocessor}{\ \ \ \ \_ql\_msg\_stream\ <<\ message;\ \(\backslash\)}}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\ \ \ \ throw\ QuantLib::Error(\_\_FILE\_\_,\_\_LINE\_\_,\ \(\backslash\)}}
+\DoxyCodeLine{00123\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BOOST\_CURRENT\_FUNCTION,\_ql\_msg\_stream.str());\ \(\backslash\)}}
+\DoxyCodeLine{00124\ \textcolor{preprocessor}{\}\ \(\backslash\)}}
+\DoxyCodeLine{00125\ \textcolor{preprocessor}{QL\_MULTILINE\_ASSERTION\_END}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#define\ QL\_ENSURE(condition,message)\ \(\backslash\)}}
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{QL\_MULTILINE\_ASSERTION\_BEGIN\ \(\backslash\)}}
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{if\ (!(condition))\ \{\ \(\backslash\)}}
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\ \ \ \ std::ostringstream\ \_ql\_msg\_stream;\ \(\backslash\)}}
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\ \ \ \ \_ql\_msg\_stream\ <<\ message;\ \(\backslash\)}}
+\DoxyCodeLine{00135\ \textcolor{preprocessor}{\ \ \ \ throw\ QuantLib::Error(\_\_FILE\_\_,\_\_LINE\_\_,\ \(\backslash\)}}
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ BOOST\_CURRENT\_FUNCTION,\_ql\_msg\_stream.str());\ \(\backslash\)}}
+\DoxyCodeLine{00137\ \textcolor{preprocessor}{\}\ \(\backslash\)}}
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{QL\_MULTILINE\_ASSERTION\_END}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00142\ }
+
+\end{DoxyCode}

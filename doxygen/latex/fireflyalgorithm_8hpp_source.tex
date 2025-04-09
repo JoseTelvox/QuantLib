@@ -1,0 +1,235 @@
+\doxysection{fireflyalgorithm.\+hpp}
+\hypertarget{fireflyalgorithm_8hpp_source}{}\label{fireflyalgorithm_8hpp_source}\index{ql/experimental/math/fireflyalgorithm.hpp@{ql/experimental/math/fireflyalgorithm.hpp}}
+\mbox{\hyperlink{fireflyalgorithm_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{Copyright\ (C)\ 2015\ Andres\ Hernandez}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{<quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{<http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#ifndef\ quantlib\_optimization\_fireflyalgorithm\_hpp}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ quantlib\_optimization\_fireflyalgorithm\_hpp}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{problem_8hpp}{ql/math/optimization/problem.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{constraint_8hpp}{ql/math/optimization/constraint.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{isotropicrandomwalk_8hpp}{ql/experimental/math/isotropicrandomwalk.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{levyflightdistribution_8hpp}{ql/experimental/math/levyflightdistribution.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{mt19937uniformrng_8hpp}{ql/math/randomnumbers/mt19937uniformrng.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{seedgenerator_8hpp}{ql/math/randomnumbers/seedgenerator.hpp}}>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#include\ <cmath>}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#include\ <random>}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{keyword}{class\ }FireflyAlgorithm\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_optimization_method}{OptimizationMethod}}\ \{}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_random_walk}{RandomWalk}};}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_intensity}{Intensity}};}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ FireflyAlgorithm(\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M,}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<Intensity>\ intensity,}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<RandomWalk>\ randomWalk,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ Mde\ =\ 0,}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ mutationFactor\ =\ 1.0,}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ crossoverFactor\ =\ 0.5,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get());}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ startState(\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\ \&P,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\ \&endCriteria);}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ EndCriteria::Type\ \mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_a20e6506e19f07e8e9b81c01061887e01}{minimize}}(\mbox{\hyperlink{class_quant_lib_1_1_problem}{Problem}}\&\ P,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_end_criteria}{EndCriteria}}\&\ endCriteria)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ std::vector<Array>\ x\_,\ xI\_,\ xRW\_;\ }
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ std::vector<std::pair<Real,\ Size>\ >\ values\_;}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ lX\_,\ uX\_;}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ mutation\_,\ crossover\_;}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ M\_,\ N\_,\ Mde\_,\ Mfa\_;}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Intensity>\ intensity\_;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ ext::shared\_ptr<RandomWalk>\ randomWalk\_;}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ std::mt19937\ generator\_;}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ std::uniform\_int\_distribution<QuantLib::Size>\ distribution\_;}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_mersenne_twister_uniform_rng}{MersenneTwisterUniformRng}}\ rng\_;}
+\DoxyCodeLine{00105\ \ \ \ \ \};}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_intensity}{FireflyAlgorithm::Intensity}}\ \{}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }FireflyAlgorithm;}
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_intensity}{\string~Intensity}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_intensity_a82ebf622f71abf217e3b1912b313d020}{findBrightest}}();}
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ Mfa\_,\ N\_;}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Array>\ *x\_;}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::pair<Real,\ Size>\ >\ *values\_;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ std::vector<Array>\ *xI\_;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ intensityImpl(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valueX,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valueY,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ distance)\ =\ 0;}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ distance(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ x,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ y)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ d\ =\ 0.0;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ N\_;\ i++)\ \{}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ diff\ =\ x[i]\ -\/\ y[i];}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ d\ +=\ diff*diff;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ d;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ init(FireflyAlgorithm\ *fa)\ \{}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ x\_\ =\ \&fa-\/>x\_;}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ xI\_\ =\ \&fa-\/>xI\_;}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ values\_\ =\ \&fa-\/>values\_;}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ Mfa\_\ =\ fa-\/>Mfa\_;}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ N\_\ =\ fa-\/>N\_;}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00140\ \ \ \ \ \};}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{comment}{/*\ \ Exponentially\ decreasing\ intensity}}
+\DoxyCodeLine{00144\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{keyword}{class\ }ExponentialIntensity\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_intensity}{FireflyAlgorithm::Intensity}}\ \{}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ ExponentialIntensity(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta0,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ betaMin,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ gamma)}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ :\ beta0\_(beta0),\ betaMin\_(betaMin),\ gamma\_(gamma)\ \{\}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ intensityImpl(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valueX,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valueY,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ d)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (beta0\_\ -\/\ betaMin\_)\ *\ std::exp(-\/gamma\_\ *\ d)\ +\ betaMin\_;}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta0\_,\ betaMin\_,\ gamma\_;}
+\DoxyCodeLine{00154\ \ \ \ \ \};}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{comment}{/*\ \ Inverse\ law\ square}}
+\DoxyCodeLine{00158\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keyword}{class\ }InverseLawSquareIntensity\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_intensity}{FireflyAlgorithm::Intensity}}\ \{}
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ InverseLawSquareIntensity(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta0,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ betaMin)}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ \ :\ beta0\_(beta0),\ betaMin\_(betaMin)\ \{\}}
+\DoxyCodeLine{00163\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ intensityImpl(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valueX,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ valueY,\ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ d)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (beta0\_\ -\/\ betaMin\_)\ /\ (d\ +\ \mbox{\hyperlink{group__limit_macros_ga4f2e6bcf6b19224bce1a5a6234286c17}{QL\_EPSILON}})\ +\ betaMin\_;}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ beta0\_,\ betaMin\_;}
+\DoxyCodeLine{00168\ \ \ \ \ \};}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_random_walk}{FireflyAlgorithm::RandomWalk}}\ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }FireflyAlgorithm;}
+\DoxyCodeLine{00175\ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_random_walk}{\string~RandomWalk}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_random_walk_adb169853f01232d316b986f099e62d16}{walk}}()\ \{}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i\ =\ 0;\ i\ <\ Mfa\_;\ i++)\ \{}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ walkImpl((*xRW\_)[(*values\_)[i].second]);}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ Mfa\_,\ N\_;}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<Array>\ *x\_;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<std::pair<Real,\ Size>\ >\ *values\_;}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ std::vector<Array>\ *xRW\_;}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ *lX\_,\ *uX\_;}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ walkImpl(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ \&\ xRW)\ =\ 0;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ init(FireflyAlgorithm\ *fa)\ \{}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ x\_\ =\ \&fa-\/>x\_;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ xRW\_\ =\ \&fa-\/>xRW\_;}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ values\_\ =\ \&fa-\/>values\_;}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ Mfa\_\ =\ fa-\/>Mfa\_;}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ N\_\ =\ fa-\/>N\_;}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ lX\_\ =\ \&fa-\/>lX\_;}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ uX\_\ =\ \&fa-\/>uX\_;}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00200\ \ \ \ \ \};}
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00203\ \ \ \ \ \textcolor{comment}{/*\ \ Random\ walk\ given\ by\ distribution\ template\ parameter.\ The}}
+\DoxyCodeLine{00204\ \textcolor{comment}{\ \ \ \ \ \ \ \ distribution\ must\ be\ compatible\ with\ std::mt19937.}}
+\DoxyCodeLine{00205\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Distribution>}
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keyword}{class\ }DistributionRandomWalk\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm_1_1_random_walk}{FireflyAlgorithm::RandomWalk}}\ \{}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ DistributionRandomWalk(\mbox{\hyperlink{class_quant_lib_1_1_distribution}{Distribution}}\ dist,\ }
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta\ =\ 0.9,\ }
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ :\ walkRandom\_(std::mt19937(seed),\ std::move(dist),\ 1,\ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}(1,\ 1.0),\ seed),}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ delta\_(delta)\ \{\}}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ walkImpl(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ xRW)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ walkRandom\_.nextReal(\&xRW[0]);}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ xRW\ *=\ delta\_;}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ init(FireflyAlgorithm*\ fa)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ FireflyAlgorithm::RandomWalk::init(fa);}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ walkRandom\_.setDimension(N\_,\ *lX\_,\ *uX\_);}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_isotropic_random_walk}{IsotropicRandomWalk<Distribution,\ std::mt19937>}}\ walkRandom\_;}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta\_;}
+\DoxyCodeLine{00225\ \ \ \ \ \};}
+\DoxyCodeLine{00226\ \ \ \ \ }
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{comment}{/*\ \ Gaussian\ random\ walk}}
+\DoxyCodeLine{00229\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{keyword}{class\ }GaussianWalk\ :\ \textcolor{keyword}{public}\ DistributionRandomWalk<std::normal\_distribution<QuantLib::Real>>\ \{}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ GaussianWalk(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sigma,\ }
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta\ =\ 0.9,\ }
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ :\ DistributionRandomWalk<std::normal\_distribution<QuantLib::Real>>(}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::normal\_distribution<QuantLib::Real>(0.0,\ sigma),\ delta,\ seed)\{\}}
+\DoxyCodeLine{00237\ \ \ \ \ \};}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{comment}{/*\ \ Levy\ flight\ random\ walk}}
+\DoxyCodeLine{00241\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keyword}{class\ }LevyFlightWalk\ :\ \textcolor{keyword}{public}\ DistributionRandomWalk<LevyFlightDistribution>\ \{}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ LevyFlightWalk(\mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ alpha,\ }
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ xm\ =\ 0.5,\ }
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta\ =\ 0.9,}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ :\ DistributionRandomWalk<LevyFlightDistribution>(}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_levy_flight_distribution}{LevyFlightDistribution}}(xm,\ alpha),\ delta,\ seed)\ \{\}}
+\DoxyCodeLine{00250\ \ \ \ \ \};}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00253\ \ \ \ \ \textcolor{comment}{/*\ \ Gaussian\ random\ walk,\ but\ size\ of\ step\ decreases\ with\ each\ iteration\ step}}
+\DoxyCodeLine{00254\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00255\ \ \ \ \ \textcolor{keyword}{class\ }DecreasingGaussianWalk\ :\ \textcolor{keyword}{public}\ GaussianWalk\ \{}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ DecreasingGaussianWalk(}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ sigma,}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta\ =\ 0.9,}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ seed\ =\ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{SeedGenerator::instance}}().get())}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ :\ GaussianWalk(sigma,\ delta,\ seed),\ delta0\_(delta)\ \{\}}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ walkImpl(\mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\&\ xRW)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ iteration\_++;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (iteration\_\ >\ Mfa\_)\ \{}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//Every\ time\ all\ the\ fireflies\ have\ been\ processed}}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//multiply\ delta\ by\ itself}}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ iteration\_\ =\ 0;}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ delta\_\ *=\ delta\_;}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ GaussianWalk::walkImpl(xRW);}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ init(\mbox{\hyperlink{class_quant_lib_1_1_firefly_algorithm}{FireflyAlgorithm}}*\ fa)\textcolor{keyword}{\ override\ }\{}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ GaussianWalk::init(fa);}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ iteration\_\ =\ 0;}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ \ \ \ \ \ \ delta\_\ =\ delta0\_;}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00278\ }
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ delta0\_;}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ iteration\_;}
+\DoxyCodeLine{00282\ \ \ \ \ \};}
+\DoxyCodeLine{00283\ \}}
+\DoxyCodeLine{00284\ }
+\DoxyCodeLine{00285\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

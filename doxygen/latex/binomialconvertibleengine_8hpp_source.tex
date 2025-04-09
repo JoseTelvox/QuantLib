@@ -1,0 +1,138 @@
+\doxysection{binomialconvertibleengine.\+hpp}
+\hypertarget{binomialconvertibleengine_8hpp_source}{}\label{binomialconvertibleengine_8hpp_source}\index{ql/pricingengines/bond/binomialconvertibleengine.hpp@{ql/pricingengines/bond/binomialconvertibleengine.hpp}}
+\mbox{\hyperlink{binomialconvertibleengine_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2005,\ 2006\ Theo\ Boafo}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2006,\ 2007\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ quantlib\_binomial\_convertible\_engine\_hpp}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ quantlib\_binomial\_convertible\_engine\_hpp}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{convertiblebonds_8hpp}{ql/instruments/bonds/convertiblebonds.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{discretizedconvertible_8hpp}{ql/pricingengines/bond/discretizedconvertible.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{tflattice_8hpp}{ql/methods/lattices/tflattice.hpp}}>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{payoffs_8hpp}{ql/instruments/payoffs.hpp}}>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackscholesprocess_8hpp}{ql/processes/blackscholesprocess.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{blackconstantvol_8hpp}{ql/termstructures/volatility/equityfx/blackconstantvol.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{flatforward_8hpp}{ql/termstructures/yield/flatforward.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <utility>}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{comment}{/*\ \ \(\backslash\)ingroup\ bondengines}}
+\DoxyCodeLine{00041\ \textcolor{comment}{}}
+\DoxyCodeLine{00042\ \textcolor{comment}{\ \ \ \ \ \ \ \ \(\backslash\)test\ the\ correctness\ of\ the\ returned\ value\ is\ tested\ by}}
+\DoxyCodeLine{00043\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ checking\ it\ against\ known\ results\ in\ a\ few\ corner\ cases.}}
+\DoxyCodeLine{00044\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ T>}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{class\ }BinomialConvertibleEngine\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_convertible_bond_1_1engine}{ConvertibleBond::engine}}\ \{}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ BinomialConvertibleEngine(ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ creditSpread,}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ DividendSchedule\ dividends\ =\ DividendSchedule())}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ :\ process\_(std::move(process)),\ timeSteps\_(timeSteps),}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ dividends\_(std::move(dividends)),\ creditSpread\_(creditSpread)}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(timeSteps>0,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}timeSteps\ must\ be\ positive,\ "{}}\ <<\ timeSteps\ <<}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}\ not\ allowed"{}});}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \ \ \ \ registerWith(process\_);}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ \ \ \ \ registerWith(creditSpread);}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ calculate()\ \textcolor{keyword}{const\ override};}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\&\ creditSpread()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ creditSpread\_;\ \}}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ DividendSchedule\&\ dividends()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ dividends\_;\ \}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ process\_;}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ timeSteps\_;}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ DividendSchedule\ dividends\_;}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_handle}{Handle<Quote>}}\ creditSpread\_;}
+\DoxyCodeLine{00071\ \ \ \ \ \};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ T>}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keywordtype}{void}\ BinomialConvertibleEngine<T>::calculate()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ rfdc\ \ =\ process\_-\/>riskFreeRate()-\/>dayCounter();}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ divdc\ =\ process\_-\/>dividendYield()-\/>dayCounter();}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_day_counter}{DayCounter}}\ voldc\ =\ process\_-\/>blackVolatility()-\/>dayCounter();}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_calendar}{Calendar}}\ volcal\ =\ process\_-\/>blackVolatility()-\/>calendar();}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ s0\ =\ process\_-\/>x0();}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(s0\ >\ 0.0,\ \textcolor{stringliteral}{"{}negative\ or\ null\ underlying"{}});}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_ae3abfa256de5aa2b506ab6bda014e4dc}{Volatility}}\ v\ =\ process\_-\/>blackVolatility()-\/>blackVol(}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ \ \ arguments\_.exercise-\/>lastDate(),\ s0);}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ maturityDate\ =\ arguments\_.exercise-\/>lastDate();}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ riskFreeRate\ =\ process\_-\/>riskFreeRate()-\/>zeroRate(}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ maturityDate,\ rfdc,\ \mbox{\hyperlink{namespace_quant_lib_a1d1b94285bc6741279c70fac8b34265baae77494393cf12a7dd3634b002d4ffda}{Continuous}},\ \mbox{\hyperlink{namespace_quant_lib_abfa020992bcf412e2bc99f56d4381b4aae04188e899e91092d93c66f5c071c10a}{NoFrequency}});}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a919ba3567cc89fca373f8d6b8e80126b}{Rate}}\ q\ =\ process\_-\/>dividendYield()-\/>zeroRate(}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ maturityDate,\ divdc,\ \mbox{\hyperlink{namespace_quant_lib_a1d1b94285bc6741279c70fac8b34265baae77494393cf12a7dd3634b002d4ffda}{Continuous}},\ \mbox{\hyperlink{namespace_quant_lib_abfa020992bcf412e2bc99f56d4381b4aae04188e899e91092d93c66f5c071c10a}{NoFrequency}});}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_date}{Date}}\ referenceDate\ =\ process\_-\/>riskFreeRate()-\/>referenceDate();}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ subtract\ dividends}}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i;}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<dividends\_.size();\ i++)\ \{}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (dividends\_[i]-\/>date()\ >=\ referenceDate)}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ s0\ -\/=\ dividends\_[i]-\/>amount()\ *}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ process\_-\/>riskFreeRate()-\/>discount(dividends\_[i]-\/>date());}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a7a9bcab8006882bc7d5302a0861ab1a6}{QL\_REQUIRE}}(s0\ >\ 0.0,}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}negative\ value\ after\ subtracting\ dividends"{}});}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ binomial\ trees\ with\ constant\ coefficient}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ Handle<Quote>\ underlying(ext::shared\_ptr<Quote>(\textcolor{keyword}{new}\ SimpleQuote(s0)));}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ Handle<YieldTermStructure>\ flatRiskFree(ext::shared\_ptr<YieldTermStructure>(}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ FlatForward(referenceDate,\ riskFreeRate,\ rfdc)));}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ Handle<YieldTermStructure>\ flatDividends(}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ ext::shared\_ptr<YieldTermStructure>(\textcolor{keyword}{new}\ FlatForward(referenceDate,\ q,\ divdc)));}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ Handle<BlackVolTermStructure>\ flatVol(ext::shared\_ptr<BlackVolTermStructure>(}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ BlackConstantVol(referenceDate,\ volcal,\ v,\ voldc)));}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ maturity\ =\ rfdc.\mbox{\hyperlink{class_quant_lib_1_1_day_counter_ae714645789e0daadefad81c135c03ffe}{yearFraction}}(arguments\_.settlementDate,\ maturityDate);}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ strike\ =\ arguments\_.redemption\ /\ arguments\_.conversionRatio\ ;}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ ext::shared\_ptr<GeneralizedBlackScholesProcess>\ bs(}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{new}\ GeneralizedBlackScholesProcess(underlying,\ flatDividends,\ flatRiskFree,\ flatVol));}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ ext::shared\_ptr<T>\ tree(\textcolor{keyword}{new}\ T(bs,\ maturity,\ timeSteps\_,\ strike));}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ creditSpread\ =\ creditSpread\_-\/>value();}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Lattice>\ lattice(\textcolor{keyword}{new}\ TsiveriotisFernandesLattice<T>(}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ tree,\ riskFreeRate,\ maturity,\ timeSteps\_,\ creditSpread,\ v,\ q));}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ DiscretizedConvertible\ convertible(arguments\_,\ bs,\ dividends\_,\ creditSpread\_,\ TimeGrid(maturity,\ timeSteps\_));}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ convertible.initialize(lattice,\ maturity);}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ convertible.rollback(0.0);}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ results\_.value\ =\ results\_.settlementValue\ =\ convertible.presentValue();}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a394b39aa396098345f86d243f207f7af}{QL\_ENSURE}}(results\_.value\ <\ std::numeric\_limits<Real>::max(),}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}floating-\/point\ overflow\ on\ tree\ grid"{}});}
+\DoxyCodeLine{00131\ \ \ \ \ \}}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \}}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

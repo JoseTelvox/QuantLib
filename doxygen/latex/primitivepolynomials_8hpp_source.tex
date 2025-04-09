@@ -1,0 +1,269 @@
+\doxysection{primitivepolynomials.\+hpp}
+\hypertarget{primitivepolynomials_8hpp_source}{}\label{primitivepolynomials_8hpp_source}\index{ql/math/randomnumbers/primitivepolynomials.hpp@{ql/math/randomnumbers/primitivepolynomials.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*\ this\ file\ is\ a\ slightly\ edited\ version\ of}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ PrimitivePolynomialsModuloTwoUpToDegree27.h}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ ©\ 2002\ "{}Monte\ Carlo\ Methods\ in\ Finance"{}}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ as\ provided\ ready\ for\ compilation\ in\ the\ directory}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ "{}PrimitivePolynomialsModuloTwo"{}\ on\ the\ CD\ accompanying\ the\ book}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ "{}Monte\ Carlo\ Methods\ in\ Finance"{}\ by\ Peter\ Jäckel.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ ===========================================================================}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ NOTE:\ The\ following\ copyright\ notice\ applies\ to\ the\ original\ code,}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2002\ Peter\ Jäckel\ "{}Monte\ Carlo\ Methods\ in\ Finance"{}.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ All\ rights\ reserved.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Permission\ to\ use,\ copy,\ modify,\ and\ distribute\ this\ software\ is\ freely}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ granted,\ provided\ that\ this\ notice\ is\ preserved.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ ===========================================================================}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#ifndef\ primitivepolynomials\_hpp}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ primitivepolynomials\_hpp}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{comment}{/*\ This\ file\ is\ provided\ for\ the\ use\ with\ Sobol'\ sequences\ of\ higher}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ dimensions.\ The\ dimensionality\ of\ the\ Sobol'\ sequence\ can\ be\ extended\ to}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ virtually\ any\ size\ you\ ever\ might\ need\ by\ the\ aid\ of\ the\ table\ of}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ primitive\ polynomials\ modulo\ two.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ It\ is\ up\ to\ you\ to\ define\ a\ macro\ PPMT\_MAX\_DIM\ to\ a\ positive\ integer}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *\ less\ than\ or\ equal\ to\ 8129334.\ If\ you\ don't\ define\ it,\ it\ will\ be\ set}}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ below\ to\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_18\ which\ is\ 21200.\ That's\ how\ many}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *\ primitive\ polynomials\ are\ provided\ by\ the\ standard\ primitivepolynomial.c}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ distributed\ with\ QuantLib\ and\ that\ will\ be\ compiled\ into\ a\ static\ array.}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ Should\ you\ need\ more,\ get\ the\ original\ version\ of\ primitivepolynomial.c}}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ as\ provided\ ready\ for\ compilation\ in\ the\ directory}}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ "{}PrimitivePolynomialsModuloTwo"{}\ on\ the\ CD\ accompanying\ the\ book}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *\ "{}Monte\ Carlo\ Methods\ in\ Finance"{}\ by\ Peter\ Jäckel.}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *\ The\ file\ provides\ polynomials\ up\ to\ degree\ 27}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ for\ a\ grand\ total\ of\ 8129334\ dimensions.}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ *\ Since\ 8129334\ longs\ compile\ into\ an\ object\ file\ of\ at\ least\ 32517336\ byte}}
+\DoxyCodeLine{00039\ \textcolor{comment}{\ *\ size\ (in\ fact,\ gcc\ -\/c\ -\/O0\ PrimitivePolynomialsModuloTwoUpToDegree27.c}}
+\DoxyCodeLine{00040\ \textcolor{comment}{\ *\ produced\ a\ file\ PrimitivePolynomialsModuloTwoUpToDegree27.o\ with\ 32519920}}
+\DoxyCodeLine{00041\ \textcolor{comment}{\ *\ bytes),\ it\ is\ recommended\ to\ only\ compile\ as\ many\ as\ you\ may\ ever\ need.}}
+\DoxyCodeLine{00042\ \textcolor{comment}{\ *\ Worse\ even\ than\ the\ output\ file\ size\ is\ the\ virtual\ memory\ requirement}}
+\DoxyCodeLine{00043\ \textcolor{comment}{\ *\ for\ the\ compilation.\ For\ Visual\ C++\ 6\ you\ will\ need\ to\ use\ the\ /Zm\ compiler}}
+\DoxyCodeLine{00044\ \textcolor{comment}{\ *\ option\ to\ set\ the\ compiler's\ memory\ allocation\ limit\ (/Zm1500\ should\ work)}}
+\DoxyCodeLine{00045\ \textcolor{comment}{\ *\ So\ really\ only\ take\ the\ maximum\ of\ what\ you\ think\ you\ might\ ever\ need.}}
+\DoxyCodeLine{00046\ \textcolor{comment}{\ *\ After\ all,\ you\ can\ always\ recompile\ with\ more,\ should\ you\ need\ it.}}
+\DoxyCodeLine{00047\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{comment}{/*\ \ PPMT\ :\ Primitive\ Polynomials\ Modulo\ Two}}
+\DoxyCodeLine{00050\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00051\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00052\ \textcolor{comment}{\ *\ The\ encoding\ is\ as\ follows:}}
+\DoxyCodeLine{00053\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00054\ \textcolor{comment}{\ *\ The\ coefficients\ of\ each\ primitive\ polynomial\ are\ the\ bits\ of\ the\ given}}
+\DoxyCodeLine{00055\ \textcolor{comment}{\ *\ integer.\ The\ leading\ and\ trailing\ coefficients,\ which\ are\ 1\ for\ all\ of\ the}}
+\DoxyCodeLine{00056\ \textcolor{comment}{\ *\ polynomials,\ have\ been\ omitted.}}
+\DoxyCodeLine{00057\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00058\ \textcolor{comment}{\ *\ Example:\ The\ polynomial}}
+\DoxyCodeLine{00059\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00060\ \textcolor{comment}{\ *\ \ \ \ \ \ 4\ \ \ \ 2}}
+\DoxyCodeLine{00061\ \textcolor{comment}{\ *\ \ \ \ \ x\ \ +\ x\ \ +\ 1}}
+\DoxyCodeLine{00062\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00063\ \textcolor{comment}{\ *\ is\ encoded\ as\ \ 2\ \ in\ the\ array\ of\ polynomials\ of\ degree\ 4\ because\ the}}
+\DoxyCodeLine{00064\ \textcolor{comment}{\ *\ binary\ sequence\ of\ coefficients}}
+\DoxyCodeLine{00065\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00066\ \textcolor{comment}{\ *\ \ \ 10101}}
+\DoxyCodeLine{00067\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00068\ \textcolor{comment}{\ *\ becomes}}
+\DoxyCodeLine{00069\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00070\ \textcolor{comment}{\ *\ \ \ \ 0101}}
+\DoxyCodeLine{00071\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00072\ \textcolor{comment}{\ *\ after\ stripping\ off\ the\ top\ bit,\ and\ this\ is\ converted\ to}}
+\DoxyCodeLine{00073\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00074\ \textcolor{comment}{\ *\ \ \ \ \ 010}}
+\DoxyCodeLine{00075\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00076\ \textcolor{comment}{\ *\ by\ right-\/shifting\ and\ losing\ the\ rightmost\ bit.\ Similarly,\ we\ have}}
+\DoxyCodeLine{00077\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00078\ \textcolor{comment}{\ *\ \ \ 5\ \ \ \ 4\ \ \ \ 2}}
+\DoxyCodeLine{00079\ \textcolor{comment}{\ *\ \ x\ \ +\ x\ \ +\ x\ \ +\ x\ +\ 1}}
+\DoxyCodeLine{00080\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00081\ \textcolor{comment}{\ *\ encoded\ as\ \ 13\ \ [\ (1)1101(1)\ ]\ \ in\ the\ array\ for\ degree\ 5.}}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \textcolor{comment}{/*\ Example:\ replace\ primitivepolynomials.cpp\ provided\ by\ QuantLib\ standard}}
+\DoxyCodeLine{00085\ \textcolor{comment}{\ *\ distribution\ with\ the\ 8129334\ polinomials\ version\ and}}
+\DoxyCodeLine{00086\ \textcolor{comment}{\ *\ comment\ out\ the\ line\ below\ if\ you\ want\ absolutely\ all\ of\ the}}
+\DoxyCodeLine{00087\ \textcolor{comment}{\ *\ provided\ primitive\ polynomials\ modulo\ two.}}
+\DoxyCodeLine{00088\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00089\ \textcolor{comment}{\ *\ \#define\ PPMT\_MAX\_DIM\ 8129334}}
+\DoxyCodeLine{00090\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00091\ \textcolor{comment}{\ *\ Note\ that\ PPMT\_MAX\_DIM\ will\ be\ redefined\ to\ be\ the\ nearest\ equal\ or\ larger}}
+\DoxyCodeLine{00092\ \textcolor{comment}{\ *\ number\ of\ polynomials\ up\ to\ one\ of\ the\ predefined\ macros}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ *\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_XX}}
+\DoxyCodeLine{00094\ \textcolor{comment}{\ *\ below.}}
+\DoxyCodeLine{00095\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_01\ \ \ \ \ \ \ \ \ 1}}
+\DoxyCodeLine{00099\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_02\ \ \ \ \ \ \ \ \ 2}}
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_03\ \ \ \ \ \ \ \ \ 4}}
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_04\ \ \ \ \ \ \ \ \ 6}}
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_05\ \ \ \ \ \ \ \ 12}}
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_06\ \ \ \ \ \ \ \ 18}}
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_07\ \ \ \ \ \ \ \ 36}}
+\DoxyCodeLine{00105\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_08\ \ \ \ \ \ \ \ 52}}
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_09\ \ \ \ \ \ \ 100}}
+\DoxyCodeLine{00107\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_10\ \ \ \ \ \ \ 160}}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_11\ \ \ \ \ \ \ 336}}
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_12\ \ \ \ \ \ \ 480}}
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_13\ \ \ \ \ \ 1110}}
+\DoxyCodeLine{00111\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_14\ \ \ \ \ \ 1866}}
+\DoxyCodeLine{00112\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_15\ \ \ \ \ \ 3666}}
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_16\ \ \ \ \ \ 5714}}
+\DoxyCodeLine{00114\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_17\ \ \ \ \ 13424}}
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_18\ \ \ \ \ 21200}}
+\DoxyCodeLine{00116\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_19\ \ \ \ \ 48794}}
+\DoxyCodeLine{00117\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_20\ \ \ \ \ 72794}}
+\DoxyCodeLine{00118\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_21\ \ \ \ 157466}}
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_22\ \ \ \ 277498}}
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_23\ \ \ \ 634458}}
+\DoxyCodeLine{00121\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_24\ \ \ \ 910938}}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_25\ \ \ 2206938}}
+\DoxyCodeLine{00123\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_26\ \ \ 3926838}}
+\DoxyCodeLine{00124\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_27\ \ \ 8129334}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \textcolor{preprocessor}{\#define\ N\_PRIMITIVES\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_27}}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\#ifndef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00129\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_18}}
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#if\ \ \ \ \ \ PPMT\_MAX\_DIM\ >\ N\_PRIMITIVES}}
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#\ error\ \ PPMT\_MAX\_DIM\ cannot\ be\ greater\ than\ N\_PRIMITIVES}}
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_01}}
+\DoxyCodeLine{00135\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_01}}
+\DoxyCodeLine{00137\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 01}}
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_02}}
+\DoxyCodeLine{00139\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00140\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_02}}
+\DoxyCodeLine{00141\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 02}}
+\DoxyCodeLine{00142\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_03}}
+\DoxyCodeLine{00143\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_03}}
+\DoxyCodeLine{00145\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 03}}
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_04}}
+\DoxyCodeLine{00147\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00148\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_04}}
+\DoxyCodeLine{00149\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 04}}
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_05}}
+\DoxyCodeLine{00151\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00152\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_05}}
+\DoxyCodeLine{00153\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 05}}
+\DoxyCodeLine{00154\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_06}}
+\DoxyCodeLine{00155\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00156\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_06}}
+\DoxyCodeLine{00157\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 06}}
+\DoxyCodeLine{00158\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_07}}
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00160\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_07}}
+\DoxyCodeLine{00161\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 07}}
+\DoxyCodeLine{00162\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_08}}
+\DoxyCodeLine{00163\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00164\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_08}}
+\DoxyCodeLine{00165\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 08}}
+\DoxyCodeLine{00166\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_09}}
+\DoxyCodeLine{00167\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00168\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_09}}
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 09}}
+\DoxyCodeLine{00170\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_10}}
+\DoxyCodeLine{00171\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00172\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_10}}
+\DoxyCodeLine{00173\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 10}}
+\DoxyCodeLine{00174\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_11}}
+\DoxyCodeLine{00175\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00176\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_11}}
+\DoxyCodeLine{00177\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 11}}
+\DoxyCodeLine{00178\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_12}}
+\DoxyCodeLine{00179\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00180\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_12}}
+\DoxyCodeLine{00181\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 12}}
+\DoxyCodeLine{00182\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_13}}
+\DoxyCodeLine{00183\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00184\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_13}}
+\DoxyCodeLine{00185\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 13}}
+\DoxyCodeLine{00186\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_14}}
+\DoxyCodeLine{00187\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00188\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_14}}
+\DoxyCodeLine{00189\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 14}}
+\DoxyCodeLine{00190\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_15}}
+\DoxyCodeLine{00191\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00192\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_15}}
+\DoxyCodeLine{00193\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 15}}
+\DoxyCodeLine{00194\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_16}}
+\DoxyCodeLine{00195\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00196\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_16}}
+\DoxyCodeLine{00197\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 16}}
+\DoxyCodeLine{00198\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_17}}
+\DoxyCodeLine{00199\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00200\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_17}}
+\DoxyCodeLine{00201\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 17}}
+\DoxyCodeLine{00202\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_18}}
+\DoxyCodeLine{00203\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00204\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_18}}
+\DoxyCodeLine{00205\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 18}}
+\DoxyCodeLine{00206\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_19}}
+\DoxyCodeLine{00207\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00208\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_19}}
+\DoxyCodeLine{00209\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 19}}
+\DoxyCodeLine{00210\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_20}}
+\DoxyCodeLine{00211\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00212\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_20}}
+\DoxyCodeLine{00213\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 20}}
+\DoxyCodeLine{00214\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_21}}
+\DoxyCodeLine{00215\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00216\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_21}}
+\DoxyCodeLine{00217\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 21}}
+\DoxyCodeLine{00218\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_22}}
+\DoxyCodeLine{00219\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00220\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_22}}
+\DoxyCodeLine{00221\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 22}}
+\DoxyCodeLine{00222\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_23}}
+\DoxyCodeLine{00223\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00224\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_23}}
+\DoxyCodeLine{00225\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 23}}
+\DoxyCodeLine{00226\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_24}}
+\DoxyCodeLine{00227\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00228\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_24}}
+\DoxyCodeLine{00229\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 24}}
+\DoxyCodeLine{00230\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_25}}
+\DoxyCodeLine{00231\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00232\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_25}}
+\DoxyCodeLine{00233\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 25}}
+\DoxyCodeLine{00234\ \textcolor{preprocessor}{\#elif\ \ \ \ PPMT\_MAX\_DIM\ <=\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_26}}
+\DoxyCodeLine{00235\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00236\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_26}}
+\DoxyCodeLine{00237\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 26}}
+\DoxyCodeLine{00238\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00239\ \textcolor{preprocessor}{\#\ undef\ \ PPMT\_MAX\_DIM}}
+\DoxyCodeLine{00240\ \textcolor{preprocessor}{\#\ define\ PPMT\_MAX\_DIM\ N\_PRIMITIVES\_UP\_TO\_DEGREE\_27}}
+\DoxyCodeLine{00241\ \textcolor{preprocessor}{\#\ define\ N\_MAX\_DEGREE\ 27}}
+\DoxyCodeLine{00242\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \textcolor{comment}{/*\ Microsoft\ Visual\ C++\ 6.0\ */}}
+\DoxyCodeLine{00245\ \textcolor{preprocessor}{\#if\ defined(\_MSC\_VER)}}
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{comment}{/*\ disable\ useless\ warning\ C4049}}
+\DoxyCodeLine{00247\ \textcolor{comment}{\ \ \ \ \ \ \ compiler\ limit\ :\ terminating\ line\ number\ emission}}
+\DoxyCodeLine{00248\ \textcolor{comment}{\ \ \ \ \ \ \ No\ line\ number\ support\ is\ available\ for\ file\ with\ more}}
+\DoxyCodeLine{00249\ \textcolor{comment}{\ \ \ \ \ \ \ than\ 64K\ source\ lines.\ */}}
+\DoxyCodeLine{00250\ \textcolor{preprocessor}{\ \ \ \ \#pragma\ warning(disable:\ 4049)}}
+\DoxyCodeLine{00251\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00253\ \textcolor{keyword}{extern}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \textcolor{stringliteral}{"{}C"{}}}
+\DoxyCodeLine{00258\ }
+\DoxyCodeLine{00259\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00267\ \textcolor{keyword}{const}\ \textcolor{keywordtype}{long}\ *\textcolor{keyword}{const}\ PrimitivePolynomials[N\_MAX\_DEGREE];}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

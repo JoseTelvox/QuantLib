@@ -1,0 +1,139 @@
+\doxysection{trbdf2.\+hpp}
+\hypertarget{trbdf2_8hpp_source}{}\label{trbdf2_8hpp_source}\index{ql/methods/finitedifferences/trbdf2.hpp@{ql/methods/finitedifferences/trbdf2.hpp}}
+\mbox{\hyperlink{trbdf2_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2011\ Fabien\ Le\ Floc'h}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_trbdf2\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_trbdf2\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{finitedifferencemodel_8hpp}{ql/methods/finitedifferences/finitedifferencemodel.hpp}}>}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{comment}{//\ NOTE:\ There\ is\ room\ for\ performance\ improvement\ especially\ in}}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{comment}{//\ the\ array\ manipulation}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Operator>}
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keyword}{class\ }TRBDF2\ \ \{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ typedefs}}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \mbox{\hyperlink{class_quant_lib_1_1_operator_traits}{OperatorTraits<Operator>}}\ traits;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ traits::operator\_type\ operator\_type;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ traits::array\_type\ array\_type;}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ traits::bc\_set\ bc\_set;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ \textcolor{keyword}{typename}\ traits::condition\_type\ condition\_type;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructors}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ TRBDF2(\textcolor{keyword}{const}\ operator\_type\&\ L,}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ bc\_set\&\ bcs)}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ :\ L\_(L),\ I\_(operator\_type::identity(L.size())),}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ \ dt\_(0.0),\ bcs\_(bcs),\ alpha\_(2.0-\/sqrt(2.0))\ \{\}}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ step(array\_type\&\ a,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t);}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setStep(\mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ dt)\ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ dt\_\ =\ dt;}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ implicitPart\_\ =\ I\_\ +\ 0.5*alpha\_*dt\_*L\_;}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ explicitTrapezoidalPart\_\ =\ I\_\ -\/\ 0.5*alpha\_*dt\_*L\_;}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ explicitBDF2PartFull\_\ =}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\/(1.0-\/alpha\_)*(1.0-\/alpha\_)/(alpha\_*(2.0-\/alpha\_))*I\_;}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ explicitBDF2PartMid\_\ =\ 1.0/(alpha\_*(2.0-\/alpha\_))*I\_;}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ alpha\_;}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ operator\_type\ L\_,\ I\_,\ explicitTrapezoidalPart\_,}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ explicitBDF2PartFull\_,explicitBDF2PartMid\_,\ implicitPart\_;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ dt\_;}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ bc\_set\ bcs\_;}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ array\_type\ aInit\_;}
+\DoxyCodeLine{00104\ \ \ \ \ \};}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keyword}{template}\ <\textcolor{keyword}{class}\ Operator>}
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ TRBDF2<Operator>::step(\mbox{\hyperlink{class_quant_lib_1_1_operator_traits}{array\_type}}\&\ a,\ \mbox{\hyperlink{namespace_quant_lib_a4f78b18a4dd1a979eb78b4e1e8ac1503}{Time}}\ t)\ \{}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ i;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_array}{Array}}\ aInit(a.size());}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<a.size();i++)\ \{}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ aInit[i]\ =\ a[i];}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ aInit\_\ =\ aInit;}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>setTime(t);}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \textcolor{comment}{//trapezoidal\ explicit\ part}}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (L\_.isTimeDependent())\ \{}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ L\_.setTime(t);}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ explicitTrapezoidalPart\_\ =\ I\_\ -\/\ 0.5*alpha\_*dt\_*L\_;}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyBeforeApplying(explicitTrapezoidalPart\_);}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ a\ =\ explicitTrapezoidalPart\_.applyTo(a);}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyAfterApplying(a);}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ trapezoidal\ implicit\ part}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (L\_.isTimeDependent())\ \{}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ L\_.setTime(t-\/dt\_);}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ implicitPart\_\ =\ I\_\ +\ 0.5*alpha\_*dt\_*L\_;}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyBeforeSolving(implicitPart\_,a);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ a\ =\ implicitPart\_.solveFor(a);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyAfterSolving(a);}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ BDF2\ explicit\ part}}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (L\_.isTimeDependent())\ \{}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ \ \ L\_.setTime(t);}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)\ \{}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyBeforeApplying(explicitBDF2PartFull\_);}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_operator_traits}{array\_type}}\ b0\ =\ explicitBDF2PartFull\_.applyTo(aInit\_);}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyAfterApplying(b0);}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)\ \{}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyBeforeApplying(explicitBDF2PartMid\_);}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_operator_traits}{array\_type}}\ b1\ =\ explicitBDF2PartMid\_.applyTo(a);}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyAfterApplying(b1);}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ a\ =\ b0+b1;}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ reuse\ implicit\ part\ -\/\ works\ only\ for\ alpha=2-\/sqrt(2)}}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyBeforeSolving(implicitPart\_,a);}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ a\ =\ implicitPart\_.solveFor(a);}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i=0;\ i<bcs\_.size();\ i++)}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ \ bcs\_[i]-\/>applyAfterSolving(a);}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \ \ \ \ \}}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \}}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

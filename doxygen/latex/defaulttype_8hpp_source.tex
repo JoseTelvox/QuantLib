@@ -1,0 +1,154 @@
+\doxysection{defaulttype.\+hpp}
+\hypertarget{defaulttype_8hpp_source}{}\label{defaulttype_8hpp_source}\index{ql/experimental/credit/defaulttype.hpp@{ql/experimental/credit/defaulttype.hpp}}
+\mbox{\hyperlink{defaulttype_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2009\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ Copyright\ (C)\ 2009\ Jose\ Aparicio}}
+\DoxyCodeLine{00006\ \textcolor{comment}{}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ quantlib\_default\_type\_hpp}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ quantlib\_default\_type\_hpp}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{period_8hpp}{ql/time/period.hpp}}>}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{enum}\ \mbox{\hyperlink{namespace_quant_lib_a197bfb2321381d9a5d8c94b56f6ef6cf}{Seniority}}\ \{}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ SecDom\ =\ 0,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ SnrFor,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ SubLT2,}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ JrSubT2,}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ PrefT1,}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Unassigned\ value,\ allows\ for\ default\ RR\ quote}}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ NoSeniority,}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ markit\ parlance}}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ SeniorSec\ \ \ \ \ =\ SecDom,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ SeniorUnSec\ \ \ =\ SnrFor,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ SubTier1\ \ \ \ \ \ =\ PrefT1,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ SubUpperTier2\ =\ JrSubT2,}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ SubLoweTier2\ \ =\ SubLT2}
+\DoxyCodeLine{00051\ \ \ \ \ \};}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_atomic_default}{AtomicDefault}}\ \{}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ Type\ \{}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Includes\ one\ of\ the\ restructuring\ cases}}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ \ \ \ Restructuring\ =\ 0,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ \ \ \ Bankruptcy,}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ \ \ \ FailureToPay,}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \ \ \ \ RepudiationMoratorium,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \ \ \ Acceleration,}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ \ \ \ Default,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ synonyms}}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ \ \ \ ObligationAcceleration\ =\ Acceleration,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \ \ \ \ ObligationDefault\ =\ Default,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \ \ \ CrossDefault\ =\ Default,}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Other\ non-\/isda}}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ \ \ \ Downgrade,\ \ \ \textcolor{comment}{//\ Non-\/ISDA,\ not\ in\ FpML}}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ \ \ \ MergerEvent\ \ \textcolor{comment}{//\ Non-\/ISDA,\ not\ in\ FpML}}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00077\ \ \ \ \ \};}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{comment}{//\ these\ could\ be\ merged\ with\ the\ ones\ above\ if\ not\ because}}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{comment}{//\ \ \ restructuring\ types\ can\ not\ be\ combined\ together.}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_quant_lib_1_1_restructuring}{Restructuring}}\ \{}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ Type\ \{}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ \ \ \ NoRestructuring\ =\ 0,}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ \ \ \ ModifiedRestructuring,}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ \ \ \ ModifiedModifiedRestructuring,}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ \ \ \ FullRestructuring,}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ AnyRestructuring,}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Markit\ notation:}}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ XR\ =\ NoRestructuring,}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ MR\ =\ ModifiedRestructuring,}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ \ \ \ MM\ =\ ModifiedModifiedRestructuring,}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ CR\ =\ FullRestructuring}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00097\ \ \ \ \ \};}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keyword}{class\ }DefaultType\ \{}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ DefaultType(AtomicDefault::Type\ defType\ =}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ AtomicDefault::Bankruptcy,}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Restructuring::Type\ restType\ =\ Restructuring::XR);}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \string~DefaultType()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ AtomicDefault::Type\ defaultType()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ defTypes\_;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ Restructuring::Type\ restructuringType()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ restrType\_;\}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ isRestructuring()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ restrType\_\ !=\ Restructuring::NoRestructuring;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ bool\ isAtomic()\ const\ \{\ return\ defTypes\_.size()\ ==\ 1;\}}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_quant_lib_1_1_default_type_af3edf0f015d582542f6df2049457c6bd}{containsDefaultType}}(AtomicDefault::Type\ defType)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ defTypes\_\ ==\ \ defType;}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ containsRestructuringType(Restructuring::Type\ resType)\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (restrType\_\ ==\ resType)\ ||}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (Restructuring::AnyRestructuring\ ==\ resType);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \textcolor{comment}{//std::set<AtomicDefault::Type>\ defTypes\_;}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ AtomicDefault::Type\ defTypes\_;}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ Restructuring::Type\ restrType\_;}
+\DoxyCodeLine{00146\ \ \ \ \ \};}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keywordtype}{bool}\ operator==(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_default_type}{DefaultType}}\&\ lhs,\ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_default_type}{DefaultType}}\&\ rhs);}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00165\ \ \ \ \ \textcolor{keyword}{class\ }FailureToPay\ :\ \textcolor{keyword}{public}\ DefaultType\ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Only\ atomic\ construction.}}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Amount\ contract\ by\ default\ is\ in\ dollars\ as\ per\ ISDA\ doc\ and\ not}}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ the\ contract\ curr.\ Theres\ an\ issue\ here......\ FIX\ ME}}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ FailureToPay(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ grace,}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ amount\ =\ 1.e+6)}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ :\ DefaultType(AtomicDefault::FailureToPay,\ Restructuring::XR),}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ gracePeriod\_(grace),\ amountRequired\_(amount)\ \{\}}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ amountRequired()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ amountRequired\_;\}}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\&\ gracePeriod()\textcolor{keyword}{\ const\ }\{\textcolor{keywordflow}{return}\ gracePeriod\_;\}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Grace\ period\ to\ consider\ the\ event.\ If\ payment\ occurs\ during}}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ period\ the\ event\ should\ be\ removed\ from\ its\ container.}}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_period}{Period}}\ gracePeriod\_;}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Minimum\ default\ amount\ triggering\ the\ event}}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a372ac5c1a422a6b276fe0552d4d83f50}{Real}}\ amountRequired\_;}
+\DoxyCodeLine{00183\ \ \ \ \ \};}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \}}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

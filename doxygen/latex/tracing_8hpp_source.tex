@@ -1,0 +1,140 @@
+\doxysection{tracing.\+hpp}
+\hypertarget{tracing_8hpp_source}{}\label{tracing_8hpp_source}\index{ql/utilities/tracing.hpp@{ql/utilities/tracing.hpp}}
+\mbox{\hyperlink{tracing_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ Copyright\ (C)\ 2005\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ <quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ <http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#ifndef\ quantlib\_tracing\_hpp}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ quantlib\_tracing\_hpp}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{types_8hpp}{ql/types.hpp}}>}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{errors_8hpp}{ql/errors.hpp}}>}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{singleton_8hpp}{ql/patterns/singleton.hpp}}>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <boost/current\_function.hpp>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <iosfwd>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{QuantLib::detail}}\ \{}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }Tracing\ :\ \textcolor{keyword}{public}\ Singleton<Tracing>\ \{}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_singleton}{QuantLib::Singleton}}<Tracing>;}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00038\ \ \ \ \ \ \ \ \ \ \ \ \ Tracing();\ \ \textcolor{comment}{//\ NOLINT(modernize-\/use-\/equals-\/delete)}}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ enable()\ \{}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#if\ defined(QL\_ENABLE\_TRACING)}}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ enabled\_\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a8efe9cb3e67c8d0585e57b4d53c5d2fe}{QL\_FAIL}}(\textcolor{stringliteral}{"{}tracing\ support\ not\ available"{}});}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ disable()\ \{\ enabled\_\ =\ \textcolor{keyword}{false};\ \}}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ setStream(std::ostream\&\ stream)\ \{\ out\_\ =\ \&stream;\ \}}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ enabled()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ enabled\_;\ \}}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ std::ostream\&\ stream()\ \{\ \textcolor{keywordflow}{return}\ *out\_;\ \}}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ depth()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ depth\_;\ \}}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ down()\ \{\ depth\_++;\ \}}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ up()\ \{\ depth\_-\/-\/;\ \}}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ \ \ \ \ std::ostream*\ out\_;}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ enabled\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_a8ac1a45a37d8d3dda438a2e59e222620}{Integer}}\ depth\_\ =\ 0;}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ \}}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00214\ \textcolor{preprocessor}{\#if\ defined(QL\_ENABLE\_TRACING)}}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \textcolor{preprocessor}{\#define\ QL\_DEFAULT\_TRACER\ \ \ QuantLib::detail::Tracing::instance()}}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_ENABLE\ \(\backslash\)}}
+\DoxyCodeLine{00219\ \textcolor{preprocessor}{QL\_DEFAULT\_TRACER.enable()}}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_DISABLE\ \(\backslash\)}}
+\DoxyCodeLine{00222\ \textcolor{preprocessor}{QL\_DEFAULT\_TRACER.disable()}}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_ON(out)\ \(\backslash\)}}
+\DoxyCodeLine{00225\ \textcolor{preprocessor}{QL\_DEFAULT\_TRACER.setStream(out)}}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \textcolor{preprocessor}{\#define\ QL\_TRACE(message)\ \(\backslash\)}}
+\DoxyCodeLine{00228\ \textcolor{preprocessor}{if\ (QL\_DEFAULT\_TRACER.enabled())\ \(\backslash\)}}
+\DoxyCodeLine{00229\ \textcolor{preprocessor}{\ \ \ \ try\ \{\ \(\backslash\)}}
+\DoxyCodeLine{00230\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ QL\_DEFAULT\_TRACER.stream()\ <<\ "{}trace["{}\ <<\ QL\_DEFAULT\_TRACER.depth()\ \(\backslash\)}}
+\DoxyCodeLine{00231\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ "{}]:\ "{}\ <<\ message\ <<\ std::endl;\ \(\backslash\)}}
+\DoxyCodeLine{00232\ \textcolor{preprocessor}{\ \ \ \ \}\ catch\ (...)\ \{\}\ \(\backslash\)}}
+\DoxyCodeLine{00233\ \textcolor{preprocessor}{else}}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00235\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_ENTER\_FUNCTION\ \(\backslash\)}}
+\DoxyCodeLine{00236\ \textcolor{preprocessor}{if\ (QL\_DEFAULT\_TRACER.enabled())\ \(\backslash\)}}
+\DoxyCodeLine{00237\ \textcolor{preprocessor}{\ \ \ \ try\ \{\ \(\backslash\)}}
+\DoxyCodeLine{00238\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ QL\_DEFAULT\_TRACER.down();\ \(\backslash\)}}
+\DoxyCodeLine{00239\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ QL\_DEFAULT\_TRACER.stream()\ <<\ "{}trace["{}\ <<\ QL\_DEFAULT\_TRACER.depth()\ \(\backslash\)}}
+\DoxyCodeLine{00240\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ "{}]:\ "{}\ \(\backslash\)}}
+\DoxyCodeLine{00241\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ "{}Entering\ "{}\ <<\ BOOST\_CURRENT\_FUNCTION\ \(\backslash\)}}
+\DoxyCodeLine{00242\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ std::endl;\ \(\backslash\)}}
+\DoxyCodeLine{00243\ \textcolor{preprocessor}{\ \ \ \ \}\ catch\ (...)\ \{\}\ \(\backslash\)}}
+\DoxyCodeLine{00244\ \textcolor{preprocessor}{else}}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_EXIT\_FUNCTION\ \(\backslash\)}}
+\DoxyCodeLine{00247\ \textcolor{preprocessor}{if\ (QL\_DEFAULT\_TRACER.enabled())\ \(\backslash\)}}
+\DoxyCodeLine{00248\ \textcolor{preprocessor}{\ \ \ \ try\ \{\ \(\backslash\)}}
+\DoxyCodeLine{00249\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ QL\_DEFAULT\_TRACER.stream()\ <<\ "{}trace["{}\ <<\ QL\_DEFAULT\_TRACER.depth()\ \(\backslash\)}}
+\DoxyCodeLine{00250\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ "{}]:\ "{}\ \(\backslash\)}}
+\DoxyCodeLine{00251\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ "{}Exiting\ "{}\ <<\ BOOST\_CURRENT\_FUNCTION\ \(\backslash\)}}
+\DoxyCodeLine{00252\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ <<\ std::endl;\ \(\backslash\)}}
+\DoxyCodeLine{00253\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ QL\_DEFAULT\_TRACER.up();\ \(\backslash\)}}
+\DoxyCodeLine{00254\ \textcolor{preprocessor}{\ \ \ \ \}\ catch\ (...)\ \{\ QL\_DEFAULT\_TRACER.up();\ \}\ \(\backslash\)}}
+\DoxyCodeLine{00255\ \textcolor{preprocessor}{else}}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_LOCATION\ \(\backslash\)}}
+\DoxyCodeLine{00258\ \textcolor{preprocessor}{QL\_TRACE("{}At\ line\ "{}\ <<\ \_\_LINE\_\_\ <<\ "{}\ in\ "{}\ <<\ \_\_FILE\_\_)}}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_VARIABLE(variable)\ \(\backslash\)}}
+\DoxyCodeLine{00261\ \textcolor{preprocessor}{QL\_TRACE(\#variable\ <<\ "{}\ =\ "{}\ <<\ variable)}}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \textcolor{preprocessor}{\#define\ QL\_DEFAULT\_TRACER}}
+\DoxyCodeLine{00266\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_ENABLE}}
+\DoxyCodeLine{00267\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_DISABLE}}
+\DoxyCodeLine{00268\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_ON(out)}}
+\DoxyCodeLine{00269\ \textcolor{preprocessor}{\#define\ QL\_TRACE(message)}}
+\DoxyCodeLine{00270\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_ENTER\_FUNCTION}}
+\DoxyCodeLine{00271\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_EXIT\_FUNCTION}}
+\DoxyCodeLine{00272\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_LOCATION}}
+\DoxyCodeLine{00273\ \textcolor{preprocessor}{\#define\ QL\_TRACE\_VARIABLE(variable)}}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

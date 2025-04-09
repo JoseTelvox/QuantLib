@@ -1,0 +1,531 @@
+\doxysection{observable.\+hpp}
+\hypertarget{observable_8hpp_source}{}\label{observable_8hpp_source}\index{ql/patterns/observable.hpp@{ql/patterns/observable.hpp}}
+\mbox{\hyperlink{observable_8hpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/*-\/\ mode:\ c++;\ tab-\/width:\ 4;\ indent-\/tabs-\/mode:\ nil;\ c-\/basic-\/offset:\ 4\ -\/*-\/\ */}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00004\ \textcolor{comment}{Copyright\ (C)\ 2000,\ 2001,\ 2002,\ 2003\ RiskMap\ srl}}
+\DoxyCodeLine{00005\ \textcolor{comment}{Copyright\ (C)\ 2003,\ 2004,\ 2005,\ 2006\ StatPro\ Italia\ srl}}
+\DoxyCodeLine{00006\ \textcolor{comment}{Copyright\ (C)\ 2011,\ 2012\ Ferdinando\ Ametrano}}
+\DoxyCodeLine{00007\ \textcolor{comment}{Copyright\ (C)\ 2013\ Chris\ Higgs}}
+\DoxyCodeLine{00008\ \textcolor{comment}{Copyright\ (C)\ 2015\ Klaus\ Spanderen}}
+\DoxyCodeLine{00009\ \textcolor{comment}{}}
+\DoxyCodeLine{00010\ \textcolor{comment}{}}
+\DoxyCodeLine{00011\ \textcolor{comment}{This\ file\ is\ part\ of\ QuantLib,\ a\ free-\/software/open-\/source\ library}}
+\DoxyCodeLine{00012\ \textcolor{comment}{for\ financial\ quantitative\ analysts\ and\ developers\ -\/\ http://quantlib.org/}}
+\DoxyCodeLine{00013\ \textcolor{comment}{}}
+\DoxyCodeLine{00014\ \textcolor{comment}{QuantLib\ is\ free\ software:\ you\ can\ redistribute\ it\ and/or\ modify\ it}}
+\DoxyCodeLine{00015\ \textcolor{comment}{under\ the\ terms\ of\ the\ QuantLib\ license.\ \ You\ should\ have\ received\ a}}
+\DoxyCodeLine{00016\ \textcolor{comment}{copy\ of\ the\ license\ along\ with\ this\ program;\ if\ not,\ please\ email}}
+\DoxyCodeLine{00017\ \textcolor{comment}{<quantlib-\/dev@lists.sf.net>.\ The\ license\ is\ also\ available\ online\ at}}
+\DoxyCodeLine{00018\ \textcolor{comment}{<http://quantlib.org/license.shtml>.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{}}
+\DoxyCodeLine{00020\ \textcolor{comment}{This\ program\ is\ distributed\ in\ the\ hope\ that\ it\ will\ be\ useful,\ but\ WITHOUT}}
+\DoxyCodeLine{00021\ \textcolor{comment}{ANY\ WARRANTY;\ without\ even\ the\ implied\ warranty\ of\ MERCHANTABILITY\ or\ FITNESS}}
+\DoxyCodeLine{00022\ \textcolor{comment}{FOR\ A\ PARTICULAR\ PURPOSE.\ \ See\ the\ license\ for\ more\ details.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#ifndef\ quantlib\_observable\_hpp}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ quantlib\_observable\_hpp}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{errors_8hpp}{ql/errors.hpp}}>}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{singleton_8hpp}{ql/patterns/singleton.hpp}}>}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{shared__ptr_8hpp}{ql/shared\_ptr.hpp}}>}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <\mbox{\hyperlink{types_8hpp}{ql/types.hpp}}>}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ <set>}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#if\ !defined(QL\_USE\_STD\_SHARED\_PTR)\ \&\&\ BOOST\_VERSION\ <\ 107400}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{keyword}{namespace\ }std\ \{}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T>}
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keyword}{struct\ }hash<boost::shared\_ptr<T>>\ \{}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ std::size\_t\ operator()(\textcolor{keyword}{const}\ boost::shared\_ptr<T>\&\ ptr)\ \textcolor{keyword}{const}\ \textcolor{keyword}{noexcept}\ \{}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::hash<typename\ boost::shared\_ptr<T>::element\_type*>()(ptr.get());}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00047\ \ \ \ \ \};}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#ifndef\ QL\_ENABLE\_THREAD\_SAFE\_OBSERVER\_PATTERN}}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ \textcolor{keyword}{class\ }Observer;}
+\DoxyCodeLine{00058\ \ \ \ \ \textcolor{keyword}{class\ }ObservableSettings;}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{class\ }Observable\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Observer;}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }ObservableSettings;}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructors,\ assignment,\ destructor}}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ Observable()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ Observable(\textcolor{keyword}{const}\ Observable\&);}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ Observable\&\ \mbox{\hyperlink{class_quant_lib_1_1_observable_ad1e086da62f05b4bc5eafa698ef6fbc3}{operator=}}(\textcolor{keyword}{const}\ Observable\&);}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ delete\ the\ move\ operations\ because\ the\ semantics\ are\ not\ yet\ clear}}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ Observable(Observable\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ Observable\&\ \mbox{\hyperlink{class_quant_lib_1_1_observable_ad1e086da62f05b4bc5eafa698ef6fbc3}{operator=}}(Observable\&\&)\ =\ \textcolor{keyword}{delete};}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \string~Observable()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::set<Observer*>\ set\_type;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ set\_type::iterator\ iterator;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ std::pair<iterator,\ bool>\ registerObserver(Observer*);}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ unregisterObserver(Observer*);}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ set\_type\ observers\_;}
+\DoxyCodeLine{00084\ \ \ \ \ \};}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keyword}{class\ }ObservableSettings\ :\ \textcolor{keyword}{public}\ Singleton<ObservableSettings>\ \{}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Singleton<ObservableSettings>;}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Observable;}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ disableUpdates(\textcolor{keywordtype}{bool}\ deferred=\textcolor{keyword}{false})\ \{}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ updatesEnabled\_\ \ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ updatesDeferred\_\ =\ deferred;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ enableUpdates();}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ updatesEnabled()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ updatesEnabled\_;\ \}}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ updatesDeferred()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ updatesDeferred\_;\ \}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ ObservableSettings()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::set<Observer*>\ set\_type;}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ set\_type::iterator\ iterator;}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ registerDeferredObservers(\textcolor{keyword}{const}\ Observable::set\_type\&\ observers);}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ unregisterDeferredObserver(\mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}*);}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ set\_type\ deferredObservers\_;}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ updatesEnabled\_\ =\ \textcolor{keyword}{true},\ updatesDeferred\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00112\ \ \ \ \ \};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keyword}{class\ }Observer\ \{\ \textcolor{comment}{//\ NOLINT(cppcoreguidelines-\/special-\/member-\/functions)}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::set<ext::shared\_ptr<Observable>>\ set\_type;}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ set\_type::iterator\ iterator;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructors,\ assignment,\ destructor}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ Observer()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ Observer(\textcolor{keyword}{const}\ Observer\&);}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ Observer\&\ operator=(\textcolor{keyword}{const}\ Observer\&);}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \string~Observer();}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ observer\ interface}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ std::pair<iterator,\ bool>}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ registerWith(\textcolor{keyword}{const}\ ext::shared\_ptr<Observable>\&);}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observer_a338928c4fe626f9ccf0b98ceb318853a}{registerWithObservables}}(\textcolor{keyword}{const}\ ext::shared\_ptr<Observer>\&);}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ unregisterWith(\textcolor{keyword}{const}\ ext::shared\_ptr<Observable>\&);}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ unregisterWithAll();}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observer_a07905c55dca858470fcf4a1aea0005aa}{update}}()\ =\ 0;}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observer_acfbf794db3e7d5cfdea2cd517a195183}{deepUpdate}}();}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ set\_type\ observables\_;}
+\DoxyCodeLine{00156\ \ \ \ \ \};}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ ObservableSettings::registerDeferredObservers(\textcolor{keyword}{const}\ Observable::set\_type\&\ observers)\ \{}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (updatesDeferred())\ \{}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \ \ \ deferredObservers\_.insert(observers.begin(),\ observers.end());}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00165\ \ \ \ \ \}}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ ObservableSettings::unregisterDeferredObserver(\mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}*\ o)\ \{}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ deferredObservers\_.erase(o);}
+\DoxyCodeLine{00169\ \ \ \ \ \}}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{keyword}{inline}\ Observable::Observable(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_observable}{Observable}}\&)\ \{}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ the\ observer\ set\ is\ not\ copied;\ no\ observer\ asked\ to}}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ register\ with\ this\ object}}
+\DoxyCodeLine{00174\ \ \ \ \ \}}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{keyword}{inline}\ Observable\&\ \mbox{\hyperlink{class_quant_lib_1_1_observable_ad1e086da62f05b4bc5eafa698ef6fbc3}{Observable::operator=}}(\textcolor{keyword}{const}\ Observable\&\ o)\ \{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ as\ above,\ the\ observer\ set\ is\ not\ copied.\ Moreover,}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ observers\ of\ this\ object\ must\ be\ notified\ of\ the\ change}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\&o\ !=\ \textcolor{keyword}{this})}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00190\ \ \ \ \ \}}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{keyword}{inline}\ std::pair<Observable::iterator,\ bool>}
+\DoxyCodeLine{00193\ \ \ \ \ Observable::registerObserver(\mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}*\ o)\ \{}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ observers\_.insert(o);}
+\DoxyCodeLine{00195\ \ \ \ \ \}}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ Observable::unregisterObserver(Observer*\ o)\ \{}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{ObservableSettings::instance}}().updatesDeferred())}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_singleton_ac412b7766b32f56372a3e966c5f3f386}{ObservableSettings::instance}}().unregisterDeferredObserver(o);}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ observers\_.erase(o);}
+\DoxyCodeLine{00202\ \ \ \ \ \}}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \ \ \ \ \textcolor{keyword}{inline}\ Observer::Observer(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}\&\ o)}
+\DoxyCodeLine{00206\ \ \ \ \ :\ observables\_(o.observables\_)\ \{}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>registerObserver(\textcolor{keyword}{this});}
+\DoxyCodeLine{00209\ \ \ \ \ \}}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}\&\ Observer::operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}\&\ o)\ \{}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>unregisterObserver(\textcolor{keyword}{this});}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ observables\_\ =\ o.observables\_;}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>registerObserver(\textcolor{keyword}{this});}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00218\ \ \ \ \ \}}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \ \ \textcolor{keyword}{inline}\ Observer::\string~Observer()\ \{}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>unregisterObserver(\textcolor{keyword}{this});}
+\DoxyCodeLine{00223\ \ \ \ \ \}}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \ \ \ \ \textcolor{keyword}{inline}\ std::pair<Observer::iterator,\ bool>}
+\DoxyCodeLine{00226\ \ \ \ \ Observer::registerWith(\textcolor{keyword}{const}\ ext::shared\_ptr<Observable>\&\ h)\ \{}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (h\ !=\ \textcolor{keyword}{nullptr})\ \{}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ h-\/>registerObserver(\textcolor{keyword}{this});}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ observables\_.insert(h);}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::make\_pair(observables\_.end(),\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00232\ \ \ \ \ \}}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00235\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observer_a338928c4fe626f9ccf0b98ceb318853a}{Observer::registerWithObservables}}(\textcolor{keyword}{const}\ ext::shared\_ptr<Observer>\ \&o)\ \{}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (o\ !=\ \textcolor{keyword}{nullptr})\ \{}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ o-\/>observables\_)}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ registerWith(observable);}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00240\ \ \ \ \ \}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00243\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ Observer::unregisterWith(\textcolor{keyword}{const}\ ext::shared\_ptr<Observable>\&\ h)\ \{}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (h\ !=\ \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ h-\/>unregisterObserver(\textcolor{keyword}{this});}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ observables\_.erase(h);}
+\DoxyCodeLine{00247\ \ \ \ \ \}}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ Observer::unregisterWithAll()\ \{}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>unregisterObserver(\textcolor{keyword}{this});}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ observables\_.clear();}
+\DoxyCodeLine{00253\ \ \ \ \ \}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observer_acfbf794db3e7d5cfdea2cd517a195183}{Observer::deepUpdate}}()\ \{}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observer_a07905c55dca858470fcf4a1aea0005aa}{update}}();}
+\DoxyCodeLine{00257\ \ \ \ \ \}}
+\DoxyCodeLine{00258\ }
+\DoxyCodeLine{00259\ \}}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \textcolor{preprocessor}{\#ifndef\ QL\_USE\_STD\_SHARED\_PTR}}
+\DoxyCodeLine{00264\ \textcolor{preprocessor}{\#include\ <boost/smart\_ptr/owner\_less.hpp>}}
+\DoxyCodeLine{00265\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00266\ \textcolor{preprocessor}{\#include\ <atomic>}}
+\DoxyCodeLine{00267\ \textcolor{preprocessor}{\#include\ <mutex>}}
+\DoxyCodeLine{00268\ \textcolor{preprocessor}{\#include\ <set>}}
+\DoxyCodeLine{00269\ \textcolor{preprocessor}{\#include\ <thread>}}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00271\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib}{QuantLib}}\ \{}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{keyword}{class\ }Observable;}
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{keyword}{class\ }ObservableSettings;}
+\DoxyCodeLine{00275\ }
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00278\ \ \ \ \ \textcolor{keyword}{class\ }Observer\ :\ \textcolor{keyword}{public}\ ext::enable\_shared\_from\_this<Observer>\ \{}
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Observable;}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }ObservableSettings;}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::set<ext::shared\_ptr<Observable>>\ set\_type;}
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ set\_type::iterator\ iterator;}
+\DoxyCodeLine{00285\ }
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructors,\ assignment,\ destructor}}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ Observer()\ \{\}}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ Observer(\textcolor{keyword}{const}\ Observer\&);}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ Observer\&\ operator=(\textcolor{keyword}{const}\ Observer\&);}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \string~Observer();}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ observer\ interface}}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ std::pair<iterator,\ bool>}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ registerWith(\textcolor{keyword}{const}\ ext::shared\_ptr<Observable>\&);}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observer_a338928c4fe626f9ccf0b98ceb318853a}{registerWithObservables}}(\textcolor{keyword}{const}\ ext::shared\_ptr<Observer>\&);}
+\DoxyCodeLine{00299\ }
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ unregisterWith(\textcolor{keyword}{const}\ ext::shared\_ptr<Observable>\&);}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ unregisterWithAll();}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observer_a07905c55dca858470fcf4a1aea0005aa}{update}}()\ =\ 0;}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observer_acfbf794db3e7d5cfdea2cd517a195183}{deepUpdate}}();}
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }Proxy\ \{}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{explicit}\ Proxy(Observer*\ \textcolor{keyword}{const}\ observer)}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ \ \ \ :\ active\_\ \ (true),}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ observer\_(observer)\ \{}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00324\ }
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ update()\textcolor{keyword}{\ const\ }\{}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (active\_)\ \{}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ c++17\ is\ required\ if\ used\ with\ std::shared\_ptr<T>}}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::weak\_ptr<Observer>\ o}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ observer\_-\/>weak\_from\_this();}
+\DoxyCodeLine{00331\ }
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//check\ for\ empty\ weak\ reference}}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//https://stackoverflow.com/questions/45507041/how-\/to-\/check-\/if-\/weak-\/ptr-\/is-\/empty-\/non-\/assigned}}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::weak\_ptr<Observer>\ empty;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (o.owner\_before(empty)\ ||\ empty.owner\_before(o))\ \{}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Observer>\ obs(o.lock());}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (obs)}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ obs-\/>update();}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ observer\_-\/>update();}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ deactivate()\ \{}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ active\_\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00350\ }
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ active\_;}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::recursive\_mutex\ mutex\_;}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \ \ \ \ Observer*\ \textcolor{keyword}{const}\ observer\_;}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \};}
+\DoxyCodeLine{00356\ }
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ ext::shared\_ptr<Proxy>\ proxy\_;}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::recursive\_mutex\ mutex\_;}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ set\_type\ observables\_;}
+\DoxyCodeLine{00361\ \ \ \ \ \};}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \ \ \ \ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_quant_lib_1_1detail}{detail}}\ \{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \textcolor{keyword}{class\ }Signal;}
+\DoxyCodeLine{00365\ \ \ \ \ \}}
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00368\ }
+\DoxyCodeLine{00369\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_observable}{Observable}}\ \{}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Observer;}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }ObservableSettings;}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::set<ext::shared\_ptr<Observer::Proxy>>\ set\_type;}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ set\_type::iterator\ iterator;}
+\DoxyCodeLine{00376\ }
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ constructors,\ assignment,\ destructor}}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ Observable();}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ Observable(\textcolor{keyword}{const}\ Observable\&);}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ Observable\&\ \mbox{\hyperlink{class_quant_lib_1_1_observable_ad1e086da62f05b4bc5eafa698ef6fbc3}{operator=}}(\textcolor{keyword}{const}\ Observable\&);}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \textcolor{keyword}{virtual}\ \string~Observable()\ \{\}}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ registerObserver(\textcolor{keyword}{const}\ ext::shared\_ptr<Observer::Proxy>\&);}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ unregisterObserver(}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Observer::Proxy>\&\ proxy,\ \textcolor{keywordtype}{bool}\ disconnect);}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ ext::shared\_ptr<detail::Signal>\ sig\_;}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ set\_type\ observers\_;}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::recursive\_mutex\ mutex\_;}
+\DoxyCodeLine{00394\ \ \ \ \ \};}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00397\ \ \ \ \ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_quant_lib_1_1_observable_settings}{ObservableSettings}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{class_quant_lib_1_1_singleton}{Singleton}}<ObservableSettings>\ \{}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Singleton<ObservableSettings>;}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \textcolor{keyword}{friend}\ \textcolor{keyword}{class\ }Observable;}
+\DoxyCodeLine{00400\ }
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ disableUpdates(\textcolor{keywordtype}{bool}\ deferred=\textcolor{keyword}{false})\ \{}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \ \ \ \ std::lock\_guard<std::mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \ \ \ \ updatesType\_\ =\ (deferred)\ ?\ UpdatesDeferred\ :\ UpdatesDisabled;}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ enableUpdates();}
+\DoxyCodeLine{00407\ }
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ updatesEnabled()\ \ \{\textcolor{keywordflow}{return}\ (updatesType\_\ \&\ UpdatesEnabled)\ !=\ 0;\ \}}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ updatesDeferred()\ \{\textcolor{keywordflow}{return}\ (updatesType\_\ \&\ UpdatesDeferred)\ !=\ 0;\ \}}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ ObservableSettings()\ :\ updatesType\_(UpdatesEnabled)\ \{\}}
+\DoxyCodeLine{00412\ }
+\DoxyCodeLine{00413\ \textcolor{preprocessor}{\#if\ defined(QL\_USE\_STD\_SHARED\_PTR)}}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::set<ext::weak\_ptr<Observer::Proxy>,}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::owner\_less<ext::weak\_ptr<Observer::Proxy>\ >\ >}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ \ \ \ \ set\_type;}
+\DoxyCodeLine{00417\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \textcolor{keyword}{typedef}\ std::set<ext::weak\_ptr<Observer::Proxy>,}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ boost::owner\_less<ext::weak\_ptr<Observer::Proxy>\ >\ >}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \ \ \ \ set\_type;}
+\DoxyCodeLine{00421\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00422\ }
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ registerDeferredObservers(\textcolor{keyword}{const}\ Observable::set\_type\&\ observers);}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}\ unregisterDeferredObserver(\textcolor{keyword}{const}\ ext::shared\_ptr<Observer::Proxy>\&\ proxy);}
+\DoxyCodeLine{00425\ }
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ set\_type\ deferredObservers\_;}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ \textcolor{keyword}{mutable}\ std::mutex\ mutex\_;}
+\DoxyCodeLine{00428\ }
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ \textcolor{keyword}{enum}\ UpdateType\ \{\ UpdatesDisabled\ =\ 0,\ UpdatesEnabled\ =\ 1,\ UpdatesDeferred\ =\ 2\}\ ;}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ std::atomic<int>\ updatesType\_;}
+\DoxyCodeLine{00431\ \ \ \ \ \};}
+\DoxyCodeLine{00432\ }
+\DoxyCodeLine{00433\ }
+\DoxyCodeLine{00434\ \ \ \ \ \textcolor{comment}{//\ inline\ definitions}}
+\DoxyCodeLine{00435\ }
+\DoxyCodeLine{00436\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ ObservableSettings::registerDeferredObservers(\textcolor{keyword}{const}\ Observable::set\_type\&\ observers)\ \{}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ deferredObservers\_.insert(observers.begin(),\ observers.end());}
+\DoxyCodeLine{00438\ \ \ \ \ \}}
+\DoxyCodeLine{00439\ }
+\DoxyCodeLine{00440\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ ObservableSettings::unregisterDeferredObserver(}
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Observer::Proxy>\&\ o)\ \{}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \ \ deferredObservers\_.erase(o);}
+\DoxyCodeLine{00443\ \ \ \ \ \}}
+\DoxyCodeLine{00444\ }
+\DoxyCodeLine{00445\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ ObservableSettings::enableUpdates()\ \{}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ std::lock\_guard<std::mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00447\ }
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ if\ there\ are\ outstanding\ deferred\ updates,\ do\ the\ notification}}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ updatesType\_\ =\ UpdatesEnabled;}
+\DoxyCodeLine{00450\ }
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (deferredObservers\_.size())\ \{}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{bool}\ successful\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \ \ \ \ \ \ std::string\ errMsg;}
+\DoxyCodeLine{00454\ }
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{auto}\ i=deferredObservers\_.begin();}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i!=deferredObservers\_.end();\ ++i)\ \{}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{try}\ \{}
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ ext::shared\_ptr<Observer::Proxy>\ proxy\ =\ i-\/>lock();}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (proxy)}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ proxy-\/>update();}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (std::exception\&\ e)\ \{}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ successful\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ errMsg\ =\ e.what();}
+\DoxyCodeLine{00464\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{catch}\ (...)\ \{}
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ successful\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00468\ }
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \ \ \ \ \ \ deferredObservers\_.clear();}
+\DoxyCodeLine{00470\ }
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{errors_8hpp_a394b39aa396098345f86d243f207f7af}{QL\_ENSURE}}(successful,}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{stringliteral}{"{}could\ not\ notify\ one\ or\ more\ observers:\ "{}}\ <<\ errMsg);}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00474\ \ \ \ \ \}}
+\DoxyCodeLine{00475\ }
+\DoxyCodeLine{00476\ }
+\DoxyCodeLine{00485\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_observable}{Observable}}\&\ \mbox{\hyperlink{class_quant_lib_1_1_observable_ad1e086da62f05b4bc5eafa698ef6fbc3}{Observable::operator=}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_observable}{Observable}}\&\ o)\ \{}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ as\ above,\ the\ observer\ set\ is\ not\ copied.\ Moreover,}}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ observers\ of\ this\ object\ must\ be\ notified\ of\ the\ change}}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (\&o\ !=\ \textcolor{keyword}{this})}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observable_afb67478418efdb94382ac9d7ae904b94}{notifyObservers}}();}
+\DoxyCodeLine{00490\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00491\ \ \ \ \ \}}
+\DoxyCodeLine{00492\ }
+\DoxyCodeLine{00493\ \ \ \ \ \textcolor{keyword}{inline}\ Observer::Observer(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}\&\ o)\ \{}
+\DoxyCodeLine{00494\ \ \ \ \ \ \ \ \ proxy\_.reset(\textcolor{keyword}{new}\ Proxy(\textcolor{keyword}{this}));}
+\DoxyCodeLine{00495\ }
+\DoxyCodeLine{00496\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(o.mutex\_);}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \ \ \ \ \ \ \ observables\_\ =\ o.observables\_;}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00500\ }
+\DoxyCodeLine{00501\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>registerObserver(proxy\_);}
+\DoxyCodeLine{00503\ \ \ \ \ \}}
+\DoxyCodeLine{00504\ }
+\DoxyCodeLine{00505\ \ \ \ \ \textcolor{keyword}{inline}\ \mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}\&\ Observer::operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{class_quant_lib_1_1_observer}{Observer}}\&\ o)\ \{}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!proxy\_)\ \{}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ \ \ \ \ proxy\_.reset(\textcolor{keyword}{new}\ Proxy(\textcolor{keyword}{this}));}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00510\ }
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00512\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>unregisterObserver(proxy\_,\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00513\ }
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(o.mutex\_);}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \ \ \ \ \ \ observables\_\ =\ o.observables\_;}
+\DoxyCodeLine{00517\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00518\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00519\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>registerObserver(proxy\_);}
+\DoxyCodeLine{00520\ }
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ *\textcolor{keyword}{this};}
+\DoxyCodeLine{00522\ \ \ \ \ \}}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00524\ \ \ \ \ \textcolor{keyword}{inline}\ Observer::\string~Observer()\ \{}
+\DoxyCodeLine{00525\ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (proxy\_)}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \ \ \ \ proxy\_-\/>deactivate();}
+\DoxyCodeLine{00528\ }
+\DoxyCodeLine{00529\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00530\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>unregisterObserver(proxy\_,\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00531\ \ \ \ \ \}}
+\DoxyCodeLine{00532\ }
+\DoxyCodeLine{00533\ \ \ \ \ \textcolor{keyword}{inline}\ std::pair<Observer::iterator,\ bool>}
+\DoxyCodeLine{00534\ \ \ \ \ Observer::registerWith(\textcolor{keyword}{const}\ ext::shared\_ptr<Observable>\&\ h)\ \{}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00536\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!proxy\_)\ \{}
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \ \ \ \ \ \ proxy\_.reset(\textcolor{keyword}{new}\ Proxy(\textcolor{keyword}{this}));}
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00539\ }
+\DoxyCodeLine{00540\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (h)\ \{}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \ \ \ \ h-\/>registerObserver(proxy\_);}
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ observables\_.insert(h);}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00544\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ std::make\_pair(observables\_.end(),\ \textcolor{keyword}{false});}
+\DoxyCodeLine{00545\ \ \ \ \ \}}
+\DoxyCodeLine{00546\ }
+\DoxyCodeLine{00547\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}}
+\DoxyCodeLine{00548\ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observer_a338928c4fe626f9ccf0b98ceb318853a}{Observer::registerWithObservables}}(\textcolor{keyword}{const}\ ext::shared\_ptr<Observer>\&\ o)\ \{}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (o)\ \{}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(o-\/>mutex\_);}
+\DoxyCodeLine{00551\ }
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ o-\/>observables\_)}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ registerWith(observable);}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00555\ \ \ \ \ \}}
+\DoxyCodeLine{00556\ }
+\DoxyCodeLine{00557\ \ \ \ \ \textcolor{keyword}{inline}}
+\DoxyCodeLine{00558\ \ \ \ \ \mbox{\hyperlink{namespace_quant_lib_af4cc4ef40b52c17cc455ead2a97aedb3}{Size}}\ Observer::unregisterWith(\textcolor{keyword}{const}\ ext::shared\_ptr<Observable>\&\ h)\ \{}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00560\ }
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (h\ \&\&\ proxy\_)\ \ \{}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \ \ \ \ h-\/>unregisterObserver(proxy\_,\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00564\ }
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ observables\_.erase(h);}
+\DoxyCodeLine{00566\ \ \ \ \ \}}
+\DoxyCodeLine{00567\ }
+\DoxyCodeLine{00568\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ Observer::unregisterWithAll()\ \{}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ std::lock\_guard<std::recursive\_mutex>\ lock(mutex\_);}
+\DoxyCodeLine{00570\ }
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keyword}{const}\ \textcolor{keyword}{auto}\&\ observable\ :\ observables\_)}
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ \ \ \ \ observable-\/>unregisterObserver(proxy\_,\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00573\ }
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ observables\_.clear();}
+\DoxyCodeLine{00575\ \ \ \ \ \}}
+\DoxyCodeLine{00576\ }
+\DoxyCodeLine{00577\ \ \ \ \ \textcolor{keyword}{inline}\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{class_quant_lib_1_1_observer_acfbf794db3e7d5cfdea2cd517a195183}{Observer::deepUpdate}}()\ \{}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{class_quant_lib_1_1_observer_a07905c55dca858470fcf4a1aea0005aa}{update}}();}
+\DoxyCodeLine{00579\ \ \ \ \ \}}
+\DoxyCodeLine{00580\ \}}
+\DoxyCodeLine{00581\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00582\ \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}
